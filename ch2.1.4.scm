@@ -109,7 +109,7 @@
 		))
 
 
-;; unit test
+;; test
 
 (define (equal-interval x y)
   (and (= (lower-bound x) (lower-bound y))
@@ -158,16 +158,6 @@
 (define (make-center-width c w)
   (make-interval (- c w) (+ c w)))
 
-(define (par1 r1 r2)
-  (div-interval (mul-interval r1 r2)
-                (add-interval r1 r2)))
-
-(define (par2 r1 r2)
-  (let ((one (make-interval 1 1))) 
-    (div-interval one
-                  (add-interval (div-interval one r1)
-                                (div-interval one r2)))))
-
 
 ;;; ex 2.12
 
@@ -181,8 +171,52 @@
 
 ;;; ex 2.13
 
+(define (percent-mul-approx x y)
+  (* (+ (/ (width x) (center x)) (/ (width y) (center y))) 100.0))
+
+(define i1 (make-center-width 1000 1))
+(define i2 (make-center-width 2000 1))
+
+(percent (mul-interval i1 i2))
+(percent-mul-approx i1 i2)
+ 
+
+;;; text
+
+(define (par1 r1 r2)
+  (div-interval (mul-interval r1 r2)
+                (add-interval r1 r2)))
+
+(define (par2 r1 r2)
+  (let ((one (make-interval 1 1))) 
+    (div-interval one
+                  (add-interval (div-interval one r1)
+                                (div-interval one r2)))))
+
 ;;; ex 2.14
 
 ;;; ex 2.15
 
 ;;; ex 2.16
+
+(define (div-interval2 x y)
+  (let ((l1 (/ (lower-bound x) (lower-bound y)))
+		(l2 (/ (lower-bound x) (upper-bound y)))
+		(u1 (/ (upper-bound x) (lower-bound y)))
+		(u2 (/ (upper-bound x) (upper-bound y))))
+	(make-interval (min (max l1 l2) (min u1 u2))
+				   (max (max l1 l2) (min u1 u2)))))
+
+(define (par3 r1 r2)
+  (div-interval2 (mul-interval r1 r2)
+				 (add-interval r1 r2)))
+
+(define (par4 r1 r2)
+  (let ((one (make-interval 1 1))) 
+    (div-interval2 one
+				   (add-interval (div-interval2 one r1)
+								 (div-interval2 one r2)))))
+
+
+			
+			   
