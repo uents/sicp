@@ -39,18 +39,10 @@
   (add-interval x (mul-interval (make-interval -1 -1) y)))
 
 ;; (sub-interval (make-interval 4 8) (make-interval 1 7))
-;; => '(-3 . 8) 
-;; これ合ってる？
+;; => '(-3 . 7) 
 
 
 ;;; ex 2.9
-
-;; 引数x,yの幅をx_w=((x_u-x_l)/2) y_w=((y_u-y_l)/2) とすると、
-;; 加算の場合、w = x_w + y_w で求まる
-;; 減算の場合も加算と同様
-;; 乗算の場合、u = x_u * y_u, l = x_l * y_l のため
-;;  w = (x_u * y_u - x_l * y_l) / 2  となり x_w, y_w の関数として成立できない
-;; 除算の場合も乗算と同様
 
 
 ;;; ex 2.10
