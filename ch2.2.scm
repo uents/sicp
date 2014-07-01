@@ -1,12 +1,13 @@
-#lang racket
+;;; #lang racket
 
 ;;;;--------------------------------------------------------
 ;;;; chapter 2.2
 ;;;; Hierarchical Data and the Closure Property
 ;;;;--------------------------------------------------------
 
+(define nil '())
 
-;;;; text codes
+;;;; text code
 
 (define (list-ref items n)
   (if (= n 0)
@@ -30,7 +31,8 @@
 
 
 ;;; lengthの反復プロセス版
-(define (length items)
+
+(define (length-iter items)
   (define (iter rest count)
 	(if (null? rest)
 		count
@@ -96,7 +98,119 @@
 
 ;;;; ex. 2.28
 
+(define (fringe lst)
+  (define (iter lst result)
+	(cond ((null? lst)
+		   result)
+		  ((pair? (car lst))
+		   (iter (cdr lst)
+				 (append result (fringe (car lst)))))
+		  (else
+		   (iter (cdr lst)
+				 (append result (list (car lst)))))))
+  (iter lst nil))
+
+
+
 ;;;; ex. 2.29
+
+;;; text code
+
+(define (make-mobile left right)
+  (list left right))
+
+(define (make-branch length structure)
+  (list length structure))
+
+;;; a.
+
+(define (left-branch mobile) (car mobile))
+(define (right-branch mobile) (cadr mobile))
+
+(define (branch-length branch) (car branch))
+(define (branch-structure branch) (cadr branch))
+
+;; テスト
+(define m
+  (make-mobile (make-branch 3
+							(make-mobile (make-branch 3 1)
+										 (make-branch 1 3)))
+			   (make-branch 4
+							(make-mobile (make-branch 1 2)
+										 (make-branch 2 1)))))
+
+(left-branch m)                      ;; => '(3 ((3 1) (1 3)))
+(branch-length    (left-branch m))   ;; => 3
+(branch-structure (left-branch m))   ;; => '((3 1) (1 3))
+
+(right-branch m)                     ;; => '(4 ((1 2) (2 1)))
+(branch-length    (right-branch m))  ;; => 4
+(branch-structure (right-branch m))  ;; => '((1 2) (2 1))
+
+
+
+;;; b.
+
+; nil以外の値であればtrue
+(define (atom? x)
+  (and (not (null? x)) (not (pair? x))))
+
+; 錘であればtrue、モービルであればfalse
+(define (simple-weight? branch)
+  (not (pair? (branch-structure branch))))
+
+(define (total-weight mobile)
+  (cond ((atom? mobile) mobile)
+		((simple-weight? mobile) (branch-structure mobile))
+		(else 
+		 (+ (total-weight (branch-structure (left-branch mobile)))
+			(total-weight (branch-structure (right-branch mobile)))))))
+
+;; テスト
+(total-weight (make-branch 1 3)) ;; => 3
+(total-weight m) ;; => 7
+
+
+;;; c.
+
+(define (moment branch)
+  (* (branch-length branch)
+	 (total-weight (branch-structure branch))))
+
+(define (balanced? mobile)
+  (cond ((atom? mobile) #t)
+		((simple-weight? mobile) #t)
+		(else
+		 (let* ((l (left-branch mobile))
+				(r (right-branch mobile)))
+		   (and (= (moment l) (moment r))
+				(balanced? (branch-structure l))
+				(balanced? (branch-structure r)))))))
+
+;; テスト
+(moment (make-branch 1 3)) ;; => 3
+(moment (left-branch m))   ;; => 12
+
+(balanced? (make-branch 1 3)) ;; => true
+(balanced? m) ;; => true
+
+
+;;; d.
+
+(define (make-mobile left right)
+  (cons left right))
+
+(define (make-branch length structure)
+  (cons length structure))
+
+;; アクセサを入れ替えるだけでよい
+
+(define (left-branch mobile) (car mobile))
+(define (right-branch mobile) (cdr mobile))
+
+(define (branch-length branch) (car branch))
+(define (branch-structure branch) (cdr branch))
+
 
 ;;;; ex. 2.30
 
