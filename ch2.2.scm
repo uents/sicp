@@ -1,11 +1,12 @@
-;;; #lang racket
+;;;; #lang racket
 
 ;;;;--------------------------------------------------------
 ;;;; chapter 2.2
 ;;;; Hierarchical Data and the Closure Property
 ;;;;--------------------------------------------------------
 
-(define nil '())
+(load "./misc.scm")
+
 
 ;;;; text code
 
@@ -15,7 +16,7 @@
 	  (list-ref (cdr items) (- n 1))))
 
 (define squares
-  (map (lambda (x) (* x x)) (range 1 6)))
+  (map square (range 1 6)))
 
 (list-ref squares 3) ;; => 16
 
@@ -151,10 +152,6 @@
 
 ;;; b.
 
-; nil以外の値であればtrue
-(define (atom? x)
-  (and (not (null? x)) (not (pair? x))))
-
 ; 錘であればtrue、モービルであればfalse
 (define (simple-weight? branch)
   (not (pair? (branch-structure branch))))
@@ -214,20 +211,42 @@
 
 ;;;; ex. 2.30
 
+(define (square-tree tree)
+  (cond ((null? tree) tree)
+		((not (pair? tree)) (square tree))
+		(else
+		 (cons (square-tree (car tree))
+			   (square-tree (cdr tree))))))
+
+;; テスト
+(square-tree (list 1
+				   (list 2 (list 3 4) 5)
+				   (list 6 7)))			  
+; => '(1 (4 (9 16) 25) (36 49))
+
+
 ;;;; ex. 2.31
+
+(define (square-tree tree) (tree-map square tree))
+
+(define (tree-map proc tree)
+  (cond ((null? tree) tree)
+		((not (pair? tree)) (proc tree))
+		(else
+		 (cons (tree-map proc (car tree))
+			   (tree-map proc (cdr tree))))))
 
 ;;;; ex. 2.32
 
-;;;; ex. 2.33
+;; <??> は (lambda (x) (cons (car s) x))
 
-;;;; ex. 2.34
+(define (subsets s)
+  (if (null? s)
+	  (list nil)
+	  (let ((rest (subsets (cdr s))))
+		(append rest (map (lambda (x) (cons (car s) x)) rest)))))
 
-;;;; ex. 2.35
+;; 理由
+;; 全ての部分集合は、ひとつの要素とそれ以外の残りの要素との全ての組み合わせから求まるため
 
-;;;; ex. 2.36
 
-;;;; ex. 2.37
-
-;;;; ex. 2.38
-
-;;;; ex. 2.39
