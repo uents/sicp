@@ -208,6 +208,15 @@
 (define (branch-length branch) (car branch))
 (define (branch-structure branch) (cdr branch))
 
+;; テストする際は、mの再評価を忘れずに
+(define m
+  (make-mobile (make-branch 3
+							(make-mobile (make-branch 3 1)
+										 (make-branch 1 3)))
+			   (make-branch 4
+							(make-mobile (make-branch 1 2)
+										 (make-branch 2 1)))))
+
 
 ;;;; ex. 2.30
 
