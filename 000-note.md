@@ -10,7 +10,9 @@ Racket REPL
 
 ### load
 
+```scheme
 (load "/path/to/file")
+```
 
 ロードした方がREPLで自動補完できてよい
 
@@ -19,8 +21,10 @@ Racket REPL
 
 http://docs.racket-lang.org/reference/debugging.html
 
+```scheme
 (require racket/trace)
 (tarce id ...)
+```
 
 
 
