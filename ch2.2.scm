@@ -87,29 +87,37 @@
 ;;; reverseを改変。carの要素がリストの場合は
 ;;; さらに再帰呼び出しして展開していく
 
-(define (deep-reverse lst)
-  (define (iter lst result)
-	(cond ((null? lst)
+(define (deep-reverse tree)
+  (define (iter tree result)
+	(cond ((null? tree)
 		   result)
-		  ((pair? (car lst))
-		   (iter (cdr lst) (cons (deep-reverse (car lst)) result)))
+		  ((pair? (car tree))
+		   (iter (cdr tree) (cons (deep-reverse (car tree)) result)))
 		  (else
-		   (iter (cdr lst) (cons (car lst) result)))))
-  (iter lst nil))
+		   (iter (cdr tree) (cons (car tree) result)))))
+  (iter tree nil))
+
+;;; map,reverseを使ったバージョン。簡潔！
+
+(define (deep-reverse tree)
+  (if (not (pair? tree))
+	  tree
+	  (reverse (map deep-reverse tree))))
+
 
 ;;;; ex. 2.28
 
-(define (fringe lst)
-  (define (iter lst result)
-	(cond ((null? lst)
+(define (fringe tree)
+  (define (iter tree result)
+	(cond ((null? tree)
 		   result)
-		  ((pair? (car lst))
-		   (iter (cdr lst)
-				 (append result (fringe (car lst)))))
+		  ((pair? (car tree))
+		   (iter (cdr tree)
+				 (append result (fringe (car tree)))))
 		  (else
-		   (iter (cdr lst)
-				 (append result (list (car lst)))))))
-  (iter lst nil))
+		   (iter (cdr tree)
+				 (append result (list (car tree)))))))
+  (iter tree nil))
 
 
 
