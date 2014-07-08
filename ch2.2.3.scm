@@ -1,194 +1,141 @@
+;;;; #lang racket
+
+;;;;--------------------------------------------------------
+;;;; chapter 2.2.3
+;;;; 
+;;;;--------------------------------------------------------
 
 
-(define nil '())
+(load "./misc.scm")
 
-(define (append list1 list2)
-  (if (null? list1)
-      list2
-      (cons (car list1) (append (cdr list1) list2))))
-
-(define (filter predicate sequence)
-  (cond ((null? sequence) nil)
-        ((predicate (car sequence))
-         (cons (car sequence)
-               (filter predicate (cdr sequence))))
-        (else (filter predicate (cdr sequence)))))
+;;;; text code
 
 (define (accumulate op initial sequence)
   (if (null? sequence)
-      initial
-      (op (car sequence)
-          (accumulate op initial (cdr sequence)))))
+	  initial
+	  (op (car sequence)
+		  (accumulate op initial (cdr sequence)))))
 
-(define (enumerate-interval low high)
-  (if (> low high)
-      nil
-      (cons low (enumerate-interval (+ low 1) high))))
+(accumulate + 0 (range 1 6)) ;; => 15
 
-(define (flatmap proc seq)
-  (accumulate append nil (map proc seq)))
+(accumulate * 1 (range 1 6)) ;; => 120
 
-;(flatmap
-; (lambda (i)
-;   (map (lambda (j) (list i j))
-;		(enumerate-interval 1 (- i 1))))
-; (enumerate-interval 1 n))
+;;; foldl (fold-left)でも同じ結果が得られる
+(foldl + 0 (range 1 6))
+(foldl * 1 (range 1 6))
 
 
-;;; ex. 2.40
+;;;; ex. 2.33
 
-(define (unique-pairs n)
-  (flatmap
-   (lambda (i)
-	 (map (lambda (j) (list i j))
-		  (enumerate-interval 1 (- i 1))))
-   (enumerate-interval 1 n)))
+(define (my-map proc sequence)
+  (accumulate (lambda (x y) (cons (proc x) y)) nil sequence))
+
+(define (my-append seq1 seq2)
+  (accumulate cons seq2 seq1))
+
+(define (my-length sequence)
+  (accumulate (lambda (x y) (+ 1 y)) 0 sequence))
+
+(my-map square (range 1 6))           ;; => '(1 4 9 16 25)
+(my-append (range 1 4) (range 11 14)) ;; => '(1 2 3 11 12 13)
+(my-length (range 11 14))             ;; => 3
+
+;;;; ex. 2.34
+
+(define (horner-eval x coefficient-sequence)
+  (accumulate (lambda (this-coeff higher-terms)
+				(+ this-coeff (* x higher-terms)))
+			  0
+			  coefficient-sequence))
+				
+
+;;;; ex. 2.35
+
+(define (enumerate-tree tree)
+  (cond ((null? tree) nil)
+        ((not (pair? tree)) (list tree))
+        (else (append (enumerate-tree (car tree))
+                      (enumerate-tree (cdr tree))))))
+
+(define (count-leaves tree)
+  (accumulate +
+			  0
+			  (map (lambda (leave) 1)
+				   (enumerate-tree tree))))
+
+;;;; ex. 2.36
+
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+	  nil
+	  (cons (accumulate op init (map car seqs))
+			(accumulate-n op init (map cdr seqs)))))
 
 
-;;; ex. 2.41
+(define s (list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12)))
 
-(define (unique-trio n)
-  (flatmap
-   (lambda (k)
-	 (flatmap
-	  (lambda (j)
-		(map (lambda (i) (list i j k))
-			 (enumerate-interval 1 (- j 1))))
-	  (enumerate-interval 1 (- k 1))))
-   (enumerate-interval 1 n)))
+(accumulate-n + 0 s) ;; => '(22 26 30)
 
 
-;;; ex. 2.42
+;;;; ex. 2.37
 
-(define (queens board-size)
-  (define (queen-cols k)
-    (if (= k 0)
-        (list empty-board)
-        (filter
-         (lambda (positions) (safe? k positions))
-         (flatmap
-          (lambda (rest-of-queens)
-            (map (lambda (new-row)
-                   (adjoin-position new-row k rest-of-queens))
-                 (enumerate-interval 1 board-size)))
-          (queen-cols (- k 1))))))
-  (queen-cols board-size))
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+(dot-product (list 1 2) (list 3 4)) ;; => 11
+
+(define (matrix-*-vector m v)
+  (map (lambda (mcols) (dot-product mcols v)) m))
+
+(matrix-*-vector (list (list 1 2) (list 3 4)) (list 3 4)) ;; => '(11 25)
+
+(define (transpose m)
+  (accumulate-n cons nil m))
+
+(transpose (list (list 1 2) (list 3 4))) ;; => '((1 3) (2 4))
+
+(define (matrix-*-matrix m n)
+  (let ((ncols (transpose n)))
+	(map (lambda (mcols) (matrix-*-vector ncols mcols)) m)))
+
+(matrix-*-matrix (list (list 1 2) (list 3 4))
+				 (list (list 1 2) (list 3 4))) ;; => '((7 10) (15 22))
+
+;;;; ex. 2.38
+
+(define fold-right accumulate)
+
+(define (fold-left op initial sequence)
+  (define (iter result rest)
+    (if (null? rest)
+        result
+        (iter (op result (car rest))
+              (cdr rest))))
+  (iter initial sequence))
+
+(fold-left / 1 (list 1 2 3))
+; => (/ (/ (/ 1 1) 2) 3)
+; => 1/6
+
+(fold-right / 1 (list 1 2 3))
+; => (/ 1 (/ 2 (/ 3 1)))
+; => 3/2
+
+(fold-right list nil (list 1 2 3))
+; => (list 1 (list 2 (list 3 nil)))
+; => '(1 (2 (3 ())))
+
+(fold-left list nil (list 1 2 3))
+; => (list (list (list nil 1) 2) 3)
+; => '(((() 1) 2) 3)
 
 
-(define empty-board '())
+;;;; ex. 2.39
 
-(define (adjoin-position new-row k rest-of-queens)
-  (append rest-of-queens (list (list k new-row))))
+(define (reverse-fr sequence)
+  (fold-right (lambda (x y) (append y (cons x nil))) nil sequence))
 
-;(define (safe? k positions)
-;  (display k)
-;  (display " ")
-;  (display positions)
-;  (newline)
-;  #t)
+(define (reverse-fl sequence)
+  (fold-left (lambda (x y) (cons y x)) nil sequence))
 
-(define (safe? k positions)
-  (safe-iter? (- k 1) k positions))
 
-(define (safe-iter? i k positions)
-  (if (= i 0)
-	  #t
-	  (let ((old-pos (list-ref positions (- i 1)))
-			(new-pos (list-ref positions (- k 1))))
-		(and (not (= (cadr old-pos) (cadr new-pos)))
-			 (not (= (cadr old-pos) (- (cadr new-pos) (- k i))))
-			 (not (= (cadr old-pos) (+ (cadr new-pos) (- k i))))
-			 (safe-iter? (- i 1) k positions)))))
-
-'(((1 1) (2 5) (3 8) (4 6) (5 3) (6 7) (7 2) (8 4))
-  ((1 1) (2 6) (3 8) (4 3) (5 7) (6 4) (7 2) (8 5))
-  ((1 1) (2 7) (3 4) (4 6) (5 8) (6 2) (7 5) (8 3))
-  ((1 1) (2 7) (3 5) (4 8) (5 2) (6 4) (7 6) (8 3))
-  ((1 2) (2 4) (3 6) (4 8) (5 3) (6 1) (7 7) (8 5))
-  ((1 2) (2 5) (3 7) (4 1) (5 3) (6 8) (7 6) (8 4))
-  ((1 2) (2 5) (3 7) (4 4) (5 1) (6 8) (7 6) (8 3))
-  ((1 2) (2 6) (3 1) (4 7) (5 4) (6 8) (7 3) (8 5))
-  ((1 2) (2 6) (3 8) (4 3) (5 1) (6 4) (7 7) (8 5))
-  ((1 2) (2 7) (3 3) (4 6) (5 8) (6 5) (7 1) (8 4))
-  ((1 2) (2 7) (3 5) (4 8) (5 1) (6 4) (7 6) (8 3))
-  ((1 2) (2 8) (3 6) (4 1) (5 3) (6 5) (7 7) (8 4))
-  ((1 3) (2 1) (3 7) (4 5) (5 8) (6 2) (7 4) (8 6))
-  ((1 3) (2 5) (3 2) (4 8) (5 1) (6 7) (7 4) (8 6))
-  ((1 3) (2 5) (3 2) (4 8) (5 6) (6 4) (7 7) (8 1))
-  ((1 3) (2 5) (3 7) (4 1) (5 4) (6 2) (7 8) (8 6))
-  ((1 3) (2 5) (3 8) (4 4) (5 1) (6 7) (7 2) (8 6))
-  ((1 3) (2 6) (3 2) (4 5) (5 8) (6 1) (7 7) (8 4))
-  ((1 3) (2 6) (3 2) (4 7) (5 1) (6 4) (7 8) (8 5))
-  ((1 3) (2 6) (3 2) (4 7) (5 5) (6 1) (7 8) (8 4))
-  ((1 3) (2 6) (3 4) (4 1) (5 8) (6 5) (7 7) (8 2))
-  ((1 3) (2 6) (3 4) (4 2) (5 8) (6 5) (7 7) (8 1))
-  ((1 3) (2 6) (3 8) (4 1) (5 4) (6 7) (7 5) (8 2))
-  ((1 3) (2 6) (3 8) (4 1) (5 5) (6 7) (7 2) (8 4))
-  ((1 3) (2 6) (3 8) (4 2) (5 4) (6 1) (7 7) (8 5))
-  ((1 3) (2 7) (3 2) (4 8) (5 5) (6 1) (7 4) (8 6))
-  ((1 3) (2 7) (3 2) (4 8) (5 6) (6 4) (7 1) (8 5))
-  ((1 3) (2 8) (3 4) (4 7) (5 1) (6 6) (7 2) (8 5))
-  ((1 4) (2 1) (3 5) (4 8) (5 2) (6 7) (7 3) (8 6))
-  ((1 4) (2 1) (3 5) (4 8) (5 6) (6 3) (7 7) (8 2))
-  ((1 4) (2 2) (3 5) (4 8) (5 6) (6 1) (7 3) (8 7))
-  ((1 4) (2 2) (3 7) (4 3) (5 6) (6 8) (7 1) (8 5))
-  ((1 4) (2 2) (3 7) (4 3) (5 6) (6 8) (7 5) (8 1))
-  ((1 4) (2 2) (3 7) (4 5) (5 1) (6 8) (7 6) (8 3))
-  ((1 4) (2 2) (3 8) (4 5) (5 7) (6 1) (7 3) (8 6))
-  ((1 4) (2 2) (3 8) (4 6) (5 1) (6 3) (7 5) (8 7))
-  ((1 4) (2 6) (3 1) (4 5) (5 2) (6 8) (7 3) (8 7))
-  ((1 4) (2 6) (3 8) (4 2) (5 7) (6 1) (7 3) (8 5))
-  ((1 4) (2 6) (3 8) (4 3) (5 1) (6 7) (7 5) (8 2))
-  ((1 4) (2 7) (3 1) (4 8) (5 5) (6 2) (7 6) (8 3))
-  ((1 4) (2 7) (3 3) (4 8) (5 2) (6 5) (7 1) (8 6))
-  ((1 4) (2 7) (3 5) (4 2) (5 6) (6 1) (7 3) (8 8))
-  ((1 4) (2 7) (3 5) (4 3) (5 1) (6 6) (7 8) (8 2))
-  ((1 4) (2 8) (3 1) (4 3) (5 6) (6 2) (7 7) (8 5))
-  ((1 4) (2 8) (3 1) (4 5) (5 7) (6 2) (7 6) (8 3))
-  ((1 4) (2 8) (3 5) (4 3) (5 1) (6 7) (7 2) (8 6))
-  ((1 5) (2 1) (3 4) (4 6) (5 8) (6 2) (7 7) (8 3))
-  ((1 5) (2 1) (3 8) (4 4) (5 2) (6 7) (7 3) (8 6))
-  ((1 5) (2 1) (3 8) (4 6) (5 3) (6 7) (7 2) (8 4))
-  ((1 5) (2 2) (3 4) (4 6) (5 8) (6 3) (7 1) (8 7))
-  ((1 5) (2 2) (3 4) (4 7) (5 3) (6 8) (7 6) (8 1))
-  ((1 5) (2 2) (3 6) (4 1) (5 7) (6 4) (7 8) (8 3))
-  ((1 5) (2 2) (3 8) (4 1) (5 4) (6 7) (7 3) (8 6))
-  ((1 5) (2 3) (3 1) (4 6) (5 8) (6 2) (7 4) (8 7))
-  ((1 5) (2 3) (3 1) (4 7) (5 2) (6 8) (7 6) (8 4))
-  ((1 5) (2 3) (3 8) (4 4) (5 7) (6 1) (7 6) (8 2))
-  ((1 5) (2 7) (3 1) (4 3) (5 8) (6 6) (7 4) (8 2))
-  ((1 5) (2 7) (3 1) (4 4) (5 2) (6 8) (7 6) (8 3))
-  ((1 5) (2 7) (3 2) (4 4) (5 8) (6 1) (7 3) (8 6))
-  ((1 5) (2 7) (3 2) (4 6) (5 3) (6 1) (7 4) (8 8))
-  ((1 5) (2 7) (3 2) (4 6) (5 3) (6 1) (7 8) (8 4))
-  ((1 5) (2 7) (3 4) (4 1) (5 3) (6 8) (7 6) (8 2))
-  ((1 5) (2 8) (3 4) (4 1) (5 3) (6 6) (7 2) (8 7))
-  ((1 5) (2 8) (3 4) (4 1) (5 7) (6 2) (7 6) (8 3))
-  ((1 6) (2 1) (3 5) (4 2) (5 8) (6 3) (7 7) (8 4))
-  ((1 6) (2 2) (3 7) (4 1) (5 3) (6 5) (7 8) (8 4))
-  ((1 6) (2 2) (3 7) (4 1) (5 4) (6 8) (7 5) (8 3))
-  ((1 6) (2 3) (3 1) (4 7) (5 5) (6 8) (7 2) (8 4))
-  ((1 6) (2 3) (3 1) (4 8) (5 4) (6 2) (7 7) (8 5))
-  ((1 6) (2 3) (3 1) (4 8) (5 5) (6 2) (7 4) (8 7))
-  ((1 6) (2 3) (3 5) (4 7) (5 1) (6 4) (7 2) (8 8))
-  ((1 6) (2 3) (3 5) (4 8) (5 1) (6 4) (7 2) (8 7))
-  ((1 6) (2 3) (3 7) (4 2) (5 4) (6 8) (7 1) (8 5))
-  ((1 6) (2 3) (3 7) (4 2) (5 8) (6 5) (7 1) (8 4))
-  ((1 6) (2 3) (3 7) (4 4) (5 1) (6 8) (7 2) (8 5))
-  ((1 6) (2 4) (3 1) (4 5) (5 8) (6 2) (7 7) (8 3))
-  ((1 6) (2 4) (3 2) (4 8) (5 5) (6 7) (7 1) (8 3))
-  ((1 6) (2 4) (3 7) (4 1) (5 3) (6 5) (7 2) (8 8))
-  ((1 6) (2 4) (3 7) (4 1) (5 8) (6 2) (7 5) (8 3))
-  ((1 6) (2 8) (3 2) (4 4) (5 1) (6 7) (7 5) (8 3))
-  ((1 7) (2 1) (3 3) (4 8) (5 6) (6 4) (7 2) (8 5))
-  ((1 7) (2 2) (3 4) (4 1) (5 8) (6 5) (7 3) (8 6))
-  ((1 7) (2 2) (3 6) (4 3) (5 1) (6 4) (7 8) (8 5))
-  ((1 7) (2 3) (3 1) (4 6) (5 8) (6 5) (7 2) (8 4))
-  ((1 7) (2 3) (3 8) (4 2) (5 5) (6 1) (7 6) (8 4))
-  ((1 7) (2 4) (3 2) (4 5) (5 8) (6 1) (7 3) (8 6))
-  ((1 7) (2 4) (3 2) (4 8) (5 6) (6 1) (7 3) (8 5))
-  ((1 7) (2 5) (3 3) (4 1) (5 6) (6 8) (7 2) (8 4))
-  ((1 8) (2 2) (3 4) (4 1) (5 7) (6 5) (7 3) (8 6))
-  ((1 8) (2 2) (3 5) (4 3) (5 1) (6 7) (7 4) (8 6))
-  ((1 8) (2 3) (3 1) (4 6) (5 2) (6 5) (7 7) (8 4))
-  ((1 8) (2 4) (3 1) (4 3) (5 6) (6 2) (7 7) (8 5)))
