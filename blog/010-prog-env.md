@@ -1,7 +1,8 @@
 計算機科学の勉強にSICPを読もう - #10 Racket/Emacsによるプログラミング環境構築
 ======================================
 
-「§2.2.4 図形言語」に入る前に、Scheme処理系およびグラフィックスまわりの環境設定メモ
+「§2.2.4 図形言語」に入る前にグラフィックスまわりの環境設定が必要だったので、
+遅ればせながらScheme処理系であるRacketやEmacsの設定メモをまとめた。
 
 PC環境
 --------------------------------
@@ -83,8 +84,23 @@ Racketへのパスを通す。
 
 この状態で```M-x run-racket```とすると、Racketが起動する。
 
+![RacketをEmacsで起動](https://farm3.staticflickr.com/2929/14423624370_8f74e98a57_o_d.png)
+
 後は、Schemeのコードを書いていけば良いし、
 ファイルを読み込みたい場合は```(load "foo.scm")``` とすればOK。
+
+
+手続きの呼び出しをトレース
+--------------------------------
+
+```scheme
+(require racket/trace)
+(trace <procedure name>)
+```
+
+とすればよい。
+
+- http://docs.racket-lang.org/reference/debugging.html
 
 
 直線や画像の描画
@@ -100,7 +116,7 @@ Racketへのパスを通す。
 - http://docs.racket-lang.org/graphics/index.html
 - http://stackoverflow.com/questions/13592352/compiling-sicp-picture-exercises-in-drracket
 
-Exampleなどを参考にすれば、だいたい使い方はわかる。
+Exampleなどを参考にすれば何となく使い方はわかる。
 
 
 ### キャンバスのオープン
@@ -113,25 +129,39 @@ Exampleなどを参考にすれば、だいたい使い方はわかる。
 (define vp (open-viewport "A Picture Language" 500 500))
 ```
 
+![キャンバスのオープン](https://farm4.staticflickr.com/3897/14587251766_eea9ff4d09_o_d.png)
+
 ### 直線の描画
+
+ウィンドウ右上から左下へ直線を引く。
 
 ```scheme
 ((draw-line vp) (make-posn 100 400) (make-posn 400 100))
 ```
 
+![直線の描画](https://farm3.staticflickr.com/2916/14610261545_f45fd6b812_o_d.png)
+
 ### 画像の描画
+
+(50,50)の座標を始点として画像を描画する。
 
 ```scheme
 ((draw-pixmap vp) "lenna.png" (make-posn 50 50))
 ```
 
+![画像の描画](https://farm4.staticflickr.com/3916/14609718332_07a0a8c902_o_d.png)
+
 ### キャンバスをクリア
+
+キャンバスの内容をクリアする。
 
 ```scheme
 ((clear-viewport vp))
 ```
 
 ### キャンバスのクローズ
+
+ビューポイントおよびウィンドウをクローズする。
 
 ```scheme
 (close-viewport vp)
