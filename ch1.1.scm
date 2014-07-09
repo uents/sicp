@@ -2,14 +2,14 @@
 
 ;;; ex 1.5
 
-(deifne (p) (p))
+(define (p) (p))
 
 (define (test x y)
   (if (= x 0)
 	  0
 	  y))
 
-(test 0 (p))
+;(test 0 (p)) ;; => 終わらない
 
 
 ;;; ex 1.6
