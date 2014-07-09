@@ -144,11 +144,11 @@ Exampleなどを参考にすれば、だいたい使い方はわかる。
 
 HomebrewやEmacsの導入は以前に書いた記事が参考になるかもしれません。(少し古いです)
 
-- [MacでHomebrewを使ってCocoa Emacsを導入する](http://uents.hatenablog.com/entry/20120303/1330745761)
-- [EmacsでAnything＋Auto Complete Mode＋YASnippetによる快適コーディング](http://uents.hatenablog.com/entry/20120311/1331468314)
+- [MacでHomebrewを使ってCocoa Emacsを導入する](/entry/20120303/1330745761)
+- [EmacsでAnything＋Auto Complete Mode＋YASnippetによる快適コーディング](/entry/20120311/1331468314)
  + ELPAを使ってないな。そろそろ書き直さないと...
 
 
 --------------------------------
 
-※「計算機科学の勉強にSICPを読もう」の目次は[こちら](http://uents.hatenablog.com/entry/2014/05/25/000000)
+※「計算機科学の勉強にSICPを読もう」の目次は[こちら](/entry/2014/05/25/000000)
