@@ -1,7 +1,7 @@
 計算機科学の勉強にSICPを読もう - #10 Racket/Emacsによるプログラミング環境構築
 ======================================
 
-「§2.2.4 図形言語」に入る前に、直線や画像を描画するための環境を用意した際のメモ。
+「§2.2.4 図形言語」に入る前に、Scheme処理系およびグラフィックスまわりの環境設定メモ
 
 PC環境
 --------------------------------
@@ -24,7 +24,7 @@ GNU Emacs 24.3.1
 Scheme処理系
 --------------------------------
 
-[最近はRacket（旧PLT-Scheme/DrScheme）がMITでも推奨](http://cl.naist.jp/index.php?SICP%CA%D9%B6%AF%B2%F1)らしい。
+[最近のMITの推奨はRacket（旧PLT-Scheme/DrScheme）](http://cl.naist.jp/index.php?SICP%CA%D9%B6%AF%B2%F1)らしい。
 
 Homebrewで取得しようとするが、
 
