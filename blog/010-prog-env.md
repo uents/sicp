@@ -2,7 +2,7 @@
 ======================================
 
 「§2.2.4 図形言語」に入る前にグラフィックスまわりの環境設定が必要だったので、
-遅ればせながらScheme処理系であるRacketやEmacsの設定メモをまとめた。
+遅ればせながらScheme処理系であるRacketやEmacsの設定も含めてまとめてみた。
 
 PC環境
 --------------------------------
@@ -15,8 +15,7 @@ $ brew --version
 0.9.5
 ```
 
-- Emacs
- + Homebrewでインストール済み
+- Emacs (Homebrewでインストール済み)
 ```
 % emacs --version
 GNU Emacs 24.3.1
@@ -51,8 +50,8 @@ plt-racket formula perhaps too minimal (https://github.com/Homebrew/homebrew/iss
 
 よくわからないので、
 
-1. 公式サイト(http://download.racket-lang.org/)からdmgファイルを取得
-2. dmgファイルをオープンしてApplicationフォルダにコピー
+1. 公式サイト(http://download.racket-lang.org/)からdmgを取得
+2. dmgをオープンしてApplicationフォルダにコピー
 
 で、インストール完了。
 
@@ -60,7 +59,7 @@ plt-racket formula perhaps too minimal (https://github.com/Homebrew/homebrew/iss
 Emacsの設定
 --------------------------------
 
-Racketのエディタが使いにくいので、Emacsをセットアップ。
+Racketのエディタが使いづらかったので、Emacsをセットアップ。
 
 EmacsでScheme処理系を動かすためのmajor/minor-modeとしてGeiserを導入した。
 
@@ -77,7 +76,7 @@ Racketへのパスを通す。
 (setq geiser-active-implementations '(racket))
 ```
 
-### Emacsを起動
+### Racket REPLを起動
 
 - 拡張子が.scmの場合、major-modeはScheme、minor-modeはRacketとなる
 - Auto Complete Modeを事前に導入していると、minor-modeにAuto Completeが追加される
@@ -89,9 +88,19 @@ Racketへのパスを通す。
 後は、Schemeのコードを書いていけば良いし、
 ファイルを読み込みたい場合は```(load "foo.scm")``` とすればOK。
 
+### デバッグ
 
-手続きの呼び出しをトレース
---------------------------------
+#### print文
+
+```scheme
+(define x 1)
+(define y 2)
+(define z 3)
+
+(display (format "~a ~a ~a ~%" x y z))
+```
+
+#### 手続きをトレース
 
 ```scheme
 (require racket/trace)
@@ -100,84 +109,19 @@ Racketへのパスを通す。
 
 とすればよい。
 
-- http://docs.racket-lang.org/reference/debugging.html
-
-
-直線や画像の描画
---------------------------------
-
-- http://www.neilvandyke.org/racket-sicp/
-
-によると、RacketのSICPプラグインを読み込めば、paintという手続きで画像が表示できるが、
-直線などのプリミティブな描画についてはよくわからない。
-
-ググったところ Racket Graphics Legacy Library にたどり着く。
-
-- http://docs.racket-lang.org/graphics/index.html
-- http://stackoverflow.com/questions/13592352/compiling-sicp-picture-exercises-in-drracket
-
-Exampleなどを参考にすれば何となく使い方はわかる。
-
-
-### キャンバスのオープン
-
-白いキャンバスウィンドウが表示される。
-
-```scheme
-(require graphics/graphics)
-(open-graphics)
-(define vp (open-viewport "A Picture Language" 500 500))
-```
-
-![キャンバスのオープン](https://farm4.staticflickr.com/3897/14587251766_eea9ff4d09_o_d.png)
-
-### 直線の描画
-
-ウィンドウ右上から左下へ直線を引く。
-
-```scheme
-((draw-line vp) (make-posn 100 400) (make-posn 400 100))
-```
-
-![直線の描画](https://farm3.staticflickr.com/2916/14610261545_f45fd6b812_o_d.png)
-
-### 画像の描画
-
-(50,50)の座標を始点として画像を描画する。
-
-```scheme
-((draw-pixmap vp) "lenna.png" (make-posn 50 50))
-```
-
-![画像の描画](https://farm4.staticflickr.com/3916/14609718332_07a0a8c902_o_d.png)
-
-### キャンバスをクリア
-
-キャンバスの内容をクリアする。
-
-```scheme
-((clear-viewport vp))
-```
-
-### キャンバスのクローズ
-
-ビューポイントおよびウィンドウをクローズする。
-
-```scheme
-(close-viewport vp)
-(close-graphics)
-```
+http://docs.racket-lang.org/reference/debugging.html
 
 
 その他
 --------------------------------
 
-HomebrewやEmacsの導入は以前に書いた記事が参考になるかもしれません。(少し古いです)
+### HomebrewやEmacsの導入
+
+以前に書いた記事が参考になるかもしれません。(少し古いです)
 
 - [MacでHomebrewを使ってCocoa Emacsを導入する](/entry/20120303/1330745761)
 - [EmacsでAnything＋Auto Complete Mode＋YASnippetによる快適コーディング](/entry/20120311/1331468314)
- + ELPAを使ってないな。そろそろ書き直さないと...
-
+ + ELPAに触れてないので、そろそろ書き直さないと...
 
 --------------------------------
 
