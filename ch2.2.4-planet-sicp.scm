@@ -30,6 +30,7 @@
 
 
 ;;; text code
+
 (define (corner-split painter n)
   (if (= n 0)
       painter
@@ -131,26 +132,7 @@
          (make-segment (make-vect 0.5 0.3) (make-vect 0.3 0.0)))))
 
 
-;;; ex. 2.50
+;;; ex. 2.50-51
 
-;(define (flip-horiz painter) #t)
-
-;(define (rotate180 painter) #t)
-
-
-;;; ex. 2.51
-
-;(define (below painter1 painter2) #t)
-
-
-;;; primitives
-
-;(require graphics/graphics)
-;(open-graphics)
-;(define vp (open-viewport "A Picture Language" 500 500))
-
-;(define (rkt-draw-line start-vec end-vec)
-;  (define (vect->posn vec)
-;	(make-posn (xcor-vect vec) (ycor-vect vec)))
-;  ((draw-line vp) (vect->posn start-vec) (vect->posn end-vec)))
+;; planet/sicp.ssでは実装済み
 
