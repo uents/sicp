@@ -9,19 +9,22 @@
 ;;;;
 ;;;; 0. Setup Geiser on Emacs 24
 ;;;;     see also my blog (in Japanese)
-;;;;     http://uents.hatenablog.com/entry/2014/07/09/143208
+;;;;     http://uents.hatenablog.com/entry/2014/05/25/000000
 ;;;;
-;;;; 1. Checkout my codes
+;;;; 1. Download source codes
 ;;;;     git clone https://github.com/uents/sicp.git
 ;;;;
 ;;;; 2. Start Emacs and Racket REPL (M-x run-racket)
 ;;;;
-;;;; 3. Exec below commands on Racket REPL
+;;;; 3. Executes below commands on Racket REPL
 ;;;;
 ;;;;   (load "ch2.2.4.scm")
 ;;;;   (open-canvas)
 ;;;;   (draw wave)
 ;;;;   (clear-canvas)
+;;;;   (draw (corner-split wave 4))
+;;;;   (clear-canvas)
+;;;;   (draw (square-limit wave 4))
 ;;;;   ....
 ;;;;
 
@@ -83,7 +86,7 @@
 ;;;   単位方形 ([0.0,0.0] .. [1.0,1.0]) での座標を使って与えられる
 ;;; - SICPのテキスト内のdraw-lineという手続きは、
 ;;;   Racket Graphics Legacy Libraryに
-;;;   同名の手続きがあるため、ここではlineに変更する
+;;;   同名の手続きがあるため、ここではlineとしている
 
 (define (segments->painter segment-list)
   (lambda (frame)
