@@ -1,6 +1,6 @@
 ;;;; #lang racket
 ;;;;
-;;;; Chapter 2.4
+;;;; SICP Chapter 2.2.4
 ;;;;  A Picture Language (using racket graphics legacy library)
 ;;;;
 ;;;; Author: @uents on twitter
