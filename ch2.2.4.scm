@@ -47,6 +47,13 @@
 			 (* s (ycor-vect vec))))
 
 
+;;;; Segment (ex. 2.48)
+
+(define (make-segment start-vec end-vec) (cons start-vec end-vec))
+(define start-segment car)
+(define end-segment cdr)
+
+
 ;;;; Frame (ex. 2.47)
 
 (define (make-frame origin edge1 edge2)
@@ -66,20 +73,16 @@
                            (edge2-frame frame))))))
 
 
-;;;; Segment (ex. 2.48)
+;;;; Painter (ex. 2.49)
 
-(define (make-segment start-vec end-vec) (cons start-vec end-vec))
-(define start-segment car)
-(define end-segment cdr)
-
-;;;; Painter
-
-;;; - ペインタとはフレームを引数にとり、そのフレームのなかに図形を描画する手続き
+;;; - ペインタとはフレームを引数にとり、
+;;;   そのフレームのなかに図形(複数の線分)を描画する手続き
 ;;; - segment->painterは線分リストを引数にとり、
 ;;;   その線分を指定されるフレームないに描画する手続きを返す
 ;;; - segment->painterに与える線分リストは
 ;;;   単位方形 ([0.0,0.0] .. [1.0,1.0]) での座標を使って与えられる
-;;; - SICPのテキスト内のdraw-lineという手続きは、Racket Graphics Legacy Libraryに
+;;; - SICPのテキスト内のdraw-lineという手続きは、
+;;;   Racket Graphics Legacy Libraryに
 ;;;   同名の手続きがあるため、ここではlineに変更する
 
 (define (segments->painter segment-list)
@@ -91,29 +94,30 @@
 		((frame-coord-map frame) (end-segment segment))))
 	 segment-list)))
 
-;;; フレームの外形を描くペインタ (ex. 2.49a)
+
+;; フレームの外形を描くペインタ
 
 (define outline
-  (let* ((v0 (make-vect 0.0 0.0))
-		 (v1 (make-vect 1.0 0.0))
-		 (v2 (make-vect 0.0 1.0))
-		 (v3 (make-vect 1.0 1.0)))
-	(segments->painter (list (make-segment v0 v1)
-							  (make-segment v1 v3)
-							  (make-segment v3 v2)
-							  (make-segment v2 v0)))))
+  (let ((v1 (make-vect 0.0 0.0))
+		(v2 (make-vect 1.0 0.0))
+		(v3 (make-vect 0.0 1.0))
+		(v4 (make-vect 1.0 1.0)))
+	(segments->painter (list (make-segment v1 v2)
+							 (make-segment v2 v4)
+							 (make-segment v4 v3)
+							 (make-segment v3 v1)))))
 
-;;; フレームの向かい側の頂点を結んで "X" を描くペインタ (ex. 2.49b)
+;; フレームの向かい側の頂点を結んで "X" を描くペインタ
 
 (define diagonal
-  (let* ((v0 (make-vect 0.0 0.0))
-		 (v1 (make-vect 1.0 0.0))
-		 (v2 (make-vect 0.0 1.0))
-		 (v3 (make-vect 1.0 1.0)))
-	(segments->painter (list (make-segment v0 v3)
-							 (make-segment v1 v2)))))
+  (let* ((v1 (make-vect 0.0 0.0))
+		 (v2 (make-vect 1.0 0.0))
+		 (v3 (make-vect 0.0 1.0))
+		 (v4 (make-vect 1.0 1.0)))
+	(segments->painter (list (make-segment v1 v4)
+							 (make-segment v2 v3)))))
 
-;;; フレームの辺の中点を結んで菱形を描くペインタ (ex. 2.49c)
+;; フレームの辺の中点を結んで菱形を描くペインタ
 
 (define diamond
   (let* ((m1 (make-vect 0.5 0.0))
@@ -125,7 +129,7 @@
 							 (make-segment m4 m2)
 							 (make-segment m2 m1)))))
 
-;;; waveペインタ (ex. 2.49d)
+;; waveペインタ
 
 (define wave
   (segments->painter
@@ -148,7 +152,7 @@
          (make-segment (make-vect 0.5 0.3) (make-vect 0.3 0.0)))))
 
 
-;;;; Painter Operations (ex 2.44-45)
+;;;; Painter Transformations (ex 2.44-45, 50-51)
 
 (define (transform-painter painter origin corner1 corner2)
   (lambda (frame)
@@ -158,6 +162,46 @@
          (make-frame new-origin
                      (sub-vect (m corner1) new-origin)
                      (sub-vect (m corner2) new-origin)))))))
+
+(define (flip-vert painter)
+  (transform-painter painter
+                     (make-vect 0.0 1.0)    ; new origin
+                     (make-vect 1.0 1.0)    ; new end of edge1
+                     (make-vect 0.0 0.0)))  ; new end of edge2
+
+(define (shrink-to-upper-right painter)
+  (transform-painter painter
+                     (make-vect 0.5 0.5)
+                     (make-vect 1.0 0.5)
+                     (make-vect 0.5 1.0)))
+
+(define (rotate90 painter)
+  (transform-painter painter
+                     (make-vect 1.0 0.0)
+                     (make-vect 1.0 1.0)
+                     (make-vect 0.0 0.0)))
+
+(define (squash-inwards painter)
+  (transform-painter painter
+                     (make-vect 0.0 0.0)
+                     (make-vect 0.65 0.35)
+                     (make-vect 0.35 0.65)))
+
+;; ex. 2.50
+;;  flip-horiz, rotate180, rotate270 を実装する
+
+(define (flip-horiz painter)
+  (transform-painter painter
+                     (make-vect 1.0 0.0)
+                     (make-vect 0.0 0.0)
+                     (make-vect 1.0 1.0)))
+
+(define (rotate180 painter)
+  (flip-vert (flip-horiz painter)))
+
+(define (rotate270 painter)
+  (flip-vert (flip-horiz (rotate90 painter))))
+
 
 (define (beside painter1 painter2)
   (let ((split-point (make-vect 0.5 0.0)))
@@ -175,12 +219,38 @@
         (paint-left frame)
         (paint-right frame)))))
 
-;; todo
-(define (below painter1 painter2) nil)
+;; ex. 2.51
+(define (below painter1 painter2)
+  (let ((split-point (make-vect 0.0 0.5)))
+    (let ((paint-bottom
+           (transform-painter painter1
+                              (make-vect 0.0 0.0)
+							  (make-vect 1.0 0.0)
+                              split-point))
+          (paint-up
+           (transform-painter painter2
+                              split-point
+                              (make-vect 1.0 0.5)
+                              (make-vect 0.0 1.0))))
+      (lambda (frame)
+        (paint-bottom frame)
+        (paint-up frame)))))
 
 (define (flipped-pairs painter)
   (let ((painter2 (beside painter (flip-vert painter))))
     (below painter2 painter2)))
+
+;; ex 2.44-2.45
+(define (split op1 op2)
+  (define (split-proc painter n)
+	(if (= n 0)
+		painter
+		(let ((smaller (split-proc painter (- n 1) op1 op2)))
+		  (op1 painter (op2 smaller smaller)))))
+  (lambda (painter n) (split-proc painter n)))
+
+(define right-split (split beside below))
+(define up-split (split below beside))
 
 (define (corner-split painter n)
   (if (= n 0)
@@ -193,49 +263,10 @@
           (beside (below painter top-left)
                   (below bottom-right corner))))))
 
-(define (split op1 op2)
-  (define (proc painter n)
-	(if (= n 0)
-		painter
-		(let ((smaller (proc painter (- n 1))))
-		  (op1 painter (op2 smaller smaller)))))
-  proc)
-
-(define right-split (split beside below))
-
-(define up-split (split below beside))
-
 (define (square-limit painter n)
   (let ((quarter (corner-split painter n)))
     (let ((half (beside (flip-horiz quarter) quarter)))
       (below (flip-vert half) half))))
-
-(define (flip-vert painter)
-  (transform-painter painter
-                     (make-vect 0.0 1.0)    ; new origin
-                     (make-vect 1.0 1.0)    ; new end of edge1
-                     (make-vect 0.0 0.0)))  ; new end of edge2
-
-
-(define (shrink-to-upper-right painter)
-  (transform-painter painter
-                     (make-vect 0.5 0.5)
-                     (make-vect 1.0 0.5)
-                     (make-vect 0.5 1.0)))
-
-
-(define (rotate90 painter)
-  (transform-painter painter
-                     (make-vect 1.0 0.0)
-                     (make-vect 1.0 1.0)
-                     (make-vect 0.0 0.0)))
-
-
-(define (squash-inwards painter)
-  (transform-painter painter
-                     (make-vect 0.0 0.0)
-                     (make-vect 0.65 0.35)
-                     (make-vect 0.35 0.65)))
 
 
 ;;;; Canvas
@@ -246,11 +277,6 @@
 (define canvas-width  512)
 (define canvas-height 512)
 
-(define canvas-frame
-  (make-frame (make-vect canvas-margin (+ canvas-margin canvas-height))
-			  (make-vect canvas-width 0)
-			  (make-vect 0 (* -1 canvas-height))))
-
 (define vp nil) ;; view point
 
 (define open-canvas
@@ -258,11 +284,10 @@
 	(if (null? vp)
 		(begin
 		  (open-graphics)
-		  (set! vp (open-viewport "The Picture Language"
+		  (set! vp (open-viewport "A Picture Language"
 								  (+ canvas-width  (* canvas-margin 2))
 								  (+ canvas-height (* canvas-margin 2)))))
 		nil)))
-
 
 (define close-canvas
   (lambda ()
@@ -279,15 +304,26 @@
 		nil
 		((clear-viewport vp)))))
 
-;;; draw line on canvas
+
+;;;; Painter-Canvas Glue
+
+;; draw line on canvas
 (define (line start-vec end-vec)
   (define (vect->posn vec)
 	(make-posn (xcor-vect vec) (ycor-vect vec)))
   ((draw-line vp) (vect->posn start-vec)
                   (vect->posn end-vec)))
 
-;;; draw painter on canvas
+;; draw painter on canvas
 (define (draw painter)
-  (painter canvas-frame))
+  (let ((f (make-frame
+			;; 原点は、キャンバスの左下
+			(make-vect canvas-margin
+					   (+ canvas-margin canvas-height))
+			;; 片方のエッジは、キャンバスの水平方向全体
+			(make-vect canvas-width 0)
+			;; もう片方のエッジは、キャンバスの垂直方向全体
+			(make-vect 0 (* -1 canvas-height)))))
+	(painter f)))
 
-   
+
