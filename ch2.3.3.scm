@@ -57,7 +57,7 @@
 			   (union-set (cdr set1) set2)))
 		(else (union-set (cdr set1) set2))))
 
-;;; ex. 2.60
+;;; ex 2.60
 ;; element-of-set?とintersection-setは変更なし
 
 (define (adjoin-set x set) (cons x set))
@@ -143,7 +143,7 @@
                     (adjoin-set x (right-branch set))))))
 
   
-;;; ex. 2.63
+;;; ex 2.63
 
 (define (tree->list-1 tree)
   (if (null? tree)
@@ -163,7 +163,7 @@
   (copy-to-list tree '()))
 
 
-;; EXERCISE 2.64
+;;; ex 2.64
 
 (define (list->tree elements)
   (car (partial-tree elements (length elements))))
@@ -185,7 +185,25 @@
 			  remaining-elts))))
 
 
+;;; ex 2.65
+
+(define (union-tree tree1 tree2)
+  (list->tree (union-set (tree->list-2 tree1)
+						 (tree->list-2 tree2))))
+
+(define (intersection-tree tree1 tree2)
+  (list->tree (intersection-set (tree->list-2 tree1)
+								(tree->list-2 tree2))))
+
+
+
+
+
 ;;;; information retrieval
+
+(define (make-record key value) (cons key value))
+(define (key record) (car record))
+(define (value record) (cdr record))
 
 (define (lookup given-key set-of-records)
   (cond ((null? set-of-records) false)
@@ -193,3 +211,17 @@
          (car set-of-records))
         (else (lookup given-key (cdr set-of-records)))))
 
+
+(define slecao
+  (list
+   (make-record 12 '(Julio Cesar))
+   (make-record 23 '(Maicon))
+   (make-record 3  '(Thiago Silva))
+   (make-record 4  '(David Louis))
+   (make-record 6  '(Marcelo))
+   (make-record 5  '(Fernandinho))
+   (make-record 8  '(Paulinho))
+   (make-record 7  '(Hulk))
+   (make-record 11 '(Oscar))
+   (make-record 10 '(Neymar))
+   (make-record 9  '(Fred))))
