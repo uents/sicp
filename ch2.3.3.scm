@@ -122,7 +122,7 @@
 (define (make-tree entry left right)
   (list entry left right))
 
-(define (element-of-set? x set)
+(define (element-of-tree? x set)
   (cond ((null? set) false)
         ((= x (entry set)) true)
         ((< x (entry set))
@@ -187,15 +187,15 @@
 
 ;;; ex 2.65
 
-(define (union-tree tree1 tree2)
-  (list->tree (union-set (tree->list-2 tree1)
-						 (tree->list-2 tree2))))
+(define (union-set-2 tree1 tree2)
+  (list->tree
+   (union-set (tree->list-2 tree1)
+			  (tree->list-2 tree2))))
 
-(define (intersection-tree tree1 tree2)
-  (list->tree (intersection-set (tree->list-2 tree1)
-								(tree->list-2 tree2))))
-
-
+(define (intersection-set-2 tree1 tree2)
+  (list->tree
+   (intersection-set (tree->list-2 tree1)
+					 (tree->list-2 tree2))))
 
 
 
@@ -211,17 +211,54 @@
          (car set-of-records))
         (else (lookup given-key (cdr set-of-records)))))
 
-
 (define slecao
   (list
-   (make-record 12 '(Julio Cesar))
-   (make-record 23 '(Maicon))
    (make-record 3  '(Thiago Silva))
    (make-record 4  '(David Louis))
-   (make-record 6  '(Marcelo))
    (make-record 5  '(Fernandinho))
-   (make-record 8  '(Paulinho))
+   (make-record 6  '(Marcelo))
    (make-record 7  '(Hulk))
-   (make-record 11 '(Oscar))
+   (make-record 8  '(Paulinho))
+   (make-record 9  '(Fred))
    (make-record 10 '(Neymar))
-   (make-record 9  '(Fred))))
+   (make-record 11 '(Oscar))
+   (make-record 12 '(Julio Cesar))
+   (make-record 23 '(Maicon))))
+
+
+; (lookup 3  slecao)  ; => '(3 Thiago Silva)
+; (lookup 10 slecao)  ; => '(10 Neymar)
+; (lookup 13 slecao)  ; => #f
+
+
+;;; ex 2.66
+
+(define (lookup given-key tree)
+  (cond ((null? tree) false)
+		((equal? given-key (key (entry tree)))
+		 (entry tree))
+		((< given-key (key (entry tree)))
+		 (lookup-tree given-key (left-branch tree)))
+		(else
+		 (lookup-tree given-key (right-branch tree)))))
+
+(define slecao
+  (list->tree
+   (list
+	(make-record 3  '(Thiago Silva))
+	(make-record 4  '(David Louis))
+	(make-record 5  '(Fernandinho))
+	(make-record 6  '(Marcelo))
+	(make-record 7  '(Hulk))
+	(make-record 8  '(Paulinho))
+	(make-record 9  '(Fred))
+	(make-record 10 '(Neymar))
+	(make-record 11 '(Oscar))
+	(make-record 12 '(Julio Cesar))
+	(make-record 23 '(Maicon)))))
+
+
+; (lookup 3  slecao)  ; => '(3 Thiago Silva)
+; (lookup 10 slecao)  ; => '(10 Neymar)
+; (lookup 13 slecao)  ; => #f
+
