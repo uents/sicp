@@ -1,6 +1,6 @@
 ;;;; #lang racket
 ;;;;
-;;;; SICP Chapter 2.3 Symbolic Data
+;;;; SICP Chapter 2.3.3 Representing Sets
 ;;;;
 ;;;; Author: @uents on twitter
 ;;;;
