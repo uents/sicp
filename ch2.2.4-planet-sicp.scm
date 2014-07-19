@@ -1,36 +1,35 @@
 ;;;; #lang racket
 ;;;;
+;;;; SICP Chapter 2.2.4
+;;;;  A Picture Language (using planet/sicp.ss)
+;;;;
 ;;;; Author: @uents on twitter
 ;;;;
 ;;;; Usage:
 ;;;;
-;;;; 0. Setup Geiser on Emacs 24
-;;;;     see also my blog (in Japanese)
-;;;;     http://uents.hatenablog.com/entry/2014/07/09/143208
+;;;; 0. Setup Geiser on Emacs
+;;;;     M-x package-install geiser
 ;;;;
 ;;;; 1. Checkout my codes
 ;;;;     git clone https://github.com/uents/sicp.git
 ;;;;
 ;;;; 2. Start Emacs and Racket REPL (M-x run-racket)
 ;;;;
-;;;; 3. (load "ch2.2.4.scm") on Racket REPL
+;;;; 3. Executes below commands on Racket REPL
 ;;;;
+;;;;    (load "ch2.2.4.scm")
+;;;;    ...
 ;;;;
 
 
-;;;;--------------------------------------------------------
-;;;; chapter 2.4
-;;;; A Picture Language (using planet/sicp.ss)
-;;;;--------------------------------------------------------
 
 (load "misc.scm")
 
-;;; this package includes some text code
+;;; @NOTE: this package includes some text codes
 (require (planet "sicp.ss" ("soegaard" "sicp.plt" 2 1)))
 
 
 ;;; text code
-
 (define (corner-split painter n)
   (if (= n 0)
       painter

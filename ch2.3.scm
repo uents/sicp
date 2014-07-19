@@ -6,9 +6,8 @@
 ;;;;
 ;;;; Usage:
 ;;;;
-;;;; 0. Setup Geiser on Emacs 24
-;;;;     see also my blog (in Japanese)
-;;;;     http://uents.hatenablog.com/entry/2014/05/25/000000
+;;;; 0. Setup Geiser on Emacs
+;;;;     M-x package-install geiser
 ;;;;
 ;;;; 1. Download source codes
 ;;;;     git clone https://github.com/uents/sicp.git

@@ -1,14 +1,13 @@
 ;;;; #lang racket
 ;;;;
-;;;; SICP Chapter 2.3.4 Huffman Code Tree
+;;;; SICP Chapter 2.3.4 Huffman Encoding Tree
 ;;;;
 ;;;; Author: @uents on twitter
 ;;;;
 ;;;; Usage:
 ;;;;
-;;;; 0. Setup Geiser on Emacs 24
-;;;;     see also my blog (in Japanese)
-;;;;     http://uents.hatenablog.com/entry/sicp/000-index.md
+;;;; 0. Setup Geiser on Emacs
+;;;;     M-x package-install geiser
 ;;;;
 ;;;; 1. Download source codes
 ;;;;     git clone https://github.com/uents/sicp.git
