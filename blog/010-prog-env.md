@@ -63,7 +63,7 @@ Racketのエディタが使いづらかったので、Emacsをセットアップ
 
 EmacsでScheme処理系を動かすためのmajor/minor-modeとしてGeiserを導入した。
 
-### Geiseirのインストール
+### Geiserのインストール
 
 EmacsでELPAの設定まで済んでいる前提で、```M-x package-list-packages```し、geiserを選択。
 
