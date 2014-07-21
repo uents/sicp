@@ -27,9 +27,6 @@
 
 ;;; leaf 
 
-(define (make-leaf symbol weight)
-  (list 'leaf symbol weight))
-
 (define (leaf? object)
   (eq? (car object) 'leaf))
 
@@ -37,13 +34,11 @@
 
 (define (weight-leaf x) (caddr x))
 
-;;; tree
+(define (make-leaf symbol weight)
+  (list 'leaf symbol weight))
 
-(define (make-code-tree left right)
-  (list left
-        right
-        (append (symbols left) (symbols right))
-        (+ (weight left) (weight right))))
+
+;;; tree
 
 (define (left-branch tree) (car tree))
 
@@ -58,6 +53,12 @@
   (if (leaf? tree)
       (weight-leaf tree)
       (cadddr tree)))
+
+(define (make-code-tree left right)
+  (list left
+        right
+        (append (symbols left) (symbols right))
+        (+ (weight left) (weight right))))
 
 
 ;;; decoding
@@ -121,9 +122,9 @@
               (encode (cdr message) tree))))
 
 (define (encode-symbol symbol tree)
-  (if (null? (memq symbol (symbols tree)))
-	  #f
-	  (encode-symbol-1 symbol tree nil)))
+   (if (null? (memq symbol (symbols tree)))
+ 	  #f
+ 	  (encode-symbol-1 symbol tree nil)))
 
 (define (encode-symbol-1 symbol tree bits)
   (cond ((leaf? tree)
@@ -137,11 +138,67 @@
 						  (right-branch tree)
 						  (append bits (list 1))))))
 
+; racket@> (equal?
+; 		  sample-message
+; 		  (encode (decode sample-message sample-tree) sample-tree))
+; => #t
+
 
 ;;; ex 2.69
 
 (define (generate-huffman-tree pairs)
   (successive-merge (make-leaf-set pairs)))
+
+(define (successive-merge leafs)
+  (if (null? leafs)
+	  nil
+	  (successive-merge-1 (cdr leafs) (car leafs))))
+
+(define (successive-merge-1 leafs tree)
+  (if (null? leafs)
+	  tree
+	  (successive-merge-1 (cdr leafs)
+						  (make-code-tree (car leafs) tree))))
+
+;; => これだと右に偏った木になってしまう。左右のバランスを取るにはどうすれば？	 
+
+
+; racket@> (equal? (generate-huffman-tree (list '(A 4) '(B 2) '(D 1) '(C 1)))
+; 				 sample-tree)
+; => #t
+
+
+;;; ex 2.70
+
+(define word-pairs
+  (list '(A 2)
+		'(BOOM 1)
+		'(GET 2)
+		'(JOB 2)
+		'(NA 16)
+		'(SHA 3)
+		'(YIP 9)
+		'(WAH 1)))
+
+(define song-lyrics
+  '(GET A JOB
+	SHA NA NA NA NA NA NA NA NA
+	GET A JOB
+	SHA NA NA NA NA NA NA NA NA
+	WAH YIP YIP YIP YIP YIP YIP YIP YIP YIP
+	SHA BOOM))
+
+			 
+; racket@> (define word-tree (generate-huffman-tree word-pairs))
+;
+; racket@> (equal?
+;		  song-lyrics
+;		  (decode (encode song-lyrics word-tree) word-tree))
+; => #t
+; 
+; racket@> (encode song-lyrics word-tree)
+; => 87
+;
 
 
 
