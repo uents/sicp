@@ -145,27 +145,42 @@
 
 
 ;;; ex 2.69
+;;; p.96 Huffman木の生成 のアルゴリズムを再現する
 
 (define (generate-huffman-tree pairs)
   (successive-merge (make-leaf-set pairs)))
 
-(define (successive-merge leafs)
-  (if (null? leafs)
-	  nil
-	  (successive-merge-1 (cdr leafs) (car leafs))))
+(define (successive-merge tree)
+  (cond ((null? tree) nil)
+		((null? (cdr tree)) (car tree))
+		(else
+		 (successive-merge
+		  (adjoin-set (make-code-tree (car tree) (cadr tree))
+					  (cddr tree))))))
 
-(define (successive-merge-1 leafs tree)
-  (if (null? leafs)
-	  tree
-	  (successive-merge-1 (cdr leafs)
-						  (make-code-tree (car leafs) tree))))
-
-;; => これだと右に偏った木になってしまう。左右のバランスを取るにはどうすれば？	 
-
-
-; racket@> (equal? (generate-huffman-tree (list '(A 4) '(B 2) '(D 1) '(C 1)))
-; 				 sample-tree)
+; racket@> (equal?
+; 		  sample-message
+; 		  (encode (decode sample-message
+; 						  (generate-huffman-tree
+; 								  '((A 4) (B 2) (D 1) (C 1))))
+; 				  (generate-huffman-tree
+; 								  '((A 4) (B 2) (D 1) (C 1)))))
 ; => #t
+
+
+; p.s. 間違った解。これだと右に偏った木になってしまう
+;
+;(define (successive-merge leafs)
+;  (if (null? leafs)
+;	  nil
+;	  (successive-merge-1 (cdr leafs) (car leafs))))
+;
+;(define (successive-merge-1 leafs tree)
+;  (if (null? leafs)
+;	  tree
+;	  (successive-merge-1 (cdr leafs)
+;						  (make-code-tree (car leafs) tree))))
+
 
 
 ;;; ex 2.70
@@ -197,8 +212,8 @@
 ; => #t
 ; 
 ; racket@> (encode song-lyrics word-tree)
-; => 87
-;
+; => 84
+
 
 
 
