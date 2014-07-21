@@ -125,4 +125,4 @@ http://docs.racket-lang.org/reference/debugging.html
 
 --------------------------------
 
-※「計算機科学の勉強にSICPを読もう」の目次は[こちら](./index.md)
+※「計算機科学の勉強にSICPを読もう」の目次は[こちら](/entry/sicp/index.md)
