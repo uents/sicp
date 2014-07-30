@@ -64,11 +64,9 @@
   (eq? (type-tag z) 'polar))
 
 
-;;;; operation/type table
-
-;;; using hash tables
-;;;  http://docs.racket-lang.org/guide/hash-tables.html
-;;;  http://docs.racket-lang.org/reference/hashtables.html 
+;;;; operation/type table (using hash tables)
+;;;;  http://docs.racket-lang.org/guide/hash-tables.html
+;;;;  http://docs.racket-lang.org/reference/hashtables.html 
 
 (define *op-table* (make-hash))
 
@@ -244,7 +242,6 @@
 		(cons '* (cdr p))))
 
   ;; interface
-  (define (tag x) (attach-tag 'deriv x))
   (put 'deriv '+ 
 	   (lambda (exp var)
 		 (make-sum (deriv (addend exp) var)
