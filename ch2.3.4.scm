@@ -109,7 +109,7 @@
 
 (define sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0))
 
-; (decode sample-message sample-tree)
+; racket@> (decode sample-message sample-tree)
 ; => '(A D A B B C A)
 
 
@@ -158,13 +158,12 @@
 		  (adjoin-set (make-code-tree (car tree) (cadr tree))
 					  (cddr tree))))))
 
+; rakcet@> (define sample-tree-2
+;            (generate-huffman-tree '((A 4) (B 2) (D 1) (C 1))))
+
 ; racket@> (equal?
 ; 		  sample-message
-; 		  (encode (decode sample-message
-; 						  (generate-huffman-tree
-; 								  '((A 4) (B 2) (D 1) (C 1))))
-; 				  (generate-huffman-tree
-; 								  '((A 4) (B 2) (D 1) (C 1)))))
+; 		  (encode (decode sample-message sample-tree-2) sample-tree-2))
 ; => #t
 
 
@@ -211,7 +210,7 @@
 ;		  (decode (encode song-lyrics word-tree) word-tree))
 ; => #t
 ; 
-; racket@> (encode song-lyrics word-tree)
+; racket@> (length (encode song-lyrics word-tree))
 ; => 84
 
 
