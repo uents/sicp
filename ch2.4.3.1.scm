@@ -166,7 +166,7 @@
   ((get 'make-from-mag-ang 'polar) r a))
 
 
-;;;; Install packages
+;;;; Installed packages
 
 (install-rectangular-package)
 (install-polar-package)
@@ -193,8 +193,8 @@
 (define (deriv exp var)
    (cond ((number? exp) 0)
          ((variable? exp) (if (same-variable? exp var) 1 0))
-         (else ((get 'deriv (operator exp)) (operands exp)
-                                            var))))
+         (else ((get 'deriv (operator exp)) (operands exp) var))))
+
 (define (operator exp) (car exp))
 (define (operands exp) (cdr exp))
 
@@ -204,7 +204,9 @@
 ;;;; number? variable? は type に依存しないため、op-tableには吸収できないから
 
 
-;;;; b.
+;;;; b. 和算、積算を導入せよ
+;;;; c. 指数計算を導入せよ
+
 
 (define (variable? x) (symbol? x))
 
@@ -241,6 +243,14 @@
 		(cadr p)
 		(cons '* (cdr p))))
 
+  ;; exponetiation
+  (define (make-exponentiation base exponent)
+	(cond ((=number? exponent 0) 1)
+		  ((=number? exponent 1) base)
+		  (else (list '** base exponent))))
+  (define (base exp) (car exp))
+  (define (exponent exp) (cadr exp))
+
   ;; interface
   (put 'deriv '+ 
 	   (lambda (exp var)
@@ -253,16 +263,50 @@
 						(deriv (multiplicand exp) var))
 		  (make-product (deriv (multiplier exp) var)
 						(multiplicand exp)))))
+  (put 'deriv '**
+	   (lambda (exp var)
+		 (let ((b (base exp))
+			   (n (exponent exp)))
+		   (make-product
+			(make-product n
+						  (make-exponentiation b (- n 1)))
+			(deriv b var)))))
   'done)
 
-; racket@> (install-deriv-package)
-; 'done
+
+(install-deriv-package)
+
+;(define (deriv exp var) (apply-generic 'deriv exp var))
+
+
 ; racket@> (deriv '(+ x y z) 'x)
 ; 1
 ; racket@> (deriv '(+ x y z) 'y)
 ; 1
-; racket@> (deriv '(+ x y z) 'z)
-; 1
 ; racket@> (deriv '(+ x y z) 'w)
 ; 0
+
+; racket@> (deriv '(** x 1) 'x)
+; 1
+; racket@> (deriv '(** x 2) 'x)
+; '(* 2 x)
+; racket@> (deriv '(** x 3) 'x)
+; '(* 3 (** x 2))
+
+
+;;; d.
+;
+; deriv手続きのoperator/operandsの呼び出し行を
+;
+; ((get (operator exp) 'deriv) (operands exp) var)
+;
+; とした場合に、システムの変更は何が必要か？
+;
+; => install-deriv-packageのputの行を
+;
+; (put <operation> 'deriv <procedure of operation>)
+;
+; とする..
+
+
 
