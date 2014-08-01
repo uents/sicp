@@ -23,7 +23,58 @@
 
 (load "misc.scm")
 
+;;;; -----------------------------------
+;;;; operation/type table (using hash tables)
+;;;;  http://docs.racket-lang.org/guide/hash-tables.html
+;;;;  http://docs.racket-lang.org/reference/hashtables.html 
+;;;; -----------------------------------
+
+(define *op-table* (make-hash))
+
+(define (put op type item)
+  (if (not (hash-has-key? *op-table* op))
+	  (hash-set! *op-table* op (make-hash))
+	  nil)
+  (hash-set! (hash-ref *op-table* op) type item))
+
+(define (get op type)
+  (if (not (hash-has-key? *op-table* op))
+	  (error "Bad key -- OPERATION" op)
+	  (if (not (hash-has-key? (hash-ref *op-table* op) type))
+		  (error "Bad key -- TYPE" type)
+		  (hash-ref (hash-ref *op-table* op) type))))
+
+;;;; -----------------------------------
+;;;; type-tag and apply-generic system
+;;;; -----------------------------------
+
+(define (attach-tag type-tag contents)
+  (cons type-tag contents))
+
+(define (type-tag datum)
+  (if (pair? datum)
+      (car datum)
+      (error "Bad tagged datum -- TYPE-TAG" datum)))
+
+(define (contents datum)
+  (if (pair? datum)
+      (cdr datum)
+      (error "Bad tagged datum -- CONTENTS" datum)))
+
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+		  ; argsはリストで渡されるので
+		  ; contents手続きをmapしてprocをapplyで適用する
+		  (apply proc (map contents args))
+          (error
+            "No method for these types -- APPLY-GENERIC"
+            (list op type-tags))))))
+
+;;;; -----------------------------------
 ;;;; arithmetic operation for complex numbers
+;;;; -----------------------------------
 
 (define (add-complex z1 z2)
   (make-from-real-imag (+ (real-part z1) (real-part z2))
@@ -42,49 +93,9 @@
                      (- (angle z1) (angle z2))))
 
 
-;;;; tagged data
-
-(define (attach-tag type-tag contents)
-  (cons type-tag contents))
-
-(define (type-tag datum)
-  (if (pair? datum)
-      (car datum)
-      (error "Bad tagged datum -- TYPE-TAG" datum)))
-
-(define (contents datum)
-  (if (pair? datum)
-      (cdr datum)
-      (error "Bad tagged datum -- CONTENTS" datum)))
-
-(define (rectangular? z)
-  (eq? (type-tag z) 'rectangular))
-
-(define (polar? z)
-  (eq? (type-tag z) 'polar))
-
-
-;;;; operation/type table (using hash tables)
-;;;;  http://docs.racket-lang.org/guide/hash-tables.html
-;;;;  http://docs.racket-lang.org/reference/hashtables.html 
-
-(define *op-table* (make-hash))
-
-(define (put op type item)
-  (if (not (hash-has-key? *op-table* op))
-	  (hash-set! *op-table* op (make-hash))
-	  false)
-  (hash-set! (hash-ref *op-table* op) type item))
-
-(define (get op type)
-  (if (hash-has-key? *op-table* op)
-	  (if (hash-has-key? (hash-ref *op-table* op) type)
-		  (hash-ref (hash-ref *op-table* op) type)
-		  false)
-	  false))
-
-
-;;;; Complex-arithmetic package installers
+;;;; -----------------------------------
+;;;; complex-arithmetic package
+;;;; -----------------------------------
 
 (define (install-rectangular-package)
   ;; internal procedures
@@ -113,6 +124,7 @@
 
 (define (install-polar-package)
   ;; internal procedures
+
   (define (magnitude z) (car z))
   (define (angle z) (cdr z))
   (define (make-from-mag-ang r a) (cons r a))
@@ -137,28 +149,13 @@
   'done)
 
 
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-		  ; argsはリストで渡されるので
-		  ; contents手続きをmapして、procをapplyで適用する
-		  (apply proc (map contents args))
-          (error
-            "No method for these types -- APPLY-GENERIC"
-            (list op type-tags))))))
-
-
-;;;; Generic selectors
-
+;;; generic selectors
 (define (real-part z) (apply-generic 'real-part z))
 (define (imag-part z) (apply-generic 'imag-part z))
 (define (magnitude z) (apply-generic 'magnitude z))
 (define (angle z) (apply-generic 'angle z))
 
-
-;;;; Constructors for complex numbers
-
+;;; constructors
 (define (make-from-real-imag x y)
   ((get 'make-from-real-imag 'rectangular) x y))
 
@@ -166,13 +163,14 @@
   ((get 'make-from-mag-ang 'polar) r a))
 
 
-;;;; Installed packages
-
+;;; installed packages
 (install-rectangular-package)
 (install-polar-package)
 
 
-;;;; Test
+;;;; -----------------------------------
+;;;; test
+;;;; -----------------------------------
 
 ; 例えば (real-part (make-from-real-imag 4 3)) は、
 ; 置き換えモデルを使うと、
