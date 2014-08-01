@@ -83,8 +83,11 @@
 ; (またcompany-fileがタグを持つのも変な気もする)
 
 (define (get-record file name)
-  (let ((tag (type-tag file)))
-	(attach-tag tag ((get 'get-record (type-tag file)) (contents file) name))))
+  (let* ((tag (type-tag file))
+		 (record ((get 'get-record tag) (contents file) name)))
+	(if (null? record)
+		nil
+		(attach-tag tag record))))
 
 ;;; b. 従業員のレコードから給与情報を返すget-salaryを実装せよ
 
@@ -94,7 +97,7 @@
 ;;; c. 全ての事業所ファイルに対し従業員のレコードを返すfind-employee-recordを実装せよ
 
 (define (find-employee-record files name)
-  (map (lambda (file) (get-record file name)) files))
+  (filter pair? (map (lambda (file) (get-record file name)) files)))
 
 ;;; d.
 
@@ -135,10 +138,55 @@
   (2 (Masuo Fuguta) 2400)
   (3 (Nanbutsu Isasaka) 4500)))
 
+;; accessor package
+(define (install-osaka-office-package)
+  (define (id-record record) (car record))
+  (define (name-record record) (cadr record))
+  (define (salary-record record) (caddr record))
+  (define (get-record file name)
+	(cond ((null? file) nil)
+		  ((equal? name (name-record (car file))) (car file))
+		  (else (get-record (cdr file) name))))
+  (define (get-salary record)
+	(salary-record record))
+
+  ;; interface
+  (put 'get-record 'osaka get-record)
+  (put 'get-salary 'osaka get-salary)
+  'done)
+
+(install-osaka-office-package)
+
+;; append tag to original database file
+(define *osaka-office-file*
+  (attach-tag 'osaka *osaka-office-file*))
 
 
+;;; test
+
+; racket@> (get-salary (get-record *tokyo-office-file* '(Katsuo Isono)))
+; 1500
+; 
+; racket@> (get-salary (get-record *osaka-office-file* '(Masuo Fuguta)))
+; 2400
+;
+; racket@> (get-record *tokyo-office-file* '(Wakeme Isono))
+; '()
 
 
-	   
-  
+; racket@> (find-employee-record
+; 		  (list *tokyo-office-file* *osaka-office-file*)
+; 		  '(Katsuo Isono))
+; '((tokyo (Katsuo Isono) . 1500))
+
+
+; racket@> (find-employee-record
+; 		  (list *tokyo-office-file* *osaka-office-file*)
+; 		  '(Namihei Isono))
+; '((osaka 1 (Namihei Isono) 3600))
+
+; racket@> (find-employee-record
+; 		  (list *tokyo-office-file* *osaka-office-file*)
+; 		  '(Wakeme Isono))
+; '()
 
