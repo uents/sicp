@@ -148,41 +148,51 @@
        (lambda (r a) (tag (make-from-mag-ang r a))))
   'done)
 
-
-;;; generic selectors
-(define (real-part z) (apply-generic 'real-part z))
-(define (imag-part z) (apply-generic 'imag-part z))
-(define (magnitude z) (apply-generic 'magnitude z))
-(define (angle z) (apply-generic 'angle z))
+;;; installed packages
+(install-rectangular-package)
+(install-polar-package)
 
 ;;; constructors
+;;; コンストラクタは引数に型がないため、apply-genericは使えない
 (define (make-from-real-imag x y)
   ((get 'make-from-real-imag 'rectangular) x y))
 
 (define (make-from-mag-ang r a)
   ((get 'make-from-mag-ang 'polar) r a))
 
-
-;;; installed packages
-(install-rectangular-package)
-(install-polar-package)
+;;; generic selectors
+;;; アクセサは引数が複素数データのため、apply-genericを使う
+(define (real-part z) (apply-generic 'real-part z))
+(define (imag-part z) (apply-generic 'imag-part z))
+(define (magnitude z) (apply-generic 'magnitude z))
+(define (angle z) (apply-generic 'angle z))
 
 
 ;;;; -----------------------------------
 ;;;; test
 ;;;; -----------------------------------
 
-; 例えば (real-part (make-from-real-imag 4 3)) は、
-; 置き換えモデルを使うと、
+; racket@> (define z (make-from-real-imag 4 3))
 ; 
-; => (apply (get 'real-part '(rectangular))
-; 	      (map contents (list (make-from-real-imag 4 3))))
-; => (apply (get 'real-part '(rectangular))
-; 	      '((mcons 4 3)))
-; => (mcar (mcons 4 3))
+; racket@> z
+; '(rectangular 4 . 3)
+; 
+; racket@> (real-part z)
+; 4
+; racket@> (imag-part z)
+; 3
+; racket@> (magnitude z)
+; 5
+
+; 例えば (real-part z) は置き換えモデルを使うと、
+; 
+; => (real-part '(rectanglar 4 . 3)
+; => (apply-generic 'real-part '(real-parg 4 . 3))
+; => (apply (get 'real-part '(rectangular)) (map contents '((rectanglar 4 . 3)))
+; => (apply car '((4 . 3)))
 ; => 4
 ; 
-; となる
+; のような感じになる
 
 
 
@@ -212,6 +222,7 @@
   (and (variable? v1) (variable? v2) (eq? v1 v2)))
 
 
+;;; deriv operation package
 (define (install-deriv-package)
   (define (=number? exp num)
 	(and (number? exp) (= exp num)))
@@ -271,10 +282,9 @@
 			(deriv b var)))))
   'done)
 
-
 (install-deriv-package)
 
-;(define (deriv exp var) (apply-generic 'deriv exp var))
+(define (deriv exp var) (apply-generic 'deriv exp var))
 
 
 ; racket@> (deriv '(+ x y z) 'x)
