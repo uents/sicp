@@ -33,15 +33,20 @@
 (define (put op type item)
   (if (not (hash-has-key? *op-table* op))
 	  (hash-set! *op-table* op (make-hash))
-	  nil)
+	  true)
   (hash-set! (hash-ref *op-table* op) type item))
 
 (define (get op type)
-  (if (not (hash-has-key? *op-table* op))
-	  (error "Bad key -- OPERATION" op)
-	  (if (not (hash-has-key? (hash-ref *op-table* op) type))
-		  (error "Bad key -- TYPE" type)
-		  (hash-ref (hash-ref *op-table* op) type))))
+  (define (not-found . msg)
+	(display msg (current-error-port))
+	(display "\n")
+	false)
+  (if (hash-has-key? *op-table* op)
+	  (if (hash-has-key? (hash-ref *op-table* op) type)
+		  (hash-ref (hash-ref *op-table* op) type)
+		  (not-found "Bad key -- TYPE" type))
+	  (not-found "Bad key -- OPERATION" op)))
+
 
 ;;;; -----------------------------------
 ;;;; type-tag and apply-generic system
@@ -70,8 +75,6 @@
           (error
             "No method for these types -- APPLY-GENERIC"
             (list op type-tags))))))
-
-
 
 
 ;;;;; ex 2.74

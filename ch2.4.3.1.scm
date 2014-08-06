@@ -34,15 +34,42 @@
 (define (put op type item)
   (if (not (hash-has-key? *op-table* op))
 	  (hash-set! *op-table* op (make-hash))
-	  nil)
+	  true)
   (hash-set! (hash-ref *op-table* op) type item))
 
 (define (get op type)
-  (if (not (hash-has-key? *op-table* op))
-	  (error "Bad key -- OPERATION" op)
-	  (if (not (hash-has-key? (hash-ref *op-table* op) type))
-		  (error "Bad key -- TYPE" type)
-		  (hash-ref (hash-ref *op-table* op) type))))
+  (define (not-found . msg)
+	(display msg (current-error-port))
+	(display "\n")
+	false)
+  (if (hash-has-key? *op-table* op)
+	  (if (hash-has-key? (hash-ref *op-table* op) type)
+		  (hash-ref (hash-ref *op-table* op) type)
+		  (not-found "Bad key -- TYPE" type))
+	  (not-found "Bad key -- OPERATION" op)))
+
+
+; racket@> (put 'add '(number number) +)
+; racket@> (put 'sub '(number number) -)
+; 
+; racket@> *op-table*
+; '#hash((sub . #hash(((number number) . #<procedure:->)))
+;        (add . #hash(((number number) . #<procedure:+>))))
+;
+; racket@> ((get 'add '(number number)) 3 4)
+; 7
+; racket@> ((get 'sub '(number number)) 3 4)
+; -1
+; racket@> ((get 'mul '(number number)) 3 4)
+; (Bad key -- OPERATION mul)
+; application: not a procedure;
+;  expected a procedure that can be applied to arguments
+;   given: #f
+;   arguments...:
+;    3
+;    4
+;   context...:
+;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
 
 ;;;; -----------------------------------
 ;;;; type-tag and apply-generic system

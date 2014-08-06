@@ -34,15 +34,19 @@
 (define (put op type item)
   (if (not (hash-has-key? *op-table* op))
 	  (hash-set! *op-table* op (make-hash))
-	  false)
+	  true)
   (hash-set! (hash-ref *op-table* op) type item))
 
 (define (get op type)
+  (define (not-found . msg)
+	(display msg (current-error-port))
+	(display "\n")
+	false)
   (if (hash-has-key? *op-table* op)
 	  (if (hash-has-key? (hash-ref *op-table* op) type)
 		  (hash-ref (hash-ref *op-table* op) type)
-		  false)
-	  false))
+		  (not-found "Bad key -- TYPE" type))
+	  (not-found "Bad key -- OPERATION" op)))
 
 
 ;;;; ---------------------------
