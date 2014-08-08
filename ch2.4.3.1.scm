@@ -95,7 +95,7 @@
 ;;;; -----------------------------------
 
 (define (install-rectangular-package)
-  ;; internal procedures
+  ;; internal
   (define (real-part z) (car z))
   (define (imag-part z) (cdr z))
   (define (make-from-real-imag x y) (cons x y))
@@ -107,7 +107,7 @@
   (define (make-from-mag-ang r a) 
     (cons (* r (cos a)) (* r (sin a))))
 
-  ;; interface to the rest of the system
+  ;; interface
   (define (tag x) (attach-tag 'rectangular x))
   (put 'real-part '(rectangular) real-part)
   (put 'imag-part '(rectangular) imag-part)
@@ -120,8 +120,7 @@
   'done)
 
 (define (install-polar-package)
-  ;; internal procedures
-
+  ;; internal
   (define (magnitude z) (car z))
   (define (angle z) (cdr z))
   (define (make-from-mag-ang r a) (cons r a))
@@ -133,7 +132,7 @@
     (cons (sqrt (+ (square x) (square y)))
           (atan y x)))
 
-  ;; interface to the rest of the system
+  ;; interface
   (define (tag x) (attach-tag 'polar x))
   (put 'real-part '(polar) real-part)
   (put 'imag-part '(polar) imag-part)
@@ -145,10 +144,6 @@
        (lambda (r a) (tag (make-from-mag-ang r a))))
   'done)
 
-;;; installed packages
-(install-rectangular-package)
-(install-polar-package)
-
 ;;; constructors
 ;;; コンストラクタは引数に型がないため、apply-genericは使えない
 (define (make-from-real-imag x y)
@@ -156,6 +151,10 @@
 
 (define (make-from-mag-ang r a)
   ((get 'make-from-mag-ang 'polar) r a))
+
+;;; installed packages
+(install-rectangular-package)
+(install-polar-package)
 
 
 ;;;; -----------------------------------
@@ -316,8 +315,6 @@
   'done)
 
 (install-deriv-package)
-
-(define (deriv exp var) (apply-generic 'deriv exp var))
 
 
 ; racket@> (deriv '(+ x y z) 'x)
