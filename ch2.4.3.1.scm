@@ -96,14 +96,17 @@
 
 (define (install-rectangular-package)
   ;; internal
-  (define (real-part z) (car z))
-  (define (imag-part z) (cdr z))
-  (define (make-from-real-imag x y) (cons x y))
-  (define (magnitude z)
+  (define (real-part z)
+	(car z))
+  (define (imag-part z)
+	(cdr z))
+  (define (magnitude-part z)
     (sqrt (+ (square (real-part z))
              (square (imag-part z)))))
-  (define (angle z)
+  (define (angle-part z)
     (atan (imag-part z) (real-part z)))
+  (define (make-from-real-imag x y)
+	(cons x y))
   (define (make-from-mag-ang r a) 
     (cons (* r (cos a)) (* r (sin a))))
 
@@ -111,8 +114,8 @@
   (define (tag x) (attach-tag 'rectangular x))
   (put 'real-part '(rectangular) real-part)
   (put 'imag-part '(rectangular) imag-part)
-  (put 'magnitude '(rectangular) magnitude)
-  (put 'angle '(rectangular) angle)
+  (put 'magnitude-part '(rectangular) magnitude-part)
+  (put 'angle-part '(rectangular) angle-part)
   (put 'make-from-real-imag 'rectangular
        (lambda (x y) (tag (make-from-real-imag x y))))
   (put 'make-from-mag-ang 'rectangular
@@ -121,13 +124,16 @@
 
 (define (install-polar-package)
   ;; internal
-  (define (magnitude z) (car z))
-  (define (angle z) (cdr z))
-  (define (make-from-mag-ang r a) (cons r a))
+  (define (magnitude-part z)
+	(car z))
+  (define (angle-part z)
+	(cdr z))
   (define (real-part z)
-    (* (magnitude z) (cos (angle z))))
+    (* (magnitude-part z) (cos (angle-part z))))
   (define (imag-part z)
-    (* (magnitude z) (sin (angle z))))
+    (* (magnitude-part z) (sin (angle-part z))))
+  (define (make-from-mag-ang r a)
+	(cons r a))
   (define (make-from-real-imag x y) 
     (cons (sqrt (+ (square x) (square y)))
           (atan y x)))
@@ -136,23 +142,21 @@
   (define (tag x) (attach-tag 'polar x))
   (put 'real-part '(polar) real-part)
   (put 'imag-part '(polar) imag-part)
-  (put 'magnitude '(polar) magnitude)
-  (put 'angle '(polar) angle)
+  (put 'magnitude-part '(polar) magnitude-part)
+  (put 'angle-part '(polar) angle-part)
   (put 'make-from-real-imag 'polar
        (lambda (x y) (tag (make-from-real-imag x y))))
   (put 'make-from-mag-ang 'polar
        (lambda (r a) (tag (make-from-mag-ang r a))))
   'done)
 
-;;; constructors
-;;; コンストラクタは引数に型がないため、apply-genericは使えない
+;; constructors
 (define (make-from-real-imag x y)
   ((get 'make-from-real-imag 'rectangular) x y))
 
 (define (make-from-mag-ang r a)
   ((get 'make-from-mag-ang 'polar) r a))
 
-;;; installed packages
 (install-rectangular-package)
 (install-polar-package)
 
@@ -175,8 +179,8 @@
 
 (define (real-part z) (apply-generic 'real-part z))
 (define (imag-part z) (apply-generic 'imag-part z))
-(define (magnitude z) (apply-generic 'magnitude z))
-(define (angle z) (apply-generic 'angle z))
+(define (magnitude-part z) (apply-generic 'magnitude-part z))
+(define (angle-part z) (apply-generic 'angle-part z))
 
 
 ;;;; -----------------------------------
@@ -192,12 +196,12 @@
                        (- (imag-part z1) (imag-part z2))))
 
 (define (mul-complex z1 z2)
-  (make-from-mag-ang (* (magnitude z1) (magnitude z2))
-                     (+ (angle z1) (angle z2))))
+  (make-from-mag-ang (* (magnitude-part z1) (magnitude-part z2))
+                     (+ (angle-part z1) (angle-part z2))))
 
 (define (div-complex z1 z2)
-  (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
-                     (- (angle z1) (angle z2))))
+  (make-from-mag-ang (/ (magnitude-part z1) (magnitude-part z2))
+                     (- (angle-part z1) (angle-part z2))))
 
 
 ;;;; -----------------------------------
@@ -213,7 +217,7 @@
 ; 4
 ; racket@> (imag-part z)
 ; 3
-; racket@> (magnitude z)
+; racket@> (magnitude-part z)
 ; 5
 
 ; 例えば (real-part z) は置き換えモデルを使うと、

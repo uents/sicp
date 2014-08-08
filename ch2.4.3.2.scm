@@ -49,7 +49,7 @@
 
 
 ;;;; -----------------------------------
-;;;; type-tag and apply-generic system
+;;;; type-tag system
 ;;;; -----------------------------------
 
 (define (attach-tag type-tag contents)
@@ -65,16 +65,11 @@
       (cdr datum)
       (error "Bad tagged datum -- CONTENTS" datum)))
 
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-		  ; argsはリストで渡されるので
-		  ; contents手続きをmapしてprocをapplyで適用する
-		  (apply proc (map contents args))
-          (error
-            "No method for these types -- APPLY-GENERIC"
-            (list op type-tags))))))
+
+
+;;;; -----------------------------------
+;;;; exercise
+;;;; -----------------------------------
 
 
 ;;;;; ex 2.74
