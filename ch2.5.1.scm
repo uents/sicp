@@ -68,7 +68,7 @@
 
 
 ;;;; ---------------------------
-;;;;  generic accessors
+;;;;  generic operators
 ;;;; ---------------------------
 
 (define (apply-generic op . args)
@@ -350,13 +350,6 @@
 ;   context...:
 ;    /Users/uents/work/sicp/ch2.5.scm:61:0: apply-generic
 ;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
-
-
-;;; これはいらない
-;(define (attach-tag type-tag contents)
-;  (if (number? contents)
-;	  contents
-;	  (cons type-tag contents)))
 
 (define (type-tag datum)
   (cond ((number? datum) 'scheme-number)
