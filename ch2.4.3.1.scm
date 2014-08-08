@@ -71,8 +71,9 @@
 ;   context...:
 ;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
 
+
 ;;;; -----------------------------------
-;;;; type-tag and apply-generic system
+;;;; type-tag system
 ;;;; -----------------------------------
 
 (define (attach-tag type-tag contents)
@@ -87,37 +88,6 @@
   (if (pair? datum)
       (cdr datum)
       (error "Bad tagged datum -- CONTENTS" datum)))
-
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-		  ; argsはリストで渡されるので
-		  ; contents手続きをmapしてprocをapplyで適用する
-		  (apply proc (map contents args))
-          (error
-            "No method for these types -- APPLY-GENERIC"
-            (list op type-tags))))))
-
-;;;; -----------------------------------
-;;;; arithmetic operation for complex numbers
-;;;; -----------------------------------
-
-(define (add-complex z1 z2)
-  (make-from-real-imag (+ (real-part z1) (real-part z2))
-                       (+ (imag-part z1) (imag-part z2))))
-
-(define (sub-complex z1 z2)
-  (make-from-real-imag (- (real-part z1) (real-part z2))
-                       (- (imag-part z1) (imag-part z2))))
-
-(define (mul-complex z1 z2)
-  (make-from-mag-ang (* (magnitude z1) (magnitude z2))
-                     (+ (angle z1) (angle z2))))
-
-(define (div-complex z1 z2)
-  (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
-                     (- (angle z1) (angle z2))))
 
 
 ;;;; -----------------------------------
@@ -187,12 +157,48 @@
 (define (make-from-mag-ang r a)
   ((get 'make-from-mag-ang 'polar) r a))
 
+
+;;;; -----------------------------------
 ;;; generic selectors
 ;;; アクセサは引数が複素数データのため、apply-genericを使う
+;;;; -----------------------------------
+
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+		  ; argsはリストで渡されるので
+		  ; contents手続きをmapしてprocをapplyで適用する
+		  (apply proc (map contents args))
+          (error
+            "No method for these types -- APPLY-GENERIC"
+            (list op type-tags))))))
+
 (define (real-part z) (apply-generic 'real-part z))
 (define (imag-part z) (apply-generic 'imag-part z))
 (define (magnitude z) (apply-generic 'magnitude z))
 (define (angle z) (apply-generic 'angle z))
+
+
+;;;; -----------------------------------
+;;;; arithmetic operation for complex numbers
+;;;; -----------------------------------
+
+(define (add-complex z1 z2)
+  (make-from-real-imag (+ (real-part z1) (real-part z2))
+                       (+ (imag-part z1) (imag-part z2))))
+
+(define (sub-complex z1 z2)
+  (make-from-real-imag (- (real-part z1) (real-part z2))
+                       (- (imag-part z1) (imag-part z2))))
+
+(define (mul-complex z1 z2)
+  (make-from-mag-ang (* (magnitude z1) (magnitude z2))
+                     (+ (angle z1) (angle z2))))
+
+(define (div-complex z1 z2)
+  (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
+                     (- (angle z1) (angle z2))))
 
 
 ;;;; -----------------------------------
@@ -342,6 +348,4 @@
 ; (put <operation> 'deriv <procedure of operation>)
 ;
 ; とする..
-
-
 
