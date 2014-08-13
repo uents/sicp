@@ -39,8 +39,8 @@
 
 (define (get-table table key1 key2)
   (define (not-found . msg)
-	(display msg (current-error-port))
-	(display "\n")
+;	(display msg (current-error-port))
+;	(display "\n")
 	false)
   (if (hash-has-key? table key1)
 	  (if (hash-has-key? (hash-ref table key1) key2)
@@ -58,7 +58,7 @@
 (define (put-coercion type1 type2 item)
   (put-table *coercion-table* type1 type2 item))
 (define (get-coercion type1 type2)
-  (get-table *coercion-table* type2 type2))
+  (get-table *coercion-table* type1 type2))
 
 
 ;;;; ---------------------------
@@ -114,9 +114,6 @@
 (define (div x y) (apply-generic 'div x y))
 (define (equ? x y) (apply-generic 'equ? x y))
 (define (=zero? x) (apply-generic '=zero? x))
-
-(define (numer z) (apply-generic 'numer z))
-(define (denom z) (apply-generic 'denom z))
 
 (define (real-part z) (apply-generic 'real-part z))
 (define (imag-part z) (apply-generic 'imag-part z))
@@ -281,6 +278,9 @@
   ;; ex 2.81
   (put 'exp '(scheme-number scheme-number)
 	   (lambda (x y) (tag (expt x y))))
+  ;; ex 2.83
+  (put 'raise '(scheme-number)
+	   (lambda (z) (make-complex-from-real-imag z 0)))
 
   'done)
 
@@ -339,10 +339,8 @@
   (put '=zero? '(rational)
 	   (lambda (x) (= (numer x) 0)))
   ;; ex 2.83
-  (put 'numer '(rational)
-	   (lambda (x) (make-integer (numer x))))
-  (put 'denom '(rational)
-	   (lambda (x) (make-integer (denom x))))
+  (put 'raise '(rational)
+	   (lambda (z) (make-scheme-number (/ (numer z) (denom z)))))
 
   'done)
 
@@ -369,7 +367,7 @@
   (put 'div '(integer integer)
        (lambda (x y) (tag (/ x y))))
   (put 'make 'integer
-       (lambda (x) (tag x)))
+       (lambda (x) (tag (floor x))))
 
   ;; ex 2.79
   (put 'equ? '(integer integer)
@@ -377,6 +375,10 @@
   ;; ex 2.80
   (put '=zero? '(integer)
 	   (lambda (x) (= x 0)))
+  ;; ex 2.83
+  (put 'raise '(integer)
+	   (lambda (z) (make-rational z 1)))
+
   'done)
 
 ;; constructor
@@ -472,20 +474,39 @@
 
 ;;;; ex 2.83
 
+;; add to integer package
+;
+;(put 'raise '(integer)
+;	 (lambda (z) (make-rational z 1)))
+
+;; add to rational package
+;
+;(put 'raise '(rational)
+;	 (lambda (z) (make-scheme-number (/ (numer z) (denom z)))))
+
+;; add to scheme number package
+;
+;(put 'raise '(scheme-number)
+;	 (lambda (z) (make-complex-from-real-imag z 0)))
+
+
 (define (raise z) (apply-generic 'raise z))
 
-(put 'raise '(integer)
-	 (lambda (z) (make-rational z 1)))
 
-(put 'raise '(rational)
-	 (lambda (z) (make-scheme-number (div (numer z) (denom z)))))
-
-(put 'raise '(scheme-number)
-	 (lambda (z) (make-complex-from-real-imag z 0)))
-
-
-; racket@> (raise 3)
+; racket@> (raise (make-integer 3))
 ; '(rational 3 . 1)
+; 
+; racket@> (raise (raise (make-integer 3)))
+; '(scheme-number . 3)
+; 
+; racket@> (raise (raise (raise (make-integer 3))))
+; '(complex rectangular 3 . 0)
+;
+; racket@> (raise (raise (raise (raise (make-integer 3)))))
+; (Bad key -- KEY2 (complex))
+; No method for these types (raise (complex))
+;   context...:
+;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
 
 
 ;;;; ex 2.84
@@ -505,6 +526,9 @@
 ; racket@> (higher-type? (type-tag 5)
 ; 					   (type-tag (make-complex-from-real-imag 4 3)))
 ; 'complex
+; 
+; racket@> (higher-type? (type-tag 5) (type-tag (make-integer 3)))
+; 'scheme-number
 
 
 (define (apply-generic op . args)
@@ -531,6 +555,27 @@
 									(list op type-tags)))))))
 			  (error "No method for these types"
 					 (list op type-tags)))))))
+
+
+(put-coercion 'integer 'rational (lambda (n) (raise n)))
+(put-coercion 'integer 'scheme-number (lambda (n) (raise (raise n))))
+(put-coercion 'integer 'complex (lambda (n) (raise (raise (raise n)))))
+
+(put-coercion 'rational 'scheme-number (lambda (n) (raise n)))
+(put-coercion 'rational 'complex (lambda (n) (raise (raise n))))
+
+(put-coercion 'scheme-number 'complex (lambda (n) (raise n)))
+
+
+; racket@> (add (make-complex-from-real-imag 1 0)
+; 			  (add (make-scheme-number 2)
+; 				   (add (make-rational 3 1) (make-integer 4))))
+; '(complex rectangular 10 . 0)
+;
+; racket@> (add (make-integer 1)
+; 			  (add (make-rational 2 1)
+; 				   (add (make-scheme-number 3) (make-complex-from-real-imag 4 0))))
+; '(complex rectangular 10 . 0)
 
 
 ;;;; ex 2.85
