@@ -167,15 +167,15 @@
 ;;;; -----------------------------------
 
 (define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-		  ; argsはリストで渡されるので
-		  ; contents手続きをmapしてprocをapplyで適用する
-		  (apply proc (map contents args))
-          (error
-            "No method for these types -- APPLY-GENERIC"
-            (list op type-tags))))))
+  (let* ((type-tags (map type-tag args))
+		 (proc (get op type-tags))))
+	(if proc
+		; argsはリストで渡されるので
+		; contents手続きをmapしてprocをapplyで適用する
+		(apply proc (map contents args))
+		(error
+		 "No method for these types -- APPLY-GENERIC"
+		 (list op type-tags)))))
 
 (define (real-part z) (apply-generic 'real-part z))
 (define (imag-part z) (apply-generic 'imag-part z))
