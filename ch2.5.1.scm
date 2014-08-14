@@ -277,8 +277,8 @@
 ;;;; ---------------------------
 
 (define (install-scheme-number-package)
-  (define (tag x)
-    (attach-tag 'scheme-number x))
+  ;; interface
+  (define (tag x) (attach-tag 'scheme-number x))
   (put 'add '(scheme-number scheme-number)
        (lambda (x y) (tag (+ x y))))
   (put 'sub '(scheme-number scheme-number)
