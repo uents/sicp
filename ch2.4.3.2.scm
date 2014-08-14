@@ -77,8 +77,7 @@
 
 ;;; a. 指定された事業所ファイルから従業員のレコードを返すget-recordを実装せよ
 
-; employee-nameにタグがないので、apply-genericは使えない
-; (またcompany-fileがタグを持つのも変な気もする)
+; nameにタグがないので、apply-genericは使えない
 
 (define (get-record file name)
   (let* ((tag (type-tag file))
