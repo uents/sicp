@@ -108,6 +108,7 @@
 
 ;; accessor package
 (define (install-tokyo-office-package)
+  ;; internal
   (define (name-record record) (car record))
   (define (salary-record record) (cdr record))
   (define (get-record file name)
@@ -137,6 +138,7 @@
 
 ;; accessor package
 (define (install-osaka-office-package)
+  ;; internal
   (define (id-record record) (car record))
   (define (name-record record) (cadr record))
   (define (salary-record record) (caddr record))
