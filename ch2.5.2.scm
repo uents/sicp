@@ -86,26 +86,26 @@
 ;;;; -------------------------------------
 
 (define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-          (apply proc (map contents args))
-          (if (= (length args) 2)
-              (let ((type1 (car type-tags))
-                    (type2 (cadr type-tags))
-                    (a1 (car args))
-                    (a2 (cadr args)))
-                (let ((t1->t2 (get-coercion type1 type2))
-                      (t2->t1 (get-coercion type2 type1)))
-                  (cond (t1->t2
-                         (apply-generic op (t1->t2 a1) a2))
-                        (t2->t1
-                         (apply-generic op a1 (t2->t1 a2)))
-                        (else
-                         (error "No method for these types"
-                                (list op type-tags))))))
-              (error "No method for these types"
-                     (list op type-tags)))))))
+  (let* ((type-tags (map type-tag args))
+		 (proc (get op type-tags)))
+	(if proc
+		(apply proc (map contents args))
+		(if (= (length args) 2)
+			(let ((type1 (car type-tags))
+				  (type2 (cadr type-tags))
+				  (a1 (car args))
+				  (a2 (cadr args)))
+			  (let ((t1->t2 (get-coercion type1 type2))
+					(t2->t1 (get-coercion type2 type1)))
+				(cond (t1->t2
+					   (apply-generic op (t1->t2 a1) a2))
+					  (t2->t1
+					   (apply-generic op a1 (t2->t1 a2)))
+					  (else
+					   (error "No method for these types"
+							  (list op type-tags))))))
+			(error "No method for these types"
+				   (list op type-tags))))))
 
 
 (define (add x y) (apply-generic 'add x y))
@@ -131,15 +131,25 @@
 	(car z))
   (define (imag-part z)
 	(cdr z))
-  (define (magnitude-part z)
-    (sqrt (+ (square (real-part z))
-             (square (imag-part z)))))
-  (define (angle-part z)
-    (atan (imag-part z) (real-part z)))
   (define (make-from-real-imag x y)
-	(cons x y))
+ 	(cons x y))
+
+  ;; ex 2.86
+  ; (define (magnitude-part z)
+  ;   (sqrt (+ (square (real-part z))
+  ;            (square (imag-part z)))))
+  ; (define (angle-part z)
+  ;   (atan (imag-part z) (real-part z)))
+  ; (define (make-from-mag-ang r a) 
+  ;   (cons (* r (cos a)) (* r (sin a))))
+
+  (define (magnitude-part z)
+    (square-root (add (square (real-part z))
+					  (square (imag-part z)))))
+  (define (angle-part z)
+    (atang (imag-part z) (real-part z)))
   (define (make-from-mag-ang r a) 
-    (cons (* r (cos a)) (* r (sin a))))
+    (cons (mul r (cosine a)) (mul r (sine a))))
 
   ;; interface
   (define (tag x) (attach-tag 'rectangular x))
@@ -159,13 +169,23 @@
   (define (magnitude-part z) (car z))
   (define (angle-part z) (cdr z))
   (define (make-from-mag-ang r a) (cons r a))
+
+  ;; ex 2.86
+  ; (define (real-part z)
+  ;   (* (magnitude-part z) (cos (angle-part z))))
+  ; (define (imag-part z)
+  ;   (* (magnitude-part z) (sin (angle-part z))))
+  ; (define (make-from-real-imag x y) 
+  ;   (cons (sqrt (+ (square x) (square y)))
+  ;         (atan y x)))
+
   (define (real-part z)
-    (* (magnitude-part z) (cos (angle-part z))))
+    (mul (magnitude-part z) (cosine (angle-part z))))
   (define (imag-part z)
-    (* (magnitude-part z) (sin (angle-part z))))
+    (mul (magnitude-part z) (sine (angle-part z))))
   (define (make-from-real-imag x y) 
-    (cons (sqrt (+ (square x) (square y)))
-          (atan y x)))
+    (cons (square-root (add (square x) (square y)))
+          (atang y x)))
 
   ;; interface
   (define (tag x) (attach-tag 'polar x))
@@ -210,7 +230,7 @@
                        (- (angle-part z1) (angle-part z2))))
 
   ;; interface
-  (define (tag z) (attach-tag 'complex z))
+  (define (tag x) (attach-tag 'complex x))
   (put 'add '(complex complex)
        (lambda (z1 z2) (tag (add-complex z1 z2))))
   (put 'sub '(complex complex)
@@ -235,6 +255,9 @@
   ;; ex 2.80
   (put '=zero? '(complex)
 	   (lambda (x) (= (magnitude-part x) 0)))
+  ;; ex 2.85
+  (put 'project '(complex)
+	   (lambda (z) (make-scheme-number (real-part z))))
 
   'done)
 
@@ -253,8 +276,8 @@
 ;;;; ---------------------------
 
 (define (install-scheme-number-package)
-  (define (tag x)
-    (attach-tag 'scheme-number x))
+  ;; interface
+  (define (tag x) (attach-tag 'scheme-number x))
   (put 'add '(scheme-number scheme-number)
        (lambda (x y) (tag (+ x y))))
   (put 'sub '(scheme-number scheme-number)
@@ -268,7 +291,6 @@
 		 (tag (if (eq? 'integer (type-tag x))
 				  (contents x)
 				  x))))
-
   ;; ex 2.79
   (put 'equ? '(scheme-number scheme-number)
 	   (lambda (x y) (= x y)))
@@ -281,6 +303,20 @@
   ;; ex 2.83
   (put 'raise '(scheme-number)
 	   (lambda (z) (make-complex-from-real-imag z 0)))
+  ;; ex 2.85
+  (put 'project '(scheme-number)
+	   (lambda (z) (make-rational z 1)))
+  ;; ex 2.86
+  (put 'square '(scheme-number)
+	   (lambda (z) (tag (* z z))))
+  (put 'square-root '(scheme-number)
+	   (lambda (z) (tag (sqrt z))))
+  (put 'sine '(scheme-number)
+	   (lambda (z) (tag (sin z))))
+  (put 'cosine '(scheme-number)
+	   (lambda (z) (tag (cos z))))
+  (put 'atang '(scheme-number)
+	   (lambda (z) (tag (atan z))))
 
   'done)
 
@@ -319,7 +355,6 @@
 
   ;; interface
   (define (tag x) (attach-tag 'rational x))
-
   (put 'add '(rational rational)
        (lambda (x y) (tag (add-rat x y))))
   (put 'sub '(rational rational)
@@ -330,7 +365,6 @@
        (lambda (x y) (tag (div-rat x y))))
   (put 'make 'rational
        (lambda (n d) (tag (make-rat n d))))
-
   ;; ex 2.79
   (put 'equ? '(rational rational)
 	   (lambda (x y) (= (* (numer x) (denom y))
@@ -341,6 +375,28 @@
   ;; ex 2.83
   (put 'raise '(rational)
 	   (lambda (z) (make-scheme-number (/ (numer z) (denom z)))))
+  ;; ex 2.85
+  (put 'project '(rational)
+	   (lambda (z) (make-integer (/ (numer z) (denom z)))))
+  ;; ex 2.86
+  (put 'square '(rational)
+	   (lambda (z)
+		 (let ((n (numer z))
+			   (d (denom z)))
+		   (make-rat (* n n)
+					 (* d d)))))
+  (put 'square-root '(rational)
+	   (lambda (z) (make-rat (sqrt (numer z))
+							 (sqrt (denom z)))))
+  (put 'sine '(rational)
+	   (lambda (z) (make-rat (sin (/ (numer z) (denom z)))
+							 1)))
+  (put 'cosine '(rational)
+	   (lambda (z) (make-rat (cos (/ (numer z) (denom z)))
+							 1)))
+  (put 'atang '(rational)
+	   (lambda (z) (make-rat (atan (/ (number z) (denom z)))
+							 1)))
 
   'done)
 
@@ -356,8 +412,8 @@
 ;;;; ---------------------------
 
 (define (install-integer-package)
-  (define (tag x)
-    (attach-tag 'integer x))
+  ;; interface
+  (define (tag x) (attach-tag 'integer x))
   (put 'add '(integer integer)
        (lambda (x y) (tag (+ x y))))
   (put 'sub '(integer integer)
@@ -368,7 +424,6 @@
        (lambda (x y) (tag (/ x y))))
   (put 'make 'integer
        (lambda (x) (tag (floor x))))
-
   ;; ex 2.79
   (put 'equ? '(integer integer)
 	   (lambda (x y) (= x y)))
@@ -378,6 +433,17 @@
   ;; ex 2.83
   (put 'raise '(integer)
 	   (lambda (z) (make-rational z 1)))
+  ;; ex 2.86
+  (put 'square '(integer)
+	   (lambda (z) (tag (* z z))))
+  (put 'square-root '(integer)
+	   (lambda (z) (tag (sqrt z))))
+  (put 'sine '(integer)
+	   (lambda (z) (tag (sin z))))
+  (put 'cosine '(integer)
+	   (lambda (z) (tag (cos z))))
+  (put 'atang '(integer)
+	   (lambda (z) (tag (atan z))))
 
   'done)
 
@@ -441,29 +507,29 @@
 ;;; c.
 
 (define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-          (apply proc (map contents args))
-          (if (= (length args) 2)
-              (let ((type1 (car type-tags))
-                    (type2 (cadr type-tags))
-                    (a1 (car args))
-                    (a2 (cadr args)))
-				(if (eq? type1 type2)                     ;; 
-					(error "No method for these types"    ;; added for ex 2.83 c
-						   (list op type-tags))           ;;
-					(let ((t1->t2 (get-coercion type1 type2))
-						  (t2->t1 (get-coercion type2 type1)))
-					  (cond (t1->t2
-							 (apply-generic op (t1->t2 a1) a2))
-							(t2->t1
-							 (apply-generic op a1 (t2->t1 a2)))
-							(else
-							 (error "No method for these types"
-									(list op type-tags)))))))
-			  (error "No method for these types"
-					 (list op type-tags)))))))
+  (let* ((type-tags (map type-tag args))
+		 (proc (get op type-tags)))
+	(if proc
+		(apply proc (map contents args))
+		(if (= (length args) 2)
+			(let ((type1 (car type-tags))
+				  (type2 (cadr type-tags))
+				  (a1 (car args))
+				  (a2 (cadr args)))
+			  (if (eq? type1 type2)                     ;; 
+				  (error "No method for these types"    ;; added for ex 2.83
+						 (list op type-tags))           ;;
+				  (let ((t1->t2 (get-coercion type1 type2))
+						(t2->t1 (get-coercion type2 type1)))
+					(cond (t1->t2
+						   (apply-generic op (t1->t2 a1) a2))
+						  (t2->t1
+						   (apply-generic op a1 (t2->t1 a2)))
+						  (else
+						   (error "No method for these types"
+								  (list op type-tags)))))))
+			(error "No method for these types"
+				   (list op type-tags))))))
 
 ; racket@> (exp (make-complex-from-real-imag 1 1) (make-complex-from-real-imag 4 3))
 ; (Bad key -- KEY2 (complex complex))
@@ -489,8 +555,11 @@
 ;(put 'raise '(scheme-number)
 ;	 (lambda (z) (make-complex-from-real-imag z 0)))
 
-
-(define (raise z) (apply-generic 'raise z))
+(define (raise z)
+  (let ((proc (get 'raise (list (type-tag z)))))
+	(if proc
+		(proc (contents z))
+		false)))
 
 
 ; racket@> (raise (make-integer 3))
@@ -532,39 +601,45 @@
 
 
 (define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-          (apply proc (map contents args))
-          (if (= (length args) 2)
-              (let ((type1 (car type-tags))
-                    (type2 (cadr type-tags))
-                    (a1 (car args))
-                    (a2 (cadr args)))
-				(if (eq? type1 type2)                   ;; 
-					(error "No method for these types"  ;; added for ex 2.83 c
-						   (list op type-tags))         ;;
-					(let ((t1->t2 (get-coercion type1 type2))
-						  (t2->t1 (get-coercion type2 type1)))
-					  (cond ((eq? type1 (higher-type? type1 type2)) ;;
-							 (apply-generic op a1 (t2->t1 a2)))     ;; modified for ex 2.84
-							((eq? type2 (higher-type? type1 type2)) ;;
-							 (apply-generic op (t1->t2 a1) a2))     ;;
-							(else
-							 (error "No method for these types"
-									(list op type-tags)))))))
-			  (error "No method for these types"
-					 (list op type-tags)))))))
+  (let* ((type-tags (map type-tag args))
+		 (proc (get op type-tags)))
+	(if proc
+		(apply proc (map contents args))
+		(if (= (length args) 2)
+			(let ((type1 (car type-tags))
+				  (type2 (cadr type-tags))
+				  (a1 (car args))
+				  (a2 (cadr args)))
+			  (if (eq? type1 type2)                   ;; 
+				  (error "No method for these types"  ;; added for ex 2.83
+						 (list op type-tags))         ;;
+				  (let ((t1->t2 (get-coercion type1 type2))
+						(t2->t1 (get-coercion type2 type1)))
+					(cond ((eq? type1 (higher-type? type1 type2)) ;;
+						   (apply-generic op a1 (t2->t1 a2)))     ;; modified for ex 2.84
+						  ((eq? type2 (higher-type? type1 type2)) ;;
+						   (apply-generic op (t1->t2 a1) a2))     ;;
+						  (else
+						   (error "No method for these types"
+								  (list op type-tags)))))))
+			(error "No method for these types"
+				   (list op type-tags))))))
 
 
-(put-coercion 'integer 'rational (lambda (n) (raise n)))
-(put-coercion 'integer 'scheme-number (lambda (n) (raise (raise n))))
-(put-coercion 'integer 'complex (lambda (n) (raise (raise (raise n)))))
+(put-coercion 'integer 'rational
+			  (lambda (z) (raise z)))
+(put-coercion 'integer 'scheme-number
+			  (lambda (z) (raise (raise z))))
+(put-coercion 'integer 'complex
+			  (lambda (z) (raise (raise (raise z)))))
 
-(put-coercion 'rational 'scheme-number (lambda (n) (raise n)))
-(put-coercion 'rational 'complex (lambda (n) (raise (raise n))))
+(put-coercion 'rational 'scheme-number
+			  (lambda (z) (raise z)))
+(put-coercion 'rational 'complex
+			  (lambda (z) (raise (raise z))))
 
-(put-coercion 'scheme-number 'complex (lambda (n) (raise n)))
+(put-coercion 'scheme-number 'complex
+			  (lambda (z) (raise z)))
 
 
 ; racket@> (add (make-complex-from-real-imag 1 0)
@@ -579,4 +654,198 @@
 
 
 ;;;; ex 2.85
+
+
+;; add to rational package
+; 
+; (put 'project '(rational)
+; 	 (lambda (z) (make-integer (/ (number z) (denom z)))))
+
+;; add to scheme number package
+; (put 'project '(scheme-number)
+; 	 (lambda (z) (make-rational z 1)))
+
+;; add to complex package
+; 
+; (put 'project '(complex)
+; 	 (lambda (z) (make-scheme-number (real-part z))))
+
+;(define (project z) (apply-generic 'project z))
+
+(define (project z)
+  (let ((proc (get 'project (list (type-tag z)))))
+	(if proc
+		(proc (contents z))
+		false)))
+
+
+; racket@> (project (make-complex-from-real-imag 3.5 1.5))
+; '(scheme-number . 3.5)
+; 
+; racket@> (project (project (make-complex-from-real-imag 3.5 1.5)))
+; '(rational 7.0 . 2.0)
+; 
+; racket@> (project (project (project (make-complex-from-real-imag 3.5 1.5))))
+; '(integer . 3.0)
+; 
+; racket@> (project (project (project (project (make-complex-from-real-imag 3.5 1.5)))))
+; #f
+
+
+(define (lower z)
+  (if (not (pair? z))
+	  z
+	  (let ((p (project z)))
+		(if p
+			(if (equ? z (raise p))
+				(lower p)
+				z)
+			z))))
+
+; racket@> (lower (make-complex-from-real-imag 3.5 1))
+; '(complex rectangular 3.5 . 1)
+; 
+; racket@> (lower (make-complex-from-real-imag 3.5 0))
+; '(rational 7.0 . 2.0)
+; 
+; racket@> (lower (make-complex-from-real-imag 3 0))
+; '(integer . 3)
+
+(define (apply-generic op . args)
+  (let* ((type-tags (map type-tag args))
+		 (proc (get op type-tags)))
+	(if proc
+		(lower (apply proc (map contents args))) ;; modified for ex 2.85
+		(if (= (length args) 2)
+			(let ((type1 (car type-tags))
+				  (type2 (cadr type-tags))
+				  (a1 (car args))
+				  (a2 (cadr args)))
+			  (if (eq? type1 type2)                   ;; 
+				  (error "No method for these types"  ;; added for ex 2.83
+						 (list op type-tags))         ;;
+				  (let ((t1->t2 (get-coercion type1 type2))
+						(t2->t1 (get-coercion type2 type1)))
+					(cond ((eq? type1 (higher-type? type1 type2)) ;;
+						   (apply-generic op a1 (t2->t1 a2)))     ;; modified for ex 2.84
+						  ((eq? type2 (higher-type? type1 type2)) ;;
+						   (apply-generic op (t1->t2 a1) a2))     ;;
+						  (else
+						   (error "No method for these types"
+								  (list op type-tags)))))))
+			(error "No method for these types"
+				   (list op type-tags))))))
+
+;; before 
+; 
+; racket@> (sub (make-complex-from-real-imag 3.5 1)
+;               (make-complex-from-real-imag 1.5 1))
+; '(complex rectangular 2.0 . 0)
+
+
+;; after
+; 
+; racket@> (sub (make-complex-from-real-imag 3.5 1)
+;                (make-complex-from-real-imag 1.5 1))
+; '(integer . 2.0)
+
+
+;;;; ex 2.86
+
+;; before
+;
+; racket@> (magnitude-part (make-complex-from-real-imag 4 3))
+; 5
+; 
+; racket@> (real-part (make-complex-from-mag-ang 5 0))
+; 5
+;
+ 
+; racket@> (magnitude-part (make-complex-from-real-imag (make-integer 4) (make-integer 3)))
+; *: contract violation
+;   expected: number?
+;   given: '(integer . 4)
+;   argument position: 1st
+;   other arguments...:
+;    '(integer . 4)
+;   context...:
+;    /Users/uents/work/sicp/misc.scm:7:0: square
+;    /Users/uents/work/sicp/ch2.5.2.scm:134:2: magnitude-part
+;    /Users/uents/work/sicp/ch2.5.2.scm:657:0: apply-generic
+;    /Users/uents/work/sicp/ch2.5.2.scm:657:0: apply-generic
+;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
+;
+; racket@> (real-part (make-complex-from-mag-ang (make-integer 5) (make-integer 0)))
+; cos: contract violation
+;   expected: number?
+;   given: '(integer . 0)
+;   context...:
+;    /Users/uents/work/sicp/ch2.5.2.scm:162:2: real-part
+;    /Users/uents/work/sicp/ch2.5.2.scm:657:0: apply-generic
+;    /Users/uents/work/sicp/ch2.5.2.scm:657:0: apply-generic
+;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
+
+
+;;; add to integer package
+; 
+; (put 'square '(integer)
+; 	 (lambda (z) (tag (* z z))))
+; (put 'square-root '(integer)
+; 	 (lambda (z) (tag (sqrt z))))
+; (put 'sine '(integer)
+; 	 (lambda (z) (tag (sin z))))
+; (put 'cosine '(integer)
+; 	 (lambda (z) (tag (cos z))))
+; (put 'atang '(integer)
+; 	 (lambda (z) (tag (atan z))))
+
+
+;;; add to rational package
+; 
+; (put 'square '(rational)
+; 	 (lambda (z)
+; 	   (let ((n (numer z))
+; 			 (d (denom z)))
+; 		 (make-rat (* n n)
+; 				   (* d d)))))
+; (put 'square-root '(rational)
+; 	 (lambda (z) (make-rat (sqrt (numer z))
+; 						   (sqrt (denom z)))))
+; (put 'sine '(rational)
+; 	 (lambda (z) (make-rat (sin (/ (numer z) (denom z)))
+; 						  1)))
+; (put 'cosine '(rational)
+; 	 (lambda (z) (make-rat (cos (/ (numer z) (denom z)))
+; 						  1)))
+; (put 'atang '(rational)
+; 	 (lambda (z) (make-rat (atan (/ (number z) (denom z)))
+; 						   1)))
+
+;;; add to scheme number package
+; 
+; (put 'square '(scheme-number)
+; 	 (lambda (z) (tag (* z z))))
+; (put 'square-root '(scheme-number)
+; 	 (lambda (z) (tag (sqrt z))))
+; (put 'sine '(scheme-number)
+; 	 (lambda (z) (tag (sin z))))
+; (put 'cosine '(scheme-number)
+; 	 (lambda (z) (tag (cos z))))
+; (put 'atang '(scheme-number)
+; 	 (lambda (z) (tag (atan z))))
+
+
+(define (square z) (apply-generic 'square z))
+(define (square-root z) (apply-generic 'square-root z))
+(define (sine z) (apply-generic 'sine z))
+(define (cosine z) (apply-generic 'cosine z))
+(define (atang z) (apply-generic 'atang z))
+
+;; after
+; racket@> (magnitude-part (make-complex-from-real-imag (make-integer 4) (make-integer 3)))
+; '(integer . 5)
+
+; racket@> (real-part (make-complex-from-mag-ang (make-integer 5) (make-integer 0)))
+; '(integer . 5)
+
 
