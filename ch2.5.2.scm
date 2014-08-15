@@ -582,10 +582,7 @@
 ; '(complex rectangular 3 . 0)
 ;
 ; racket@> (raise (raise (raise (raise (make-integer 3)))))
-; (Bad key -- KEY2 (complex))
-; No method for these types (raise (complex))
-;   context...:
-;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
+; #f
 
 
 ;;;; ex 2.84
