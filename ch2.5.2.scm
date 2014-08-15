@@ -68,13 +68,13 @@
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
 
-;; modified on ex 2.78
+;; modified for ex 2.78
 (define (type-tag datum)
   (cond ((number? datum) 'scheme-number)
 		((pair? datum) (car datum))
 		(else (error "Bad tagged datum -- TYPE-TAG" datum))))
 
-;; modified on ex 2.78
+;; modified for ex 2.78
 (define (contents datum)
   (cond ((number? datum) datum)
 		((pair? datum) (cdr datum))
@@ -490,11 +490,11 @@
 ; (Bad key -- KEY2 (complex complex))
 ; ....
 
-; 1. apply-genericの中で (get 'exp '(complex complex)) が実行され #f が返る
+; 1. apply-genericの中でexp手続きを探すため、(get 'exp '(complex complex)) が実行され #f が返る
 ; 2. 1の返値はprocに格納されるため、procが#fとなる
-;    よって、applyの実行ではなく型変換の方の処理に入る
-; 3. type1 type2とも'complexのため、t1->t2に complex->complex が格納される
-; 4. (apply-generic op (t1->t2 a1) a2) => (apply-generic op a1 a2)
+;    よって、proc手続きの実行は行われず、型変換のの処理に入る
+; 3. type1 type2とも'complexのため、t1->t2に complex->complex o手続きが格納される
+; 4. (apply-generic op (t1->t2 a1) a2) → (apply-generic op a1 a2)
 ;    となり、同じ条件で再度 apply-genericが実行される
 ; 5. 1に戻る
 
@@ -536,6 +536,16 @@
 ; No method for these types (exp (complex complex))
 ;   context...:
 ;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
+
+
+;;;; ex 2.82
+
+; 型変換を単に先頭の引数の型に合わせるという手法では、
+; 引数の情報が落ちる可能性がある。
+; 
+; 例えば第1引数を整数、第2引数を虚数が存在する複素数とすると、
+; 単に先頭の引数の型に変換する手法では整数に変換されるため、
+; 第2引数の虚数の情報が落ちてしまう。
 
 
 ;;;; ex 2.83
@@ -669,8 +679,6 @@
 ; 
 ; (put 'project '(complex)
 ; 	 (lambda (z) (make-scheme-number (real-part z))))
-
-;(define (project z) (apply-generic 'project z))
 
 (define (project z)
   (let ((proc (get 'project (list (type-tag z)))))
