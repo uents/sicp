@@ -102,8 +102,9 @@
   (define (imag-part z)
 	(cdr z))
   (define (magnitude-part z)
-    (sqrt (+ (square (real-part z))
-             (square (imag-part z)))))
+  	(let ((x (real-part z))
+  		  (y (imag-part z)))
+  	  (sqrt (+ (* x x) (* y y)))))
   (define (angle-part z)
     (atan (imag-part z) (real-part z)))
   (define (make-from-real-imag x y)
@@ -134,7 +135,7 @@
   (define (imag-part z)
     (* (magnitude-part z) (sin (angle-part z))))
   (define (make-from-real-imag x y) 
-    (cons (sqrt (+ (square x) (square y)))
+    (cons (sqrt (+ (* x x) (* y y)))
           (atan y x)))
 
   ;; interface
