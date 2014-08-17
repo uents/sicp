@@ -135,17 +135,17 @@
  	(cons x y))
 
   ;; ex 2.86
-  ; (define (magnitude-part z)
-  ;   (sqrt (+ (square (real-part z))
-  ;            (square (imag-part z)))))
-  ; (define (angle-part z)
-  ;   (atan (imag-part z) (real-part z)))
-  ; (define (make-from-mag-ang r a) 
-  ;   (cons (* r (cos a)) (* r (sin a))))
-
+  ;; (define (magnitude-part z)
+  ;; 	(let ((x (real-part z))
+  ;; 		  (y (imag-part z)))
+  ;; 	  (sqrt (+ (* x x) (* y y)))))
+  ;; (define (angle-part z)
+  ;; 	(atan (imag-part z) (real-part z)))
+  ;; (define (make-from-mag-ang r a) 
+  ;; 	(cons (* r (cos a)) (* r (sin a))))
   (define (magnitude-part z)
     (square-root (add (square (real-part z))
-					  (square (imag-part z)))))
+  					  (square (imag-part z)))))
   (define (angle-part z)
     (atang (imag-part z) (real-part z)))
   (define (make-from-mag-ang r a) 
@@ -171,14 +171,13 @@
   (define (make-from-mag-ang r a) (cons r a))
 
   ;; ex 2.86
-  ; (define (real-part z)
-  ;   (* (magnitude-part z) (cos (angle-part z))))
-  ; (define (imag-part z)
-  ;   (* (magnitude-part z) (sin (angle-part z))))
-  ; (define (make-from-real-imag x y) 
-  ;   (cons (sqrt (+ (square x) (square y)))
-  ;         (atan y x)))
-
+  ;; (define (real-part z)
+  ;;   (* (magnitude-part z) (cos (angle-part z))))
+  ;; (define (imag-part z)
+  ;;   (* (magnitude-part z) (sin (angle-part z))))
+  ;; (define (make-from-real-imag x y) 
+  ;; 	(cons (sqrt (+ (* x x) (* y y)))
+  ;; 		  (atan y x)))
   (define (real-part z)
     (mul (magnitude-part z) (cosine (angle-part z))))
   (define (imag-part z)
@@ -250,8 +249,8 @@
   (put 'angle-part '(complex) angle-part)
   ;; ex 2.79
   (put 'equ? '(complex complex)
-	   (lambda (x y) (and (= (magnitude-part x) (magnitude-part y))
-						  (= (angle-part x) (angle-part y)))))
+	   (lambda (x y) (and (equ? (magnitude-part x) (magnitude-part y)) ;; modified for ex 2.86
+						  (equ? (angle-part x) (angle-part y)))))      ;; = -> equ?
   ;; ex 2.80
   (put '=zero? '(complex)
 	   (lambda (x) (= (magnitude-part x) 0)))
@@ -315,8 +314,8 @@
 	   (lambda (z) (tag (sin z))))
   (put 'cosine '(scheme-number)
 	   (lambda (z) (tag (cos z))))
-  (put 'atang '(scheme-number)
-	   (lambda (z) (tag (atan z))))
+  (put 'atang '(scheme-number scheme-number)
+	   (lambda (x y) (tag (atan x y))))
 
   'done)
 
@@ -383,20 +382,20 @@
 	   (lambda (z)
 		 (let ((n (numer z))
 			   (d (denom z)))
-		   (make-rat (* n n)
-					 (* d d)))))
+		   (tag (make-rat (* n n)
+						  (* d d))))))
   (put 'square-root '(rational)
-	   (lambda (z) (make-rat (sqrt (numer z))
-							 (sqrt (denom z)))))
+	   (lambda (z) (tag (make-rat (sqrt (numer z))
+								  (sqrt (denom z))))))
   (put 'sine '(rational)
-	   (lambda (z) (make-rat (sin (/ (numer z) (denom z)))
-							 1)))
+	   (lambda (z) (tag (make-rat (sin (/ (numer z) (denom z)))
+								  1))))
   (put 'cosine '(rational)
-	   (lambda (z) (make-rat (cos (/ (numer z) (denom z)))
-							 1)))
-  (put 'atang '(rational)
-	   (lambda (z) (make-rat (atan (/ (number z) (denom z)))
-							 1)))
+	   (lambda (z) (tag (make-rat (cos (/ (numer z) (denom z)))
+								  1))))
+  (put 'atang '(rational rational)
+	   (lambda (x y) (tag (make-rat (atan (/ (numer x) (denom x))
+										  (/ (numer y) (denom y)))))))
 
   'done)
 
@@ -442,8 +441,8 @@
 	   (lambda (z) (tag (sin z))))
   (put 'cosine '(integer)
 	   (lambda (z) (tag (cos z))))
-  (put 'atang '(integer)
-	   (lambda (z) (tag (atan z))))
+  (put 'atang '(integer integer)
+	   (lambda (x y) (tag (atan x y))))
 
   'done)
 
@@ -741,18 +740,11 @@
 			(error "No method for these types"
 				   (list op type-tags))))))
 
-;; before 
-; 
-; racket@> (sub (make-complex-from-real-imag 3.5 1)
-;               (make-complex-from-real-imag 1.5 1))
-; '(complex rectangular 2.0 . 0)
+; racket@> (add (make-complex-from-real-imag 1 0)
+; 			  (add (make-scheme-number 2)
+; 				   (add (make-rational 3 1) (make-integer 4))))
+; '(integer . 10)
 
-
-;; after
-; 
-; racket@> (sub (make-complex-from-real-imag 3.5 1)
-;                (make-complex-from-real-imag 1.5 1))
-; '(integer . 2.0)
 
 
 ;;;; ex 2.86
@@ -774,7 +766,6 @@
 ;   other arguments...:
 ;    '(integer . 4)
 ;   context...:
-;    /Users/uents/work/sicp/misc.scm:7:0: square
 ;    /Users/uents/work/sicp/ch2.5.2.scm:134:2: magnitude-part
 ;    /Users/uents/work/sicp/ch2.5.2.scm:657:0: apply-generic
 ;    /Users/uents/work/sicp/ch2.5.2.scm:657:0: apply-generic
@@ -792,59 +783,16 @@
 
 
 ;;; add to integer package
-; 
-; (put 'square '(integer)
-; 	 (lambda (z) (tag (* z z))))
-; (put 'square-root '(integer)
-; 	 (lambda (z) (tag (sqrt z))))
-; (put 'sine '(integer)
-; 	 (lambda (z) (tag (sin z))))
-; (put 'cosine '(integer)
-; 	 (lambda (z) (tag (cos z))))
-; (put 'atang '(integer)
-; 	 (lambda (z) (tag (atan z))))
-
 
 ;;; add to rational package
-; 
-; (put 'square '(rational)
-; 	 (lambda (z)
-; 	   (let ((n (numer z))
-; 			 (d (denom z)))
-; 		 (make-rat (* n n)
-; 				   (* d d)))))
-; (put 'square-root '(rational)
-; 	 (lambda (z) (make-rat (sqrt (numer z))
-; 						   (sqrt (denom z)))))
-; (put 'sine '(rational)
-; 	 (lambda (z) (make-rat (sin (/ (numer z) (denom z)))
-; 						  1)))
-; (put 'cosine '(rational)
-; 	 (lambda (z) (make-rat (cos (/ (numer z) (denom z)))
-; 						  1)))
-; (put 'atang '(rational)
-; 	 (lambda (z) (make-rat (atan (/ (number z) (denom z)))
-; 						   1)))
 
 ;;; add to scheme number package
-; 
-; (put 'square '(scheme-number)
-; 	 (lambda (z) (tag (* z z))))
-; (put 'square-root '(scheme-number)
-; 	 (lambda (z) (tag (sqrt z))))
-; (put 'sine '(scheme-number)
-; 	 (lambda (z) (tag (sin z))))
-; (put 'cosine '(scheme-number)
-; 	 (lambda (z) (tag (cos z))))
-; (put 'atang '(scheme-number)
-; 	 (lambda (z) (tag (atan z))))
-
 
 (define (square z) (apply-generic 'square z))
 (define (square-root z) (apply-generic 'square-root z))
 (define (sine z) (apply-generic 'sine z))
 (define (cosine z) (apply-generic 'cosine z))
-(define (atang z) (apply-generic 'atang z))
+(define (atang x y) (apply-generic 'atang  x y))
 
 ;; after
 ; racket@> (magnitude-part (make-complex-from-real-imag (make-integer 4) (make-integer 3)))
