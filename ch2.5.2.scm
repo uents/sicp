@@ -395,7 +395,8 @@
 								  1))))
   (put 'atang '(rational rational)
 	   (lambda (x y) (tag (make-rat (atan (/ (numer x) (denom x))
-										  (/ (numer y) (denom y)))))))
+										  (/ (numer y) (denom y)))
+									1))))
 
   'done)
 
