@@ -1,7 +1,6 @@
 ;;;; #lang racket
 ;;;;
-;;;; SICP Chapter 3.1.1 Local State Variables 
-;;;;              3.1.2 The Benefits of Introducing Assignment
+;;;; SICP Chapter 3.1 Assignment and Local State
 ;;;;
 ;;;; Author: @uents on twitter
 ;;;;
@@ -17,10 +16,9 @@
 ;;;;
 ;;;; 3. Executes below commands on Racket REPL
 ;;;;
-;;;;   (load "ch3.1.1.scm")
+;;;;   (load "ch3.1.scm")
 ;;;;   ....
 ;;;;
-
 
 (load "misc.scm")
 
