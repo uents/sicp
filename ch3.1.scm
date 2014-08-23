@@ -136,7 +136,6 @@
 			 (iter (- remain 1) passed)))))
   (iter trials 0))
 
-
 ; racket@> (estimate-integral
 ; 		  (lambda (x y)
 ; 			(<= (+ (square (- x 5)) (square (- y 7))) (square 3)))
