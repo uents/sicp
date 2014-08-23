@@ -150,3 +150,44 @@
 
 ; 精度がいまいちなのは小数の領域を拾っていないから
 
+
+;;;; ex 3.7
+
+(define (make-joint another-account another-password password)
+  (lambda (pw method)
+	(if (eq? pw password)
+		(another-account another-password method)
+		"Incorrect password")))
+
+; racket@> (define peter-acc (make-secure-account 100 'open-sesame))
+; racket@> ((peter-acc 'open-sesame 'withdraw) 0)
+; 100
+; racket@> (define paul-acc (make-joint peter-acc 'open-sesame 'rosebud))
+; racket@> ((paul-acc 'rosebud 'withdraw) 40)
+; 60
+; racket@> ((peter-acc 'open-sesame 'withdraw) 0)
+; 60
+
+
+;;;; ex 3.8
+
+(define *zero-evaluated* false)
+
+(define (f x)
+  (cond ((= x 0)
+		 (begin (set! *zero-evaluated* true)
+				0))
+		((= x 1)
+		 (if (eq? *zero-evaluated* true) 1 0))
+		(else
+		 "Unexpected argument -- " x)))
+
+		   
+; racket@> (set! *zero-evaluated* false)
+; racket@> (+ (f 0) (f 1))
+; 1
+
+; racket@> (set! *zero-evaluated* false)
+; racket@> (+ (f 1) (f 0))
+; 0		  
+
