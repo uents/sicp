@@ -89,7 +89,6 @@
 
 ;;; ex 3.16
 
-
 (define 3-pairs (cons 'a (cons 'b (cons 'c nil))))
 
 (define p (cons 'b nil))
@@ -120,6 +119,7 @@
 
 
 ;;; ex 3.17
+
 (define (count-pairs-2 x)
   (let ((bred-crumbs nil))
 	; チェック済みのペアかどうかを調べる
@@ -135,6 +135,7 @@
 				true
 				(iter (cdr crumbs)))))
 	  (iter bred-crumbs))
+
 	; ペアの数え上げ手続き。外部環境に
 	; パンくずリストをおくために内部手続きとする
 	(define (count-proc x)
@@ -147,6 +148,46 @@
 	(count-proc x)))
 
 
+;;; ex 3.18
 
+(define (cycle-list? x)
+  (let ((bred-crumbs nil))
+	; チェック済みのペアかどうかを調べる
+	; チェック済みでないペアの場合、その参照をパンくずリストに追加
+	(define (checked-pair? x)
+	  (define (iter crumbs)
+		(if (null? crumbs)
+			(begin
+			  (set! bred-crumbs
+					(append bred-crumbs (list x)))
+			  false)
+			(if (eq? x (car crumbs))
+				true
+				(iter (cdr crumbs)))))
+	  (iter bred-crumbs))
+
+	; チェック処理
+	(define (check-proc x)
+	  (cond ((not (pair? x)) false)
+			((checked-pair? x) true)
+			(else (check-proc (cdr x)))))
+	(check-proc x)))
+
+; racket@> (cycle-list? 3-pairs)
+; #f
+; racket@> (cycle-list? 4-pairs)
+; #f
+; racket@> (cycle-list? 7-pairs)
+; #f
+; racket@> (cycle-list? infinity-pairs)
+; #t
+
+
+;;; ex 3.19
+
+;; ギブアップ...
+
+
+;;; ex 3.20
 
 
