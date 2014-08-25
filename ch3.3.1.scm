@@ -50,24 +50,30 @@
 		y
 		(let ((temp (cdr x)))
 		  (set-cdr! x y)
-		  (loop temp x))))
+	  (loop temp x))))
   (loop x '()))
 
 (define v (list 'a 'b 'c 'd))
 
+; display procedure for mutable list
+(define (disp msg)
+  (begin
+	(display msg (current-error-port))
+	(newline (current-error-port))))
+
 ; racket@> v
 ; (mcons 'a (mcons 'b (mcons 'c (mcons 'd '()))))
-; racket@> (debug-print v)
+; racket@> (disp v)
 ; (a b c d)
 ; 
 ; racket@> (define w (mystery v))
 ; racket@> w
 ; (mcons 'd (mcons 'c (mcons 'b (mcons 'a '()))))
-; racket@> (debug-print w)
+; racket@> (disp w)
 ; (d c b a)
 ; racket@> v
 ; (mcons 'a '())
-; racket@> (debug-print v)
+; racket@> (disp v)
 ; (a)
 
 
