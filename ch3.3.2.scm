@@ -22,9 +22,12 @@
 
 (load "misc.scm")
 
-;; set-car!, set-cdr! などを使用するために必要
+;; ミュータブルなデータを使用するために必要
 (require r5rs)
 
+
+;;; FIFO
+(define (make-queue) (cons '() '()))
 
 (define (front-ptr queue) (car queue))
 (define (rear-ptr queue) (cdr queue))
@@ -32,7 +35,6 @@
 (define (set-rear-ptr! queue item) (set-cdr! queue item))
 
 (define (empty-queue? queue) (null? (front-ptr queue)))
-(define (make-queue) (cons '() '()))
 
 (define (front-queue queue)
   (if (empty-queue? queue)
