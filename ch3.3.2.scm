@@ -80,5 +80,39 @@
   (begin
 	(display (front-ptr queue) (current-error-port))
 	(newline (current-error-port))))
+
+
+;;; ex 3.22
+
+(define (make-queue)
+  (let ((front-ptr nil)
+		(rear-ptr nil))
+	(define (empty-queue?)
+	  (null? front-ptr))
+	(define (insert-queue! item)
+	  (let ((new-pair (cons item nil)))
+		(if (empty-queue?)
+			(begin
+			  (set! front-ptr new-pair)
+			  (set! rear-ptr new-pair))
+			(begin
+			  (set-cdr! rear-ptr new-pair)
+			  (set! rear-ptr new-pair)))))
+	(define (delete-queue!)
+	  (if (empty-queue?)
+		  (error "DELETE! called with an empty queue" queue)
+		  (set! front-ptr (cdr font-ptr))))
+	(define (print-queue)
+	  (begin
+		(display front-ptr (current-error-port))
+		(newline (current-error-port))))
+
+	(define (dispatch m)
+	  (cond ((eq? m 'insert-proc!) insert-queue!)
+			((eq? m 'delete-proc!) delete-queue!)
+			((eq? m 'print-proc) print-queue)
+			(else (error "Unknown operation -- QUEUE" m))))
+	dispatch))
+
 	
 
