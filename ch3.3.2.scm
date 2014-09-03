@@ -101,7 +101,10 @@
 	(define (delete-queue!)
 	  (if (empty-queue?)
 		  (error "DELETE! called with an empty queue" queue)
-		  (set! front-ptr (cdr font-ptr))))
+		  (begin
+			(let ((item (car front-ptr)))
+			  (set! front-ptr (cdr front-ptr))
+			  item))))
 	(define (print-queue)
 	  (begin
 		(display front-ptr (current-error-port))
@@ -114,5 +117,19 @@
 			(else (error "Unknown operation -- QUEUE" m))))
 	dispatch))
 
-	
 
+; racket@> (define q1 (make-queue))
+; racket@> ((q1 'insert-proc!) 'a)
+; racket@> ((q1 'print-proc))
+; (a)
+; racket@> ((q1 'insert-proc!) 'b)
+; racket@> ((q1 'print-proc))
+; (a b)
+; racket@> ((q1 'delete-proc!))
+; 'a
+; racket@> ((q1 'print-proc))
+; (b)
+; racket@> ((q1 'delete-proc!))
+; 'b
+; racket@> ((q1 'print-proc))
+; ()
