@@ -22,8 +22,15 @@
 
 (load "misc.scm")
 
-;; set-car!, set-cdr! などを使用するために必要
+;; ミュータブルなデータを扱う場合に必要
 (require r5rs)
+
+;; display procedure for mutable list
+(define (disp msg)
+  (begin
+	(display msg (current-error-port))
+	(newline (current-error-port))))
+
 
 ;;; ex 3.12
 
@@ -55,12 +62,6 @@
 
 (define v (list 'a 'b 'c 'd))
 
-; display procedure for mutable list
-(define (disp msg)
-  (begin
-	(display msg (current-error-port))
-	(newline (current-error-port))))
-
 ; racket@> v
 ; (mcons 'a (mcons 'b (mcons 'c (mcons 'd '()))))
 ; racket@> (disp v)
@@ -81,7 +82,6 @@
 
 (define x (list 'a 'b))
 (define z1 (cons x x))
-
 (define z2 (cons (list 'a 'b) (list 'a 'b)))
 
 ; racket@> (eq? (car z1) (car z1))
