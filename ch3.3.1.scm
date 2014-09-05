@@ -27,9 +27,8 @@
 
 ;; display procedure for mutable list
 (define (disp msg)
-  (begin
-	(display msg (current-error-port))
-	(newline (current-error-port))))
+  (display msg (current-error-port))
+  (newline (current-error-port)))
 
 
 ;;; ex 3.12
