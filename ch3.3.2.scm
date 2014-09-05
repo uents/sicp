@@ -77,9 +77,8 @@
 ; (mcons '() (mcons 'b '()))
 
 (define (print-queue queue)
-  (begin
-	(display (front-ptr queue) (current-error-port))
-	(newline (current-error-port))))
+  (display (front-ptr queue) (current-error-port))
+  (newline (current-error-port)))
 
 
 ;;; ex 3.22
@@ -89,6 +88,12 @@
 		(rear-ptr nil))
 	(define (empty-queue?)
 	  (null? front-ptr))
+
+	(define (front-queue)
+	  (if (empty-queue?)
+		  (error "FRONT called with an empty queue")
+		  front-ptr))
+
 	(define (insert-queue! item)
 	  (let ((new-pair (cons item nil)))
 		(if (empty-queue?)
@@ -98,20 +103,19 @@
 			(begin
 			  (set-cdr! rear-ptr new-pair)
 			  (set! rear-ptr new-pair)))))
+
 	(define (delete-queue!)
 	  (if (empty-queue?)
-		  (error "DELETE! called with an empty queue" queue)
-		  (begin
-			(let ((item (car front-ptr)))
-			  (set! front-ptr (cdr front-ptr))
-			  item))))
+		  (error "DELETE! called with an empty queue")
+		  (set! front-ptr (cdr front-ptr))))
+
 	(define (print-queue)
-	  (begin
-		(display front-ptr (current-error-port))
-		(newline (current-error-port))))
+	  (display front-ptr (current-error-port))
+	  (newline (current-error-port)))
 
 	(define (dispatch m)
-	  (cond ((eq? m 'insert-proc!) insert-queue!)
+	  (cond ((eq? m 'front-proc) front-queue)
+			((eq? m 'insert-proc!) insert-queue!)
 			((eq? m 'delete-proc!) delete-queue!)
 			((eq? m 'print-proc) print-queue)
 			(else (error "Unknown operation -- QUEUE" m))))
@@ -126,10 +130,121 @@
 ; racket@> ((q1 'print-proc))
 ; (a b)
 ; racket@> ((q1 'delete-proc!))
-; 'a
 ; racket@> ((q1 'print-proc))
 ; (b)
 ; racket@> ((q1 'delete-proc!))
-; 'b
 ; racket@> ((q1 'print-proc))
 ; ()
+
+
+;;; ex 3.23
+
+(define (make-pair item)
+  (cons item (cons nil nil)))
+(define (item p)
+  (car p))
+(define (prev-ptr p)
+  (cadr p))
+(define (next-ptr p)
+  (cddr p))
+(define (set-prev-ptr! p q)
+  (set-car! (cdr p) q))
+(define (set-next-ptr! p q)
+  (set-cdr! (cdr p) q))
+
+(define (make-deque)
+  (let ((front-ptr nil)
+		(rear-ptr nil))
+
+	(define (empty-deque?)
+	  (null? front-ptr))
+
+	(define (front-deque)
+	  (if (empty-deque?)
+		  (error "FRONT called with an empty deque")
+		  front-ptr))
+
+	(define (rear-deque)
+	  (if (empty-deque?)
+		  (error "REAR called with an empty deque")
+		  rear-ptr))
+
+	(define (insert-deque! loc item)
+	  (let ((new-pair (make-pair item)))
+		(cond ((empty-deque?)
+			   (set! front-ptr new-pair)
+			   (set! rear-ptr new-pair))
+			  ((eq? loc 'front)
+			   (set-prev-ptr! front-ptr new-pair)
+			   (set-next-ptr! new-pair front-ptr)
+			   (set! front-ptr new-pair))
+			  ((eq? loc 'rear)
+			   (set-next-ptr! rear-ptr new-pair)
+			   (set-prev-ptr! new-pair rear-ptr)
+			   (set! rear-ptr new-pair))
+			  (else
+			   (error "Unknown location -- INSERT-DEQUE" loc)))))
+
+	(define (delete-deque! loc)
+	  (cond ((empty-deque?)
+			 (error "DELETE! called with an empty deque"))
+			((eq? front-ptr rear-ptr) ;; キューの要素が1つ
+			 (set! front-ptr nil)
+			 (set! rear-ptr nil))
+			((eq? loc 'front)
+			 (set! front-ptr (next-ptr front-ptr))
+			 (set-prev-ptr! front-ptr nil))
+			((eq? loc 'rear)
+			 (set! rear-ptr (prev-ptr rear-ptr))
+			 (set-next-ptr! rear-ptr nil))
+			(else
+			 (error "Unknown location -- INSERT-DEQUE" loc))))
+
+	(define (print-deque)
+	  (define (iter pair)
+		(display (item pair) (current-error-port))
+		(if (not (null? (next-ptr pair)))
+			(begin
+			  (display " " (current-error-port))
+			  (iter (next-ptr pair)))))
+	  (display "(" (current-error-port))
+	  (if (not (empty-deque?))
+		  (iter front-ptr))
+	  (display ")" (current-error-port))
+	  (newline (current-error-port)))
+
+	(define (dispatch m)
+	  (cond ((eq? m 'front-proc) front-deque)
+			((eq? m 'rear-proc) rear-deque)
+			((eq? m 'front-insert-proc!)
+			 (lambda (i) (insert-deque! 'front i)))
+			((eq? m 'rear-insert-proc!)
+			 (lambda (i) (insert-deque! 'rear i)))
+			((eq? m 'front-delete-proc!)
+			 (lambda () (delete-deque! 'front)))
+			((eq? m 'rear-delete-proc!)
+			 (lambda () (delete-deque! 'rear)))
+			((eq? m 'print-proc) print-deque)
+			(else (error "Unknown operation -- DEQUE" m))))
+	dispatch))
+
+; racket@> (define q2 (make-deque))
+; racket@> ((q2 'front-insert-proc!) 'x)
+; racket@> ((q2 'rear-insert-proc!) 'z)
+; racket@> ((q2 'front-insert-proc!) 'a)
+; racket@> ((q2 'print-proc))
+; (a x z)
+; racket@> ((q2 'rear-delete-proc!))
+; racket@> ((q2 'print-proc))
+; (a x)
+; racket@> ((q2 'front-delete-proc!))
+; racket@> ((q2 'print-proc))
+; (x)
+; racket@> ((q2 'front-delete-proc!))
+; racket@> ((q2 'print-proc))
+; ()
+; racket@> ((q2 'rear-delete-proc!))
+; DELETE! called with an empty deque
+;   context...:
+;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
+
