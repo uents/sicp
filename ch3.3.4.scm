@@ -51,7 +51,7 @@
 (define (inverter input output)
   (define (invert-input)
 	(let ((new-value (logical-not (get-signal input))))
-	  (after-delay inverter-delay
+	  (after-delay *inverter-delay*
 				   (lambda ()
 					 (set-signal! output new-value)))))
   (add-action! input invert-input)
@@ -65,7 +65,7 @@
 (define (and-gate a1 a2 output)
   (define (and-action-procedure)
 	(let ((new-value (logical-and (get-signal a1) (get-signal a2))))
-	  (after-delay and-gate-delay
+	  (after-delay *and-gate-delay*
 				   (lambda ()
 					 (set-signal! output new-value)))))
   (add-action! a1 and-action-procedure)
@@ -111,9 +111,9 @@
 
 
 (define (after-delay delay action)
-  (add-to-agenda! (+ delay (current-time the-agenda))
+  (add-to-agenda! (+ delay (current-time *the-agenda*))
 				  action
-				  the-agenda))
+				  *the-agenda*))
 
 
 ;;;; -----------------------------------
@@ -234,10 +234,10 @@
 ;;;; -----------------------------------
 
 ;; 遅延時間
-(define the-agenda (make-agenda))
-(define inverter-delay 2)
-(define and-gate-delay 3)
-(define or-gate-delay 5)
+(define *the-agenda* (make-agenda))
+(define *inverter-delay* 2)
+(define *and-gate-delay* 3)
+(define *or-gate-delay* 5)
 
 ;; 回路の動作に値を出力させる
 (define (probe name wire)
@@ -245,17 +245,17 @@
 			   (lambda ()
 				 (display name)
 				 (display " ")
-				 (display (current-time the-agenda))
+				 (display (current-time *the-agenda*))
 				 (display " New-value = ")
 				 (display (get-signal wire))
 				 (newline))))
 
 ;; アジェンダに登録されている手続きを全て実行する
 (define (propagate)
-  (if (empty-agenda? the-agenda)
+  (if (empty-agenda? *the-agenda*)
 	  'done
-	  (begin ((first-agenda-item the-agenda))
-			 (remove-first-agenda-item! the-agenda)
+	  (begin ((first-agenda-item *the-agenda*))
+			 (remove-first-agenda-item! *the-agenda*)
 			 (propagate))))
 
 
@@ -267,7 +267,7 @@
 (define (or-gate a1 a2 output)
   (define (or-action-procedure)
 	(let ((new-value (logical-or (get-signal a1) (get-signal a2))))
-	  (after-delay or-gate-delay
+	  (after-delay *or-gate-delay*
 				   (lambda ()
 					 (set-signal! output new-value)))))
   (add-action! a1 or-action-procedure)
@@ -279,10 +279,55 @@
 	  1
 	  0))
 
+;; テスト
 ;(define in-1 (make-wire))
 ;(define in-2 (make-wire))
 ;(define out (make-wire))
+;(probe 'in-1 in-1)
+;(probe 'in-2 in-2)
+;(probe 'out out)
+;(or-gate in-1 in-2 out)
+;(set-signal! in-1 1)
+;(propagate)
+;(set-signal! in-1 0)
+;(propagate)
+;(set-signal! in-2 1)
+;(propagate)
+;(set-signal! in-2 0)
+;(propagate)
 
+;; 結果
+;racket@> (define in-1 (make-wire))
+;racket@> (define in-2 (make-wire))
+;racket@> (define out (make-wire))
+;
+;racket@> (probe 'in-1 in-1)
+;in-1 0 New-value = 0
+;racket@> (probe 'in-2 in-2)
+;in-2 0 New-value = 0
+;racket@> (probe 'out out)
+;out 0 New-value = 0
+;
+;racket@> (or-gate in-1 in-2 out)
+;racket@> (set-signal! in-1 1)
+;racket@> (propagate)
+;in-1 0 New-value = 1
+;out 5 New-value = 1
+;
+;racket@> (set-signal! in-1 0)
+;racket@> (propagate)
+;in-1 5 New-value = 0
+;out 10 New-value = 0
+;
+;racket@> (set-signal! in-2 1)
+;racket@> (propagate)
+;in-2 10 New-value = 1
+;out 15 New-value = 1
+;
+;racket@> (set-signal! in-2 0)
+;racket@> (propagate)
+;in-2 15 New-value = 0
+;out 20 New-value = 0
 
 
 ;;; ex 3.29
