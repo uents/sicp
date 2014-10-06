@@ -33,6 +33,7 @@
 
 ;;; ex 3.12
 
+; last-pairはすでにあるので、my-last-pairに名前を変更
 (define (my-last-pair x)
   (if (null? (cdr x))
 	  x
@@ -59,20 +60,13 @@
 	  (loop temp x))))
   (loop x '()))
 
-(define v (list 'a 'b 'c 'd))
-
-; racket@> v
-; (mcons 'a (mcons 'b (mcons 'c (mcons 'd '()))))
+; racket@> (define v (list 'a 'b 'c 'd))
 ; racket@> (disp v)
 ; (a b c d)
 ; 
 ; racket@> (define w (mystery v))
-; racket@> w
-; (mcons 'd (mcons 'c (mcons 'b (mcons 'a '()))))
 ; racket@> (disp w)
 ; (d c b a)
-; racket@> v
-; (mcons 'a '())
 ; racket@> (disp v)
 ; (a)
 
