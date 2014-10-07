@@ -164,7 +164,7 @@
 (define (delete-queue! q)
   ((q 'delete-proc!)))
 (define (print-queue q)
-  ((q 'print-queue)))
+  ((q 'print-proc)))
 
 
 ;;;; -----------------------------------
