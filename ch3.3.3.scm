@@ -28,6 +28,11 @@
 
 ;;;; ex 3.24
 
+; 解答は省略。
+; 
+; make-table にテスト関数を引数で渡せるようにし、
+; assoc-tree 内の equal? の代わりにそのテスト関数を使えばよいだけ。
+
 
 ;;;; ex 3.25
 
@@ -38,9 +43,9 @@
   (car record))
 (define (value record)
   (cdr record))
-(define (key! record k)
+(define (set-key! record k)
   (set-car! record k))
-(define (value! record v)
+(define (set-value! record v)
   (set-cdr! record v))
 
 ;; tree
@@ -50,22 +55,10 @@
   (car tree))
 (define (next tree)
   (cdr tree))
-(define (record! tree record)
+(define (set-record! tree record)
   (set-car! tree record))
-(define (next! tree next)
+(define (set-next! tree next)
   (set-cdr! tree next))
-
-;; hash
-(define (make-hash name tree)
-  (cons name tree))
-(define (name-hash hash)
-  (car hash))
-(define (tree-hash hash)
-  (cdr hash))
-(define (name-hash! hash name)
-  (set-car! hash name))
-(define (tree-hash! hash tree)
-  (set-cdr! hash tree))
 
 ;; utility prodecures
 (define (assoc-tree k tree)
@@ -78,23 +71,23 @@
 (define (make-deep-record key-list v)
   (if (null? (cdr key-list))
 	  (make-record (car key-list) v)
-	  (make-hash (car key-list)
-				 (make-tree (make-deep-record (cdr key-list) v)
-							nil))))
+	  (make-record (car key-list)
+				   (make-tree (make-deep-record (cdr key-list) v)
+							  nil))))
 
-(define (adjoin-hash! key-list v hash)
-  (tree-hash! hash
+(define (adjoin-record! records key-list v)
+  (set-value! records
 			  (make-tree (make-deep-record key-list v)
-						 (tree-hash hash))))
+						 (value records))))
 
 ;; table
 (define (make-table)
-  (let ((the-hash (make-hash '*table* nil)))
+  (let ((the-hash (make-record '*table* nil)))
 	(define (lookup key-list)
-	  (define (iter key-list hash)
+	  (define (iter key-list records)
 		(if (null? key-list)
 			false
-			(let ((record (assoc-tree (car key-list) (tree-hash hash))))
+			(let ((record (assoc-tree (car key-list) (value records))))
 			  (if record
 				  (if (null? (cdr key-list))
 					  (value record)
@@ -102,15 +95,15 @@
 				  false))))
 	  (iter key-list the-hash))
 	(define (insert! key-list v)
-	  (define (iter key-list hash)
+	  (define (iter key-list records)
 		(if (null? key-list)
 			false
-			(let ((record (assoc-tree (car key-list) (tree-hash hash))))
+			(let ((record (assoc-tree (car key-list) (value records))))
 			  (if record
 				  (if (null? (cdr key-list))
-					  (value! record v)
+					  (set-value! record v)
 					  (iter (cdr key-list) record))
-				  (adjoin-hash! key-list v hash)))))
+				  (adjoin-record! records key-list v)))))
 	  (iter key-list the-hash))
 	(define (print)
 	  (begin
@@ -124,24 +117,33 @@
 			(else (error "Unknown operation -- TABLE" m))))
 	dispatch))
 
-; racket@> (define tbl (make-table))
-; racket@> ((tbl 'insert-proc!) (list 'foo 'bar) 1)
-; racket@> ((tbl 'insert-proc!) (list 'foo 'baz) 2)
-; racket@> ((tbl 'insert-proc!) (list 'foo 'qux) 3)
-; racket@> ((tbl 'insert-proc!) (list 'bar 'baz) 11)
-; racket@> ((tbl 'insert-proc!) (list 'bar 'qux) 12)
-;
-; racket@> ((tbl 'print-proc))
-; (*table* (bar (qux . 12) (baz . 11)) (foo (qux . 3) (baz . 2) (bar . 1)))
-; 
-; racket@> ((tbl 'lookup-proc) (list 'foo 'baz))
-; 2
-; racket@> ((tbl 'lookup-proc) (list 'bar 'foo))
-; #f
-; racket@> ((tbl 'lookup-proc) (list 'bar 'baz))
-; 11
+
+(define (lookup-table table key)
+  ((table 'lookup-proc) key))
+(define (insert-table! table key value)
+  ((table 'insert-proc!) key value))
+(define (print-table table)
+  ((table 'print-proc)))
 
 
+;; test
+
+racket@> (insert-table! tbl (list 'foo 'bar) 1)
+racket@> (insert-table! tbl (list 'foo 'baz) 2)
+racket@> (insert-table! tbl (list 'foo 'qux) 3)
+racket@> (insert-table! tbl (list 'bar 'baz) 11)
+racket@> (insert-table! tbl (list 'bar 'qux) 12)
+racket@> (print-table tbl)
+(*table* (bar (qux . 12) (baz . 11)) (foo (qux . 3) (baz . 2) (bar . 1)))
+
+racket@> (lookup-table tbl (list 'foo 'baz))
+2
+racket@> (lookup-table tbl (list 'foo 'foo))
+#f
+racket@> (lookup-table tbl (list 'bar 'foo))
+#f
+racket@> (lookup-table tbl (list 'bar 'baz))
+11
 
 ;;;; ex 3.26
 
