@@ -127,23 +127,24 @@
 
 
 ;; test
+;; racket@> (insert-table! tbl (list 'foo 'bar) 1)
+;; racket@> (insert-table! tbl (list 'foo 'baz) 2)
+;; racket@> (insert-table! tbl (list 'foo 'qux) 3)
+;; racket@> (insert-table! tbl (list 'bar 'baz) 11)
+;; racket@> (insert-table! tbl (list 'bar 'qux) 12)
+;; racket@> (print-table tbl)
+;; (*table* (bar (qux . 12) (baz . 11)) (foo (qux . 3) (baz . 2) (bar . 1)))
 
-racket@> (insert-table! tbl (list 'foo 'bar) 1)
-racket@> (insert-table! tbl (list 'foo 'baz) 2)
-racket@> (insert-table! tbl (list 'foo 'qux) 3)
-racket@> (insert-table! tbl (list 'bar 'baz) 11)
-racket@> (insert-table! tbl (list 'bar 'qux) 12)
-racket@> (print-table tbl)
-(*table* (bar (qux . 12) (baz . 11)) (foo (qux . 3) (baz . 2) (bar . 1)))
+;; racket@> (lookup-table tbl (list 'foo 'baz))
+;; 2
+;; racket@> (lookup-table tbl (list 'foo 'foo))
+;; #f
+;; racket@> (lookup-table tbl (list 'bar 'foo))
+;; #f
+;; racket@> (lookup-table tbl (list 'bar 'baz))
+;; 11
 
-racket@> (lookup-table tbl (list 'foo 'baz))
-2
-racket@> (lookup-table tbl (list 'foo 'foo))
-#f
-racket@> (lookup-table tbl (list 'bar 'foo))
-#f
-racket@> (lookup-table tbl (list 'bar 'baz))
-11
+
 
 ;;;; ex 3.26
 
@@ -151,19 +152,14 @@ racket@> (lookup-table tbl (list 'bar 'baz))
 
 ;;;; ex 3.27
 
-(define (fib n)
-  (cond ((= n 0) 0)
-        ((= n 1) 1)
-        (else (+ (fib (- n 1))
-                 (fib (- n 2))))))
-
 (define (memoize f)
   (let ((table (make-table)))
     (lambda (x)
-      (let ((previously-computed-result (lookup x table)))
-        (or previously-computed-result
+      (let ((momoized-result (lookup-table table (list x))))
+		(display (format "prev-ret = ~A ~%" momoized-result))
+        (or momoized-result
             (let ((result (f x)))
-              (insert! x result table)
+              (insert-table! table (list x) result)
               result))))))
 
 (define memo-fib
@@ -172,4 +168,10 @@ racket@> (lookup-table tbl (list 'bar 'baz))
                    ((= n 1) 1)
                    (else (+ (memo-fib (- n 1))
                             (memo-fib (- n 2))))))))
+
+;; (define (fib n)
+;;   (cond ((= n 0) 0)
+;;         ((= n 1) 1)
+;;         (else (+ (fib (- n 1))
+;;                  (fib (- n 2))))))
 
