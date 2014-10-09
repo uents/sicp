@@ -61,23 +61,24 @@
   (set-cdr! tree next))
 
 ;; utility prodecures
-(define (assoc-tree k tree)
-  (cond ((null? tree)
-		 false)
-        ((equal? k (key (record tree)))
-		 (record tree))
-        (else (assoc-tree k (next tree)))))
+(define (assoc-records records k)
+  (define (assoc-tree tree)
+	(cond ((null? tree)
+		   false)
+		  ((equal? k (key (record tree)))
+		   (record tree))
+		  (else (assoc-tree (next tree)))))
+  (assoc-tree (value records)))
 
-(define (make-deep-record key-list v)
-  (if (null? (cdr key-list))
-	  (make-record (car key-list) v)
-	  (make-record (car key-list)
-				   (make-tree (make-deep-record (cdr key-list) v)
-							  nil))))
-
-(define (adjoin-record! records key-list v)
+(define (adjoin-records! records key-list v)
+  (define (make-deep-records key-list)
+	(if (null? (cdr key-list))
+		(make-record (car key-list) v)
+		(make-record (car key-list)
+					 (make-tree (make-deep-records (cdr key-list))
+								nil))))
   (set-value! records
-			  (make-tree (make-deep-record key-list v)
+			  (make-tree (make-deep-records key-list)
 						 (value records))))
 
 ;; table
@@ -87,7 +88,7 @@
 	  (define (iter key-list records)
 		(if (null? key-list)
 			false
-			(let ((record (assoc-tree (car key-list) (value records))))
+			(let ((record (assoc-records records (car key-list))))
 			  (if record
 				  (if (null? (cdr key-list))
 					  (value record)
@@ -98,12 +99,12 @@
 	  (define (iter key-list records)
 		(if (null? key-list)
 			false
-			(let ((record (assoc-tree (car key-list) (value records))))
+			(let ((record (assoc-records records (car key-list))))
 			  (if record
 				  (if (null? (cdr key-list))
 					  (set-value! record v)
 					  (iter (cdr key-list) record))
-				  (adjoin-record! records key-list v)))))
+				  (adjoin-records! records key-list v)))))
 	  (iter key-list the-hash))
 	(define (print)
 	  (begin
@@ -127,6 +128,7 @@
 
 
 ;; test
+;; racket@> (define tbl (make-table))
 ;; racket@> (insert-table! tbl (list 'foo 'bar) 1)
 ;; racket@> (insert-table! tbl (list 'foo 'baz) 2)
 ;; racket@> (insert-table! tbl (list 'foo 'qux) 3)
