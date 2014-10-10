@@ -60,7 +60,7 @@
 (define (set-next! tree next)
   (set-cdr! tree next))
 
-;; utility prodecures
+;; record operations
 (define (assoc-records records k)
   (define (assoc-tree tree)
 	(cond ((null? tree)
@@ -150,7 +150,38 @@
 
 ;;;; ex 3.26
 
+;; tree
+(define (make-tree record left right)
+  (list record left right))
+(define (record tree)
+  (car tree))
+(define (left tree)
+  (cadr tree))
+(define (right tree)
+  (caddr tree))
+(define (set-record! tree record)
+  (set-car! tree record))
+(define (set-left! tree left)
+  (set-car! (cdr tree) left))
+(define (set-right! tree right)
+  (set-car! (cddr tree) right))
 
+;; record operations
+(define (assoc-records records k)
+  (define (assoc-tree tree)
+	(cond ((null? tree)
+		   false)
+		  ((equal? k (key (record tree)))
+		   (record tree))
+		  ((< k (key (record tree)))
+		   (assoc-tree (left tree)))
+		  (else
+		   (assoc-tree (right tree)))))
+  (assoc-tree (value records)))
+
+(define (adjoin-records! records key-list v)
+  ;;
+)
 
 ;;;; ex 3.27
 
