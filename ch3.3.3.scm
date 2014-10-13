@@ -179,18 +179,35 @@
 		   (assoc-tree (right tree)))))
   (assoc-tree (value records)))
 
-(define (adjoin-records! records key-list v)
-  ;;
-)
+(define (make-deep-tree key-list v)
+  (if (null? (cdr key-list))
+  	  (make-tree (make-record (car key-list) v)
+				 nil nil)
+	  (make-tree (make-record (car key-list)
+							  (make-tree (make-deep-tree (cdr key-list) v)
+										 nil nil))
+				 nil nil)))
+
+(define (adjoin-records! tree key-list v)
+  (define (iter tree key-list)
+	(cond ((null? tree)
+		   (set! tree
+				 (make-deep-tree key-list v)))
+		  ((< (car key-list) (key (record (tree))))
+		   (iter (left tree) (cdr key-list)))
+		  (else
+		   (iter (right tree) (cdr key-list)))))
+  (iter tree key-list))
+
 
 ;;;; ex 3.27
 
 (define (memoize f)
   (let ((table (make-table)))
     (lambda (x)
-      (let ((momoized-result (lookup-table table (list x))))
-		(display (format "prev-ret = ~A ~%" momoized-result))
-        (or momoized-result
+      (let ((memo-result (lookup-table table (list x))))
+		(display (format "memo-ret = ~A ~%" memo-result))
+        (or memo-result
             (let ((result (f x)))
               (insert-table! table (list x) result)
               result))))))
