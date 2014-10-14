@@ -60,62 +60,64 @@
 (define (set-next! tree next)
   (set-cdr! tree next))
 
-;; record operations
-(define (assoc-records records k)
-  (define (assoc-tree tree)
-	(cond ((null? tree)
-		   false)
-		  ((equal? k (key (record tree)))
-		   (record tree))
-		  (else (assoc-tree (next tree)))))
-  (assoc-tree (value records)))
+;; tree operations
+(define (assoc-tree tree k)
+  (cond ((null? tree)
+		 false)
+		((equal? k (key (record tree)))
+		 tree)
+		(else (assoc-tree (next tree) k))))
 
-(define (adjoin-records! records key-list v)
-  (define (make-deep-records key-list)
+(define (adjoin-tree! tree key-list v)
+  (define (make-deep-tree key-list)
 	(if (null? (cdr key-list))
-		(make-record (car key-list) v)
-		(make-record (car key-list)
-					 (make-tree (make-deep-records (cdr key-list))
-								nil))))
-  (set-value! records
-			  (make-tree (make-deep-records key-list)
-						 (value records))))
+		(make-tree (make-record (car key-list) v)
+				   (next tree))
+		(make-tree (make-record (car key-list)
+								(make-deep-tree (cdr key-list)))
+				   (next tree))))
+  (set-next! tree (make-deep-tree key-list)))
+
+(define (make-table-tree)
+  (make-tree (make-record '*table* nil) nil))
 
 ;; table
 (define (make-table)
-  (let ((the-hash (make-record '*table* nil)))
+  (let ((the-tree (make-table-tree)))
 	(define (lookup key-list)
-	  (define (iter key-list records)
+	  (define (iter tree key-list)
+;		(display (format "lookup t=~A k=~A ~%" tree key-list))
 		(if (null? key-list)
 			false
-			(let ((record (assoc-records records (car key-list))))
-			  (if record
+			(let ((t (assoc-tree tree (car key-list))))
+			  (if t
 				  (if (null? (cdr key-list))
-					  (value record)
-					  (iter (cdr key-list) record))
+					  (value (record t))
+					  (iter (value (record t)) (cdr key-list)))
 				  false))))
-	  (iter key-list the-hash))
+	  (iter the-tree key-list))
 	(define (insert! key-list v)
-	  (define (iter key-list records)
+	  (define (iter tree key-list)
+;		(display (format "insert! t=~A k=~A v=~A ~%" tree key-list v))
 		(if (null? key-list)
 			false
-			(let ((record (assoc-records records (car key-list))))
-			  (if record
+			(let ((t (assoc-tree tree (car key-list))))
+			  (if t
 				  (if (null? (cdr key-list))
-					  (set-value! record v)
-					  (iter (cdr key-list) record))
-				  (adjoin-records! records key-list v)))))
-	  (iter key-list the-hash))
+					  (set-value! (record t) v)
+					  (iter (value (record t)) (cdr key-list)))
+				  (adjoin-tree! tree key-list v)))))
+	  (iter the-tree key-list))
 	(define (print)
 	  (begin
-		(display the-hash (current-error-port))
+		(display the-tree (current-error-port))
 		(newline (current-error-port))))
 
 	(define (dispatch m)
 	  (cond ((eq? m 'lookup-proc) lookup)
 			((eq? m 'insert-proc!) insert!)
 			((eq? m 'print-proc) print)
-			(else (error "Unknown operation -- TABLE" m))))
+			(else (error "dispatch -- unknown operation" m))))
 	dispatch))
 
 
@@ -127,24 +129,25 @@
   ((table 'print-proc)))
 
 
-;; test
-;; racket@> (define tbl (make-table))
-;; racket@> (insert-table! tbl (list 'foo 'bar) 1)
-;; racket@> (insert-table! tbl (list 'foo 'baz) 2)
-;; racket@> (insert-table! tbl (list 'foo 'qux) 3)
-;; racket@> (insert-table! tbl (list 'bar 'baz) 11)
-;; racket@> (insert-table! tbl (list 'bar 'qux) 12)
-;; racket@> (print-table tbl)
-;; (*table* (bar (qux . 12) (baz . 11)) (foo (qux . 3) (baz . 2) (bar . 1)))
+;;; test
 
-;; racket@> (lookup-table tbl (list 'foo 'baz))
-;; 2
-;; racket@> (lookup-table tbl (list 'foo 'foo))
+;; racket@> (define tbl (make-table))
+;; racket@> (insert-table! tbl (list 1 2) "one two")
+;; racket@> (insert-table! tbl (list 1 3) "one three")
+;; racket@> (insert-table! tbl (list 2 3) "two three")
+;; racket@> (insert-table! tbl (list 1 4) "one four")
+;; racket@> (insert-table! tbl (list 2 4) "two four")
+;; racket@> (print-table tbl)
+;; ((*table*) (2 (3 . two three) (4 . two four)) (1 (2 . one two) (4 . one four) (3 . one three)))
+
+;; racket@> (lookup-table tbl (list 1 2))
+;; "one two"
+;; racket@> (lookup-table tbl (list 1 1))
 ;; #f
-;; racket@> (lookup-table tbl (list 'bar 'foo))
+;; racket@> (lookup-table tbl (list 2 1))
 ;; #f
-;; racket@> (lookup-table tbl (list 'bar 'baz))
-;; 11
+;; racket@> (lookup-table tbl (list 2 3))
+;; "two three"
 
 
 
@@ -166,38 +169,60 @@
 (define (set-right! tree right)
   (set-car! (cddr tree) right))
 
-;; record operations
-(define (assoc-records records k)
-  (define (assoc-tree tree)
-	(cond ((null? tree)
-		   false)
-		  ((equal? k (key (record tree)))
-		   (record tree))
-		  ((< k (key (record tree)))
-		   (assoc-tree (left tree)))
-		  (else
-		   (assoc-tree (right tree)))))
-  (assoc-tree (value records)))
+;; tree operations
+(define (assoc-tree tree k)
+  (cond ((null? tree)
+		 false)
+		((equal? k (key (record tree)))
+		 tree)
+		((< k (key (record tree)))
+		 (assoc-tree (left tree) k))
+		(else
+		 (assoc-tree (right tree) k))))
 
-(define (make-deep-tree key-list v)
-  (if (null? (cdr key-list))
-  	  (make-tree (make-record (car key-list) v)
-				 nil nil)
-	  (make-tree (make-record (car key-list)
-							  (make-tree (make-deep-tree (cdr key-list) v)
-										 nil nil))
-				 nil nil)))
+(define (adjoin-tree! tree key-list v)
+  (define (make-deep-tree key-list)
+	(if (null? (cdr key-list))
+		(make-tree (make-record (car key-list) v)
+				   nil nil)
+		(make-tree (make-record (car key-list)
+								(make-deep-tree (cdr key-list)))
+				   nil nil)))
+  (cond ((< (car key-list) (key (record tree)))
+		 (if (null? (left tree))
+			 (set-left! tree (make-deep-tree key-list))
+			 (adjoin-tree! (left tree) key-list v)))
+		((> (car key-list) (key (record tree)))
+		 (if (null? (right tree))
+			 (set-right! tree (make-deep-tree key-list))
+			 (adjoin-tree! (right tree) key-list v)))
+		(else
+		 (error "adjoin-tree! -- tree key value" tree key-list v))))
 
-(define (adjoin-records! tree key-list v)
-  (define (iter tree key-list)
-	(cond ((null? tree)
-		   (set! tree
-				 (make-deep-tree key-list v)))
-		  ((< (car key-list) (key (record (tree))))
-		   (iter (left tree) (cdr key-list)))
-		  (else
-		   (iter (right tree) (cdr key-list)))))
-  (iter tree key-list))
+(define (make-table-tree)
+  (make-tree (make-record -inf.0 nil) nil nil))
+
+
+;;; test
+
+;; racket@> (define tbl (make-table))
+;; racket@> (insert-table! tbl (list 1 2) "one two")
+;; racket@> (insert-table! tbl (list 1 3) "one three")
+;; racket@> (insert-table! tbl (list 2 3) "two three")
+;; racket@> (insert-table! tbl (list 1 4) "one four")
+;; racket@> (insert-table! tbl (list 2 4) "two four")
+;; racket@> (print-table tbl)
+;; ((-inf.0) () ((1 (2 . one two) () ((3 . one three) () ((4 . one four) () ()))) () ((2 (3 . two three) () ((4 . two four) () ())) () ())))
+
+;; racket@> (lookup-table tbl (list 1 2))
+;; "one two"
+;; racket@> (lookup-table tbl (list 1 1))
+;; #f
+;; racket@> (lookup-table tbl (list 2 1))
+;; #f
+;; racket@> (lookup-table tbl (list 2 3))
+;; "two three"
+
 
 
 ;;;; ex 3.27
