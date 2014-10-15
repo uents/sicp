@@ -69,14 +69,15 @@
 		(else (assoc-tree (next tree) k))))
 
 (define (adjoin-tree! tree key-list v)
-  (define (make-deep-tree key-list)
+  (define (make-deep-record key-list)
 	(if (null? (cdr key-list))
-		(make-tree (make-record (car key-list) v)
-				   (next tree))
-		(make-tree (make-record (car key-list)
-								(make-deep-tree (cdr key-list)))
-				   (next tree))))
-  (set-next! tree (make-deep-tree key-list)))
+		(make-record (car key-list) v)
+		(make-record (car key-list)
+					 (make-tree (make-deep-record (cdr key-list))
+								nil))))
+  (set-next! tree
+			 (make-tree (make-deep-record key-list)
+						(next tree))))
 
 (define (make-table-tree)
   (make-tree (make-record '*table* nil) nil))
