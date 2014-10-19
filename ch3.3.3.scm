@@ -232,7 +232,7 @@
   (let ((table (make-table)))
     (lambda (x)
       (let ((memo-result (lookup-table table (list x))))
-		(display (format "memo-ret = ~A ~%" memo-result))
+		(display (format "memo-ret ~A -> ~A ~%" x memo-result))
         (or memo-result
             (let ((result (f x)))
               (insert-table! table (list x) result)
@@ -245,9 +245,25 @@
                    (else (+ (memo-fib (- n 1))
                             (memo-fib (- n 2))))))))
 
-;; (define (fib n)
-;;   (cond ((= n 0) 0)
-;;         ((= n 1) 1)
-;;         (else (+ (fib (- n 1))
-;;                  (fib (- n 2))))))
+;;; test
+; racket@> (memo-fib 3)
+; memo-ret 3 -> #f 
+; memo-ret 2 -> #f 
+; memo-ret 1 -> #f 
+; memo-ret 0 -> #f 
+; memo-ret 1 -> 1 
+; 2
 
+
+;; (define (fib n)
+;;    (cond ((= n 0) 0)
+;;          ((= n 1) 1)
+;;          (else (+ (fib (- n 1))
+;;                   (fib (- n 2))))))
+;; (define memo-fib
+;;   (memoize fib))
+
+;;; test
+; racket@> (memo-fib 3)
+; memo-ret 3 -> #f 
+; 2
