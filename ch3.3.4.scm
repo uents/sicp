@@ -1,6 +1,6 @@
 ;;;; #lang racket
 ;;;;
-;;;; SICP Chapter 3.3.4 Representing Tables
+;;;; SICP Chapter 3.3.4 A Simulator for Digital Circuits
 ;;;;
 ;;;; Author: @uents on twitter
 ;;;;
@@ -77,6 +77,7 @@
       1
       0))
 
+;; 回路の作成
 (define (make-wire)
   (let ((signal-value 0)
 		(action-procedures '()))
@@ -102,18 +103,10 @@
 
 (define (get-signal wire)
   (wire 'get-signal))
-
 (define (set-signal! wire new-value)
   ((wire 'set-signal!) new-value))
-
 (define (add-action! wire action-procedure)
   ((wire 'add-action!) action-procedure))
-
-
-(define (after-delay delay action)
-  (add-to-agenda! (+ delay (current-time *the-agenda*))
-				  action
-				  *the-agenda*))
 
 
 ;;;; -----------------------------------
@@ -239,6 +232,12 @@
 (define *and-gate-delay* 3)
 (define *or-gate-delay* 5)
 
+;; 手続きを遅延時間後に実行させる
+(define (after-delay delay action)
+  (add-to-agenda! (+ delay (current-time *the-agenda*))
+				  action
+				  *the-agenda*))
+
 ;; 回路の動作に値を出力させる
 (define (probe name wire)
   (add-action! wire
@@ -332,10 +331,71 @@
 
 ;;; ex 3.29
 ;;; orをnotとandで実装する
-;;; 遅延は 2 * (and-gate-delay + inverter-delay)
+;;; 遅延は 2 * inverter-delay + and-gate-delay
+
+(define (or-gate-ex a b output)
+  (let ((c (make-wire))
+		(d (make-wire))
+		(e (make-wire)))
+	(inverter a c)
+	(inverter b d)
+	(and-gate c d e)
+	(inverter e output)
+	'ok))
+
+;; テスト
+;; (define in-1 (make-wire))
+;; (define in-2 (make-wire))
+;; (define out (make-wire))
+;; (probe 'in-1 in-1)
+;; (probe 'in-2 in-2)
+;; (probe 'out out)
+;; (or-gate-ex in-1 in-2 out)
+;; (set-signal! in-1 1)
+;; (propagate)
+;; (set-signal! in-1 0)
+;; (propagate)
+;; (set-signal! in-2 1)
+;; (propagate)
+;; (set-signal! in-2 0)
+;; (propagate)
+
+;; 結果
+;racket@> (define in-1 (make-wire))
+;racket@> (define in-2 (make-wire))
+;racket@> (define out (make-wire))
+;
+;racket@> (probe 'in-1 in-1)
+;in-1 0 New-value = 0
+;racket@> (probe 'in-2 in-2)
+;in-2 0 New-value = 0
+;racket@> (probe 'out out)
+;out 0 New-value = 0
+;
+;racket@> (or-gate in-1 in-2 out)
+;racket@> (set-signal! in-1 1)
+;racket@> (propagate)
+;in-1 0 New-value = 1
+;out 7 New-value = 1
+;
+;racket@> (set-signal! in-1 0)
+;racket@> (propagate)
+;in-1 7 New-value = 0
+;out 14 New-value = 0
+;
+;racket@> (set-signal! in-2 1)
+;racket@> (propagate)
+;in-2 14 New-value = 1
+;out 21 New-value = 1
+;
+;racket@> (set-signal! in-2 0)
+;racket@> (propagate)
+;in-2 21 New-value = 0
+;out 28 New-value = 0
 
 
 ;;; ex 3.30
+
 (define (ripple-carry-addr a-list b-list c-in sum-list)
   (let ((a-k (car a-list))
 		(b-k (car b-list))
