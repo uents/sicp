@@ -396,14 +396,155 @@
 
 ;;; ex 3.30
 
-(define (ripple-carry-addr a-list b-list c-in sum-list)
-  (let ((a-k (car a-list))
-		(b-k (car b-list))
-		(sum-k 0)
-		(c-out 0))
-	(full-adder a-k b-k c-in sum-k c-out)
-	(set! sum-list (cons sum-k sum-list))
-	(if (null? (cdr a-list))
-		sum-list
-		(ripple-carry-addr (cdr a-list) (cdr b-list) c-out sum-list))))
+;;; ripple-carry-adderを実装する前に
+;;; full-adderのテスト
+
+;; テスト
+;; (define a (make-wire))
+;; (define b (make-wire))
+;; (define c-in (make-wire))
+;; (define sum (make-wire))
+;; (define c-out (make-wire))
+;; (probe 'a a)
+;; (probe 'b b)
+;; (probe 'c-in c-in)
+;; (probe 'sum sum)
+;; (probe 'c-out c-ount)
+;; (full-adder a b c-in sum c-out)
+;; (set-signal! a 1)
+;; (propagate)
+;; (set-signal! b 1)
+;; (propagate)
+;; (set-signal! c-in 1)
+;; (propagate)
+
+;; 結果
+;; racket@> (define a (make-wire))
+;; racket@> (define b (make-wire))
+;; racket@> (define c-in (make-wire))
+;; racket@> (define sum (make-wire))
+;; racket@> (define c-out (make-wire))
+
+;; racket@> (probe 'a a)
+;; a 0 New-value = 0
+;; racket@> (probe 'b b)
+;; b 0 New-value = 0
+;; racket@> (probe 'c-in c-in)
+;; c-in 0 New-value = 0
+;; racket@> (probe 'sum sum)
+;; sum 0 New-value = 0
+;; racket@> (probe 'c-out c-out)
+;; c-out 0 New-value = 0
+;; racket@> (full-adder a b c-in sum c-out)
+;; 'ok
+
+;; racket@> (set-signal! a 1)
+;; a 0 New-value = 1
+;; 'done
+;; racket@> (propagate)
+;; sum 8 New-value = 1
+;; 'done
+
+;; racket@> (set-signal! b 1)
+;; b 8 New-value = 1
+;; 'done
+;; racket@> (propagate)
+;; c-out 24 New-value = 1
+;; sum 24 New-value = 0
+;; 'done
+
+;; racket@> (set-signal! c-in 1)
+;; c-in 24 New-value = 1
+;; 'done
+;; racket@> (propagate)
+;; sum 40 New-value = 1
+;; 'done
+
+
+;; (define (ripple-carry-adder a-list b-list c-in sum-list)
+;;   (let ((a-k (car a-list))
+;; 		(b-k (car b-list))
+;; 		(sum-k 0)
+;; 		(c-out 0))
+;; 	(full-adder a-k b-k c-in sum-k c-out)
+;; 	(set! sum-list (cons sum-k sum-list))
+;; 	(display (format "sum-list ~A ~%" sum-list))
+;; 	(if (null? (cdr a-list))
+;; 		sum-list
+;; 		(ripple-carry-adder (cdr a-list) (cdr b-list) c-out sum-list))))
+
+(define (ripple-carry-adder a-list b-list sum-list c-out)
+  (define (iter a-list b-list sum-list c-in)
+    (if (not (null? a-list))
+        (let ((a-k (car a-list))
+			  (b-k (car b-list))
+			  (sum-k (car sum-list))
+			  (c-out (make-wire)))
+		  (full-adder a-k b-k c-in sum-k c-out)
+		  (iter (cdr a-list) (cdr b-list) (cdr sum-list) c-out))
+        'ok))
+  (iter a-list b-list sum-list c-out))
+
+;; テスト
+;; racket@> (define a1 (make-wire))
+;; (define a2 (make-wire))
+;; (define a3 (make-wire))
+;; (define a4 (make-wire))
+;; (define b1 (make-wire))
+;; (define b2 (make-wire))
+;; (define b3 (make-wire))
+;; (define b4 (make-wire))
+;; (define s1 (make-wire))
+;; (define s2 (make-wire))
+;; (define s3 (make-wire))
+;; (define s4 (make-wire))
+;; (define a (list a1 a2 a3 a4))
+;; (define b (list b1 b2 b3 b4))
+;; (define s (list s1 s2 s3 s4))
+;; (define c (make-wire))
+;; (probe 's1 s1)
+;; (probe 's2 s2)
+;; (probe 's3 s3)
+;; (probe 's4 s4)
+;; (probe 'c c)
+
+;; s1 0 New-value = 0
+;; s2 0 New-value = 0
+;; s3 0 New-value = 0
+;; s4 0 New-value = 0
+;; c 0 New-value = 0
+
+;; racket@> (ripple-carry-adder a b s c)
+;; 'ok
+;; racket@> (set-signal! a1 1)
+;; 'done
+;; racket@> (propagate)
+;; s1 8 New-value = 1
+;; 'done
+;; racket@> (set-signal! b1 1)
+;; 'done
+;; racket@> (propagate)
+;; s1 24 New-value = 0
+;; s2 40 New-value = 1
+;; 'done
+;; racket@> (set-signal! a2 1)
+;; 'done
+;; racket@> (propagate)
+;; s2 48 New-value = 0
+;; s3 64 New-value = 1
+;; 'done
+
+
+;;; ex 3.31
+; invert、and-gate、or-gateのいずれも
+; add-action!で与える手続きでafter-delayを経由して
+; add-to-agenda!でアジェンダに手続きを追加している
+;
+; よって、add-action!の実体であるaccept-action-procedure!で
+; 手続きを即座に実行しなければアジェンダに手続きが追加されず
+; propagateを実行してもシミュレーションが走らない
+
+
+;;; ex 3.32
+; 省略
 
