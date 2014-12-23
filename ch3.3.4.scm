@@ -30,23 +30,7 @@
 ;;;; 回路の実装
 ;;;; -----------------------------------
 
-(define (half-adder a b s c)
-  (let ((d (make-wire))
-		(e (make-wire)))
-	(or-gate a b d)
-	(and-gate a b c)
-	(inverter c e)
-	(and-gate d e s)
-	'ok))
-
-(define (full-adder a b c-in sum c-out)
-  (let ((s (make-wire))
-		(c1 (make-wire))
-		(c2 (make-wire)))
-	(half-adder b c-in s c1)
-	(half-adder a s sum c2)
-	(or-gate c1 c2 c-out)
-	'ok))
+;;; 回路の実装
 
 (define (inverter input output)
   (define (invert-input)
@@ -77,7 +61,27 @@
       1
       0))
 
-;; 回路の作成
+(define (half-adder a b s c)
+  (let ((d (make-wire))
+		(e (make-wire)))
+	(or-gate a b d)
+	(and-gate a b c)
+	(inverter c e)
+	(and-gate d e s)
+	'ok))
+
+(define (full-adder a b c-in sum c-out)
+  (let ((s (make-wire))
+		(c1 (make-wire))
+		(c2 (make-wire)))
+	(half-adder b c-in s c1)
+	(half-adder a s sum c2)
+	(or-gate c1 c2 c-out)
+	'ok))
+
+
+;;; 回線の実装
+
 (define (make-wire)
   (let ((signal-value 0)
 		(action-procedures '()))
@@ -107,6 +111,108 @@
   ((wire 'set-signal!) new-value))
 (define (add-action! wire action-procedure)
   ((wire 'add-action!) action-procedure))
+
+
+;;;; -----------------------------------
+;;;; シミュレーションの実装
+;;;; -----------------------------------
+
+;; 手続きを遅延時間後に実行させるようアジェンダに登録する
+(define (after-delay delay action)
+  (add-to-agenda! (+ delay (current-time *the-agenda*))
+				  action
+				  *the-agenda*))
+
+;; アジェンダに登録されている手続きを全て実行させる
+(define (propagate)
+  (if (empty-agenda? *the-agenda*)
+	  'done
+	  (begin ((first-agenda-item *the-agenda*))
+			 (remove-first-agenda-item! *the-agenda*)
+			 (propagate))))
+
+;; 回線の値の変更時に現在値をプリントさせる
+(define (probe name wire)
+  (add-action! wire
+			   (lambda ()
+				 (display name)
+				 (display " ")
+				 (display (current-time *the-agenda*))
+				 (display " New-value = ")
+				 (display (get-signal wire))
+				 (newline))))w
+
+
+;;;; -----------------------------------
+;;;; アジェンダの実装
+;;;; -----------------------------------
+
+;;; アジェンダ
+(define (make-agenda) (cons 0 '()))
+(define (current-time agenda) (car agenda))
+(define (set-current-time! agenda time)
+  (set-car! agenda time))
+(define (segments agenda) (cdr agenda))
+(define (set-segments! agenda segments)
+  (set-cdr! agenda segments))
+
+;;; セグメント
+(define (make-time-segment time queue)
+  (cons time queue))
+(define (segment-time s) (car s))
+(define (segment-queue s) (cdr s))
+
+
+;;; アジェンダの操作手続き
+
+;; アジェンダが空かどうかチェック
+(define (empty-agenda? agenda)
+  (null? (segments agenda)))
+
+;; アジェンダに手続きを追加
+(define (add-to-agenda! time action agenda)
+  ; segmentsの終端かtimeの直前にsegmentがあればtrueを返す
+  (define (belongs-before? segs)
+;	(display (format "belongs-before? ~a ~%" segs))
+	(or (null? segs)
+		(< time (segment-time (car segs)))))
+  ; segmentを作成
+  (define (make-new-time-segment)
+;	(display (format "make-new-time-segments! ~%"))
+	(let ((q (make-queue)))
+	  (insert-queue! q action)
+	  (make-time-segment time q)))
+  ; segmentを追加
+  (define (add-to-segments! segs)
+;	(display (format "add-to-segments! ~a ~%" segs))
+	(if (= time (segment-time (car segs)))
+		(insert-queue! (segment-queue (car segs))
+					   action)
+		(if (belongs-before? (cdr segs))
+			(set-cdr! segs (cons (make-new-time-segment)
+								 (cdr segs)))
+			(add-to-segments! (cdr segs)))))
+
+  (let ((segs (segments agenda)))
+	(if (belongs-before? segs)
+		(set-cdr! agenda (cons (make-new-time-segment)
+							   segs))
+		(add-to-segments! segs))))
+
+;; アジェンダの先頭セグメントを取り出す
+(define (first-agenda-item agenda)
+  (if (empty-agenda? agenda)
+	  (error "Agenda is empty -- FIRST-AGENDA-ITEM")
+	  (let ((seg (car (segments agenda))))
+		(set-current-time! agenda (segment-time seg))
+		(front-queue (segment-queue seg)))))
+
+;; アジェンダの先頭セグメントを削除
+(define (remove-first-agenda-item! agenda)
+  (let ((q (segment-queue (car (segments agenda)))))
+	(delete-queue! q)
+	(if (empty-queue? q)
+		(set-segments! agenda (cdr (segments agenda))))))
 
 
 ;;;; -----------------------------------
@@ -161,101 +267,16 @@
 
 
 ;;;; -----------------------------------
-;;;; アジェンダの実装
+;;;; シミュレーションの設定
 ;;;; -----------------------------------
 
-(define (make-time-segment time queue)
-  (cons time queue))
-(define (segment-time s) (car s))
-(define (segment-queue s) (cdr s))
-
-(define (make-agenda) (cons 0 '()))
-(define (current-time agenda) (car agenda))
-(define (set-current-time! agenda time)
-  (set-car! agenda time))
-(define (segments agenda) (cdr agenda))
-(define (set-segments! agenda segments)
-  (set-cdr! agenda segments))
-
-(define (empty-agenda? agenda)
-  (null? (segments agenda)))
-
-(define (add-to-agenda! time action agenda)
-  ;; segmentsの終端かtimeの直前にsegmentがあればtrueを返す
-  (define (belongs-before? segs)
-;	(display (format "belongs-before? ~a ~%" segs))
-	(or (null? segs)
-		(< time (segment-time (car segs)))))
-  ;; segmentを作成
-  (define (make-new-time-segment)
-;	(display (format "make-new-time-segments! ~%"))
-	(let ((q (make-queue)))
-	  (insert-queue! q action)
-	  (make-time-segment time q)))
-  ;; segmentを追加
-  (define (add-to-segments! segs)
-;	(display (format "add-to-segments! ~a ~%" segs))
-	(if (= time (segment-time (car segs)))
-		(insert-queue! (segment-queue (car segs))
-					   action)
-		(if (belongs-before? (cdr segs))
-			(set-cdr! segs (cons (make-new-time-segment)
-								 (cdr segs)))
-			(add-to-segments! (cdr segs)))))
-  (let ((segs (segments agenda)))
-	(if (belongs-before? segs)
-		(set-cdr! agenda (cons (make-new-time-segment)
-							   segs))
-		(add-to-segments! segs))))
-
-(define (remove-first-agenda-item! agenda)
-  (let ((q (segment-queue (car (segments agenda)))))
-	(delete-queue! q)
-	(if (empty-queue? q)
-		(set-segments! agenda (cdr (segments agenda))))))
-
-(define (first-agenda-item agenda)
-  (if (empty-agenda? agenda)
-	  (error "Agenda is empty -- FIRST-AGENDA-ITEM")
-	  (let ((seg (car (segments agenda))))
-		(set-current-time! agenda (segment-time seg))
-		(front-queue (segment-queue seg)))))
-
-
-;;;; -----------------------------------
-;;;; シミュレーションの実行
-;;;; -----------------------------------
-
-;; 遅延時間
-(define *the-agenda* (make-agenda))
+;; 遅延時間の設定
 (define *inverter-delay* 2)
 (define *and-gate-delay* 3)
 (define *or-gate-delay* 5)
 
-;; 手続きを遅延時間後に実行させる
-(define (after-delay delay action)
-  (add-to-agenda! (+ delay (current-time *the-agenda*))
-				  action
-				  *the-agenda*))
-
-;; 回路の動作に値を出力させる
-(define (probe name wire)
-  (add-action! wire
-			   (lambda ()
-				 (display name)
-				 (display " ")
-				 (display (current-time *the-agenda*))
-				 (display " New-value = ")
-				 (display (get-signal wire))
-				 (newline))))
-
-;; アジェンダに登録されている手続きを全て実行する
-(define (propagate)
-  (if (empty-agenda? *the-agenda*)
-	  'done
-	  (begin ((first-agenda-item *the-agenda*))
-			 (remove-first-agenda-item! *the-agenda*)
-			 (propagate))))
+;; アジェンダの作成
+(define *the-agenda* (make-agenda))
 
 
 ;;;; -----------------------------------
@@ -279,54 +300,44 @@
 	  0))
 
 ;; テスト
-;(define in-1 (make-wire))
-;(define in-2 (make-wire))
-;(define out (make-wire))
-;(probe 'in-1 in-1)
-;(probe 'in-2 in-2)
-;(probe 'out out)
-;(or-gate in-1 in-2 out)
-;(set-signal! in-1 1)
-;(propagate)
-;(set-signal! in-1 0)
-;(propagate)
-;(set-signal! in-2 1)
-;(propagate)
-;(set-signal! in-2 0)
-;(propagate)
+;; racket@> (define in-1 (make-wire))
+;; (define in-2 (make-wire))
+;; (define out (make-wire))
 
-;; 結果
-;racket@> (define in-1 (make-wire))
-;racket@> (define in-2 (make-wire))
-;racket@> (define out (make-wire))
-;
-;racket@> (probe 'in-1 in-1)
-;in-1 0 New-value = 0
-;racket@> (probe 'in-2 in-2)
-;in-2 0 New-value = 0
-;racket@> (probe 'out out)
-;out 0 New-value = 0
-;
-;racket@> (or-gate in-1 in-2 out)
-;racket@> (set-signal! in-1 1)
-;racket@> (propagate)
-;in-1 0 New-value = 1
-;out 5 New-value = 1
-;
-;racket@> (set-signal! in-1 0)
-;racket@> (propagate)
-;in-1 5 New-value = 0
-;out 10 New-value = 0
-;
-;racket@> (set-signal! in-2 1)
-;racket@> (propagate)
-;in-2 10 New-value = 1
-;out 15 New-value = 1
-;
-;racket@> (set-signal! in-2 0)
-;racket@> (propagate)
-;in-2 15 New-value = 0
-;out 20 New-value = 0
+;; racket@> (probe 'in-1 in-1)
+;; (probe 'in-2 in-2)
+;; (probe 'out out)
+
+;; in-1 0 New-value = 0
+;; in-2 0 New-value = 0
+;; out 0 New-value = 0
+
+;; racket@> (or-gate in-1 in-2 out)
+;; 'ok
+
+;; racket@> (set-signal! in-1 1)
+;; 'done
+;; racket@> (propagate)
+;; in-1 0 New-value = 1
+;; out 5 New-value = 1
+
+;; racket@> (set-signal! in-1 0)
+;; 'done
+;; racket@> (propagate)
+;; in-1 5 New-value = 0
+;; out 10 New-value = 0
+
+;; racket@> (set-signal! in-2 1)
+;; 'done
+;; racket@> (propagate)
+;; in-2 10 New-value = 1
+;; out 15 New-value = 1
+
+;; racket@> (set-signal! in-2 0)
+;; 'done
+;; racket@> (propagate)
+;; in-2 15 New-value = 0
+;; out 20 New-value = 0
 
 
 ;;; ex 3.29
@@ -344,86 +355,52 @@
 	'ok))
 
 ;; テスト
-;; (define in-1 (make-wire))
-;; (define in-2 (make-wire))
-;; (define out (make-wire))
-;; (probe 'in-1 in-1)
-;; (probe 'in-2 in-2)
-;; (probe 'out out)
-;; (or-gate-ex in-1 in-2 out)
-;; (set-signal! in-1 1)
-;; (propagate)
-;; (set-signal! in-1 0)
-;; (propagate)
-;; (set-signal! in-2 1)
-;; (propagate)
-;; (set-signal! in-2 0)
-;; (propagate)
+;; racket@> (define in-1 (make-wire))
+;; racket@> (define in-2 (make-wire))
+;; racket@> (define out (make-wire))
 
-;; 結果
-;racket@> (define in-1 (make-wire))
-;racket@> (define in-2 (make-wire))
-;racket@> (define out (make-wire))
-;
-;racket@> (probe 'in-1 in-1)
-;in-1 0 New-value = 0
-;racket@> (probe 'in-2 in-2)
-;in-2 0 New-value = 0
-;racket@> (probe 'out out)
-;out 0 New-value = 0
-;
-;racket@> (or-gate in-1 in-2 out)
-;racket@> (set-signal! in-1 1)
-;racket@> (propagate)
-;in-1 0 New-value = 1
-;out 7 New-value = 1
-;
-;racket@> (set-signal! in-1 0)
-;racket@> (propagate)
-;in-1 7 New-value = 0
-;out 14 New-value = 0
-;
-;racket@> (set-signal! in-2 1)
-;racket@> (propagate)
-;in-2 14 New-value = 1
-;out 21 New-value = 1
-;
-;racket@> (set-signal! in-2 0)
-;racket@> (propagate)
-;in-2 21 New-value = 0
-;out 28 New-value = 0
+;; racket@> (probe 'in-1 in-1)
+;; in-1 0 New-value = 0
+;; racket@> (probe 'in-2 in-2)
+;; in-2 0 New-value = 0
+;; racket@> (probe 'out out)
+;; out 0 New-value = 0
+
+;; racket@> (or-gate in-1 in-2 out)
+;; racket@> (set-signal! in-1 1)
+;; racket@> (propagate)
+;; in-1 0 New-value = 1
+;; out 7 New-value = 1
+
+;; racket@> (set-signal! in-1 0)
+;; racket@> (propagate)
+;; in-1 7 New-value = 0
+;; out 14 New-value = 0
+
+;; racket@> (set-signal! in-2 1)
+;; racket@> (propagate)
+;; in-2 14 New-value = 1
+;; out 21 New-value = 1
+
+;; racket@> (set-signal! in-2 0)
+;; racket@> (propagate)
+;; in-2 21 New-value = 0
+;; out 28 New-value = 0
 
 
-;;; ex 3.30
-
-;;; ripple-carry-adderを実装する前に
-;;; full-adderのテスト
+;;; ripple-carry-adderを実装する前にfull-adderのテスト
 
 ;; テスト
-;; (define a (make-wire))
-;; (define b (make-wire))
-;; (define c-in (make-wire))
-;; (define sum (make-wire))
-;; (define c-out (make-wire))
-;; (probe 'a a)
-;; (probe 'b b)
-;; (probe 'c-in c-in)
-;; (probe 'sum sum)
-;; (probe 'c-out c-ount)
-;; (full-adder a b c-in sum c-out)
-;; (set-signal! a 1)
-;; (propagate)
-;; (set-signal! b 1)
-;; (propagate)
-;; (set-signal! c-in 1)
-;; (propagate)
-
-;; 結果
 ;; racket@> (define a (make-wire))
+;; 'ok
 ;; racket@> (define b (make-wire))
+;; 'ok
 ;; racket@> (define c-in (make-wire))
+;; 'ok
 ;; racket@> (define sum (make-wire))
+;; 'ok
 ;; racket@> (define c-out (make-wire))
+;; 'ok
 
 ;; racket@> (probe 'a a)
 ;; a 0 New-value = 0
@@ -435,6 +412,7 @@
 ;; sum 0 New-value = 0
 ;; racket@> (probe 'c-out c-out)
 ;; c-out 0 New-value = 0
+
 ;; racket@> (full-adder a b c-in sum c-out)
 ;; 'ok
 
@@ -461,18 +439,7 @@
 ;; 'done
 
 
-;; (define (ripple-carry-adder a-list b-list c-in sum-list)
-;;   (let ((a-k (car a-list))
-;; 		(b-k (car b-list))
-;; 		(sum-k 0)
-;; 		(c-out 0))
-;; 	(full-adder a-k b-k c-in sum-k c-out)
-;; 	(set! sum-list (cons sum-k sum-list))
-;; 	(display (format "sum-list ~A ~%" sum-list))
-;; 	(if (null? (cdr a-list))
-;; 		sum-list
-;; 		(ripple-carry-adder (cdr a-list) (cdr b-list) c-out sum-list))))
-
+;;; ex 3.30
 (define (ripple-carry-adder a-list b-list sum-list c-out)
   (define (iter a-list b-list sum-list c-in)
     (if (not (null? a-list))
@@ -502,12 +469,12 @@
 ;; (define b (list b1 b2 b3 b4))
 ;; (define s (list s1 s2 s3 s4))
 ;; (define c (make-wire))
-;; (probe 's1 s1)
+
+;; racket@> (probe 's1 s1)
 ;; (probe 's2 s2)
 ;; (probe 's3 s3)
 ;; (probe 's4 s4)
 ;; (probe 'c c)
-
 ;; s1 0 New-value = 0
 ;; s2 0 New-value = 0
 ;; s3 0 New-value = 0
@@ -516,6 +483,7 @@
 
 ;; racket@> (ripple-carry-adder a b s c)
 ;; 'ok
+
 ;; racket@> (set-signal! a1 1)
 ;; 'done
 ;; racket@> (propagate)
@@ -536,15 +504,22 @@
 
 
 ;;; ex 3.31
-; invert、and-gate、or-gateのいずれも
-; add-action!で与える手続きでafter-delayを経由して
-; add-to-agenda!でアジェンダに手続きを追加している
-;
-; よって、add-action!の実体であるaccept-action-procedure!で
-; 手続きを即座に実行しなければアジェンダに手続きが追加されず
-; propagateを実行してもシミュレーションが走らない
+
+;; 論理回路 ```inverter```、```and-gate```、```or-gate```はいずれも
+;; ```add-action!```に渡す手続きは内部で```after-delay```を実行する。
+;; この```after-delay```は内部で```add-to-agenda!```を実行して、
+;; アジェンダにアクション手続きを登録する。
+
+;; そこで```add-action!```の実体である```accept-action-procedure!```において、
+;; 追加されたアクション手続きを即座に走らせることで、
+;; アジェンダにアクション手続きが登録されるため、それらが必要となる。
+
+;; 仮に```accept-action-procedure!```で追加されたアクション手続きを
+;; 即座に走らせないようにすると、アジェンダに手続きが追加されないため
+;; ```propagate```を実行しても何も起きない。
 
 
 ;;; ex 3.32
-; 省略
+
+;; 省略
 
