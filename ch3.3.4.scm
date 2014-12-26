@@ -140,7 +140,7 @@
 				 (display (current-time *the-agenda*))
 				 (display " New-value = ")
 				 (display (get-signal wire))
-				 (newline))))w
+				 (newline))))
 
 
 ;;;; -----------------------------------
