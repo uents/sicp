@@ -64,6 +64,21 @@
 ;; 10009
 
 
+;;; 速度を測ってみる
+
+(define (enumerate-interval low high)
+  (if (> low high)
+      nil
+      (cons low (enumerate-interval (+ low 1) high))))
+
+;; racket@> (time (list-ref (enumerate-interval 10000 10000000) 10000))
+;; cpu time: 9206 real time: 10190 gc time: 6286
+;; 20000
+;; racket@> (time (stream-ref (stream-enumerate-interval 10000 10000000) 10000))
+;; cpu time: 6 real time: 8 gc time: 0
+;; 20000
+
+
 ;;;; ex3.50
 
 (define (mono-map proc items)
@@ -114,3 +129,4 @@
 ;; 						   (list->stream (list 1 2 3))
 ;; 						   (list->stream (list 4 5 6))))
 ;; '(5 7 9)
+
