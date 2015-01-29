@@ -130,3 +130,88 @@
 ;; 						   (list->stream (list 4 5 6))))
 ;; '(5 7 9)
 
+
+
+;;;; ex3.51
+
+(define (display-line x)
+  (display x)
+  (newline))
+
+(define (show x)
+  (display-line x)
+  x)
+
+(define x
+  (stream-map show
+			  (stream-enumerate-interval 0 10)))
+
+;; racket@> (stream->list x)
+;; 0
+;; 1
+;; 2
+;; 3
+;; 4
+;; 5
+;; 6
+;; 7
+;; 8
+;; 9
+;; 10
+;; '(0 1 2 3 4 5 6 7 8 9 10)
+;;
+;; racket@> (stream->list x)
+;; '(0 1 2 3 4 5 6 7 8 9 10)
+;; →2回目の呼び出しはメモ化された結果が変える
+
+;; 一度クリアしてから...
+;;
+;; racket@> (stream-ref x 5)
+;; 5
+;; 5
+;; racket@> (stream-ref x 7)
+;; 7
+;; 7
+;; →余計な評価は行わない
+
+;; racket@> (stream->list x)
+;; 0
+;; 1
+;; 2
+;; 3
+;; 4
+;; 6
+;; 8
+;; 9
+;; 10
+;; '(0 1 2 3 4 5 6 7 8 9 10)
+;; →5,7は評価済みなのでプリントされない
+
+
+;;;; ex3.52
+
+(define sum 0)
+
+(define (accum x)
+  (set! sum (+ x sum))
+  sum)
+
+(define seq
+  (stream-map accum
+			  (stream-enumerate-interval 1 20)))
+
+(define y (stream-filter even? seq))
+
+(define z
+  (stream-filter (lambda (x) (= (remainder x 5) 0))
+				 seq))
+
+;; このとき以下の実行結果はどうなるか
+;; (stream-ref y 7)
+;; (display-stream z)
+
+;; racket@> (stream-ref y 7)
+;; 136
+;; racket@> (display-stream z)
+;; 10 15 45 55 105 120 190 210
+
