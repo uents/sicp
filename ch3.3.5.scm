@@ -344,11 +344,44 @@
           x)
       (cv 32)))
 
-;: (define C (make-connector))
-;: (define F (celsius-fahrenheit-converter C))
-
 (define (c+ x y)
   (let ((z (make-connector)))
     (adder x y z)
     z))
+
+(define (c* x y)
+  (let ((z (make-connector)))
+	(multiplier x y z)
+	z))
+
+(define (c/ x y)
+  (let ((z (make-connector)))
+	(multiplier z y x)
+	z))
+
+(define (cv x)
+  (let ((z (make-connector)))
+	(constant x z)
+	z))
+
+
+;;; テスト
+;; racket@> (define C (make-connector))
+;; racket@> (define F (celsius-fahrenheit-converter C))
+;; racket@> (probe "C" C)
+;; #<procedure:...sicp/ch3.3.5.scm:134:2>
+;; racket@> (probe "F" F)
+;; #<procedure:...sicp/ch3.3.5.scm:134:2>
+;; racket@> (set-value! C 30 'user)
+;; Probe: C = 30
+;; Probe: F = 86
+;; 'done
+;; racket@> (forget-value! C 'user)
+;; Probe: C = ?
+;; Probe: F = ?
+;; 'done
+;; racket@> (set-value! F 72 'user)
+;; Probe: F = 72
+;; Probe: C = 200/9
+;; 'done
 
