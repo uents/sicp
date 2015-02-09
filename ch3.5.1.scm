@@ -1,6 +1,6 @@
 ;;;; #lang racket
 ;;;;
-;;;; SICP Chapter 3.5 Streams
+;;;; SICP Chapter 3.5.1 Streams
 ;;;;
 ;;;; Author: @uents on twitter
 ;;;;
@@ -16,32 +16,13 @@
 ;;;;
 ;;;; 3. Executes below commands on Racket REPL
 ;;;;
-;;;;   (load "ch3.5.scm")
+;;;;   (load "ch3.5.1.scm")
 ;;;;   ....
 ;;;;
 
-(load "misc.scm");
+(load "misc.scm")
+(load "streams.scm")
 
-;;; prime? を使うためにロード
-(require math/number-theory)
-
-;;; stream を使うためにロード
-(require racket/stream)
-
-
-;;; sicp の表記に合わせて再定義
-(define stream-null? stream-empty?)
-;;(define cons-stream stream-cons) ; 特殊形式なのでdefineで再定義できない
-(define car-stream stream-first)
-(define cdr-stream stream-rest)
-(define the-empty-stream empty-stream)
-  
-
-;; @@@TODO 再帰降下に対応する
-(define (display-stream s)
-  (stream-for-each
-   (lambda (x) (display (format "~a " x))) s)
-  (newline))
 
 (define (stream-enumerate-interval low high)
   (if (> low high)
@@ -52,15 +33,15 @@
 
 ;;; テスト
 ;; racket@> (define s (stream-enumerate-interval 10000 1000000))
-;; racket@> (car-stream s)
+;; racket@> (stream-car s)
 ;; 10000
-;; racket@> (car-stream (cdr-stream s))
+;; racket@> (stream-car (stream-cdr s))
 ;; 10001
 ;; 
 ;; racket@> (define primes (stream-filter prime? s))
-;; racket@> (car-stream primes)
+;; racket@> (stream-car primes)
 ;; 10007
-;; racket@> (car-stream (cdr-stream primes))
+;; racket@> (stream-car (stream-cdr primes))
 ;; 10009
 
 
@@ -110,18 +91,15 @@
   (if (stream-null? (car argstreams))
 	  the-empty-stream
 	  (stream-cons
-	   (apply proc (high-map car-stream argstreams))
+	   (apply proc (high-map stream-car argstreams))
 	   (apply high-stream-map
-			  (cons proc (high-map cdr-stream argstreams))))))
+			  (cons proc (high-map stream-cdr argstreams))))))
 
 (define (list->stream sequence)
   (if (null? sequence)
 	  nil
 	  (stream-cons (car sequence)
 				   (list->stream (cdr sequence)))))
-
-(define (add-streams x y)
-  (high-stream-map + x y))
 
 ;;; テスト
 ;; racket@> (stream->list
