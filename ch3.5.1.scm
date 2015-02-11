@@ -47,11 +47,6 @@
 
 ;;; 速度を測ってみる
 
-(define (enumerate-interval low high)
-  (if (> low high)
-      nil
-      (cons low (enumerate-interval (+ low 1) high))))
-
 ;; racket@> (time (list-ref (enumerate-interval 10000 10000000) 10000))
 ;; cpu time: 9206 real time: 10190 gc time: 6286
 ;; 20000
@@ -62,19 +57,7 @@
 
 ;;;; ex3.50
 
-(define (mono-map proc items)
-  (if (null? items)
-      nil
-      (cons (proc (car items))
-            (mono-map proc (cdr items)))))
-
-(define (high-map proc . argitems)
-  (if (null? (car argitems))
-	  nil
-	  (cons
-	   (apply proc (mono-map car argitems))
-	   (apply high-map
-			  (cons proc (mono-map cdr argitems))))))
+;;; ソースコードは streams.scmを参照
 
 ;;; テスト
 ;; racket@> (mono-map (lambda (n) (+ 1 n)) (list 1 2 3))
@@ -83,25 +66,7 @@
 ;; '(2 3 4)
 ;; racket@> (high-map + (list 1 2 3) (list 4 5 6))
 ;; '(5 7 9)
-
-
-;;; high-map を応用して stream-map を作る
-
-(define (high-stream-map proc . argstreams)
-  (if (stream-null? (car argstreams))
-	  the-empty-stream
-	  (stream-cons
-	   (apply proc (high-map stream-car argstreams))
-	   (apply high-stream-map
-			  (cons proc (high-map stream-cdr argstreams))))))
-
-(define (list->stream sequence)
-  (if (null? sequence)
-	  nil
-	  (stream-cons (car sequence)
-				   (list->stream (cdr sequence)))))
-
-;;; テスト
+;; 
 ;; racket@> (stream->list
 ;; 		  (high-stream-map +
 ;; 						   (list->stream (list 1 2 3))
