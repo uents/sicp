@@ -40,15 +40,12 @@
 ;; racket@> (time (stream-ref ones 1000000))
 ;; cpu time: 211 real time: 210 gc time: 0
 ;; 1
-;;
 ;; racket@> (stream->list ones)
 ;; => 返ってこない
 
 
-;; racketのstream-mapは複数のストリームを引数に取れない
-;; ex3.50で作成したhigh-stream-mapを使う
 (define integers
-  (stream-cons 1 (high-stream-map + ones integers)))
+  (stream-cons 1 (add-streams ones integers)))
 
 
 ;; フィボナッチ数
@@ -57,11 +54,11 @@
 
 (define fibs
   (stream-cons 0
-			   (stream-cons 1 (high-stream-map +
-											   fibs
-											   (stream-cdr fibs)))))
+			   (stream-cons 1 (add-streams
+							   fibs
+							   (stream-cdr fibs)))))
 
-;; racket@> (map (lambda (x) (stream-ref fibs x))
+;; racket@> (map (lambda (i) (stream-ref fibs i))
 ;; 			  (enumerate-interval 0 10))
 ;; => '(0 1 1 2 3 5 8 13 21 34 55)
 
@@ -80,7 +77,7 @@
 ;;; ex 3.53
 (define s (stream-cons 1 (add-streams s s)))
 
-;; racket@> (map (lambda (x) (stream-ref s x))
+;; racket@> (map (lambda (i) (stream-ref s i))
 ;;			  (enumerate-interval 0 10))
 ;; => '(1 2 4 8 16 32 64 128 256 512 1024)
 
