@@ -16,20 +16,41 @@
    (lambda (x) (display (format "~a " x))) s)
   (newline))
 
+(define (mono-map proc items)
+  (if (null? items)
+      nil
+      (cons (proc (car items))
+            (mono-map proc (cdr items)))))
+
+(define (high-map proc . argitems)
+  (if (null? (car argitems))
+	  nil
+	  (cons
+	   (apply proc (mono-map car argitems))
+	   (apply high-map
+			  (cons proc (mono-map cdr argitems))))))
+
+;;; ex 3.50
+(define (high-stream-map proc . argstreams)
+  (if (stream-null? (car argstreams))
+	  the-empty-stream
+	  (stream-cons
+	   (apply proc (high-map stream-car argstreams))
+	   (apply high-stream-map
+			  (cons proc (high-map stream-cdr argstreams))))))
+
 (define (list->stream sequence)
   (if (null? sequence)
 	  nil
 	  (stream-cons (car sequence)
 				   (list->stream (cdr sequence)))))
 
-(define (stream-map proc . argstreams)
-  (if (stream-null? (car argstreams))
-	  the-empty-stream
-	  (stream-cons
-	   (apply proc (map stream-car argstreams))
-	   (apply high-stream-map
-			  (cons proc (map stream-cdr argstreams))))))
+(define (scale-stream s factor)
+  (high-stream-map (lambda (x) (* x factor)) s))
 
-(define (add-stream s1 s2)
-  (stream-map + s1 s2))
+(define (add-streams s1 s2)
+  (high-stream-map + s1 s2))
+
+(define (mul-streams s1 s2)
+  (high-stream-map * s1 s2))
 
