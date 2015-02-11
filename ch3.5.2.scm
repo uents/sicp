@@ -24,7 +24,6 @@
 (load "streams.scm")
 
 
-
 (define ones
   (stream-cons 1 ones))
 
@@ -130,7 +129,7 @@
 ;; => '(1 2 3 4 5 6 8 9 10 12 15 16 18 20 24 25 27 30 32 36 40)
 
 
-;;; ex 3.57
+;;; ex 3.58
 
 ;; expandという名前はRacketの組み込みマクロと
 ;; 重複するので、別の名前で実装
@@ -140,4 +139,9 @@
    (quotient (* num radix) den)
    (my-expand (remainder (* num radix) den) den radix)))
 
- 
+
+;;; ex 3.59
+
+(define (integrate-series s)
+
+
