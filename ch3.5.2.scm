@@ -143,5 +143,38 @@
 ;;; ex 3.59
 
 (define (integrate-series s)
+  (define (iter s k)
+	(stream-cons (/ (stream-car s) k)
+				 (iter (stream-cdr s) (+ k 1))))
+  (iter s 1))
+
+;; racket@> (map (lambda (x) (stream-ref i x))
+;;			  (enumerate-interval 0 5))
+;; => '(1 1/2 1/3 1/4 1/5 1/6)
+
+(define exp-series
+  (stream-cons 1 (integrate-series exp-series)))
+
+;; racket@> (map (lambda (x) (stream-ref exp-series x))
+;; 			  (enumerate-interval 0 5))
+;; => '(1 1 1/2 1/6 1/24 1/120)
+
+(define cosine-series
+  (stream-cons 1 (scale-stream (integrate-series sine-series) -1)))
+
+(define sine-series
+  (stream-cons 0 (integrate-series cosine-series)))
+
+
+;;; ex 3.60
+
+;;(define (mul-series s1 s2)
+;;  (cons-stream ⟨??⟩ (add-streams ⟨??⟩ ⟨??⟩)))
+
+(define (mul-series s1 s2)
+  (stream-cons (* (stream-car s1) (stream-car s2))
+			   (add-streams (scale-stream (stream-cdr s2) (stream-car s1))
+							(mul-series (stream-cdr s1) s2))))
+
 
 
