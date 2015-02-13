@@ -169,12 +169,14 @@
 ;;; ex 3.60
 
 ;;(define (mul-series s1 s2)
-;;  (cons-stream ⟨??⟩ (add-streams ⟨??⟩ ⟨??⟩)))
+;;  (stream-cons ⟨??⟩ (add-streams ⟨??⟩ ⟨??⟩)))
 
 (define (mul-series s1 s2)
   (stream-cons (* (stream-car s1) (stream-car s2))
 			   (add-streams (scale-stream (stream-cdr s2) (stream-car s1))
 							(mul-series (stream-cdr s1) s2))))
 
-
+;; racket@> (map (lambda (i) (stream-ref (mul-series integers integers) i))
+;; 			  (enumerate-interval 0 5))
+;; => '(1 4 10 20 35 56)
 
