@@ -148,6 +148,7 @@
 				 (iter (stream-cdr s) (+ k 1))))
   (iter s 1))
 
+;; racket@> (define i (integrate-series ones))
 ;; racket@> (map (lambda (x) (stream-ref i x))
 ;;			  (enumerate-interval 0 5))
 ;; => '(1 1/2 1/3 1/4 1/5 1/6)
