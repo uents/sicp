@@ -35,9 +35,9 @@
   (if (stream-null? (car argstreams))
 	  the-empty-stream
 	  (stream-cons
-	   (apply proc (high-map stream-car argstreams))
+	   (apply proc (map stream-car argstreams))
 	   (apply high-stream-map
-			  (cons proc (high-map stream-cdr argstreams))))))
+			  (cons proc (map stream-cdr argstreams))))))
 
 (define (list->stream sequence)
   (if (null? sequence)
