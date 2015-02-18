@@ -23,6 +23,8 @@
 (load "misc.scm")
 (load "streams.scm")
 
+;; for using prime?
+(require math/number-theory)
 
 (define (stream-enumerate-interval low high)
   (if (> low high)
