@@ -145,9 +145,11 @@
            (iter (- trials-remaining 1) trials-passed))))
   (iter trials 0))
 
+(define (range low high x)
+  (+ low (modulo x (+ 1 (- high low)))))
+
 (define (random-in-range low high)
-  (let ((width (+ (- high low) 1)))
-	(+ low (modulo (rand) width))))
+  (range low high (rand)))
 
 (define (estimate-integral predicate x1 y1 x2 y2 trials)
   (let ((area (* (- x2 x1) (- y2 y1)))
@@ -163,15 +165,16 @@
 ; 		  (lambda (x y)
 ; 			(<= (+ (square (- x 5)) (square (- y 7))) (square 3)))
 ; 		  2 4 8 10 1000000)
-; => 21.000096
-
+; => 21.750012
+;
 ; racket@> (* (square 3) pi)
 ; 28.274333882308138			 
-
+;
 ; 精度がいまいちなのは小数の領域を拾っていないから
 
 ;;
-;; monte-carlo を使わないベタ書き版
+;; monte-carlo を使わないベタ書き版。
+;; 題意を汲み取れていないので、いまいちな解答
 ;;
 ;; (define (estimate-integral predicate x1 y1 x2 y2 trials)
 ;;   (define (iter remain passed)
