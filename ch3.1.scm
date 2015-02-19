@@ -118,34 +118,107 @@
 ; "Oops!"
 
 
+;;;; randの実装
+
+(define (rand-update x)
+  (modulo (+ (* 13 x) 47) 97))
+
+(define random-init 7)
+
+(define rand
+  (let ((x random-init))
+	(lambda ()
+	  (set! x (rand-update x))
+	  x)))
+
+
+
 ;;;; ex 3.5
 
+(define (monte-carlo trials experiment)
+  (define (iter trials-remaining trials-passed)
+    (cond ((= trials-remaining 0)
+           (/ (* trials-passed 1.0) trials)) ;;小数で返すように1.0を掛ける
+          ((experiment)
+           (iter (- trials-remaining 1) (+ trials-passed 1)))
+          (else
+           (iter (- trials-remaining 1) trials-passed))))
+  (iter trials 0))
+
 (define (random-in-range low high)
-  (let ((seed (+ (- high low) 1)))
-	(+ low (random seed))))
+  (let ((width (+ (- high low) 1)))
+	(+ low (modulo (rand) width))))
 
 (define (estimate-integral predicate x1 y1 x2 y2 trials)
-  (define (iter remain passed)
-	(let ((x (random-in-range x1 x2))
-		  (y (random-in-range y1 y2)))
-	  (cond ((= remain 0)
-			 (/ (* (- x2 x1) (- y2 y1) passed 1.0) trials))
-			((predicate x y)
-			 (iter (- remain 1) (+ passed 1)))
-			(else
-			 (iter (- remain 1) passed)))))
-  (iter trials 0))
+  (let ((area (* (- x2 x1) (- y2 y1)))
+		(passed-ratio (monte-carlo
+					   trials
+					   (lambda ()
+						 (let ((x (random-in-range x1 x2))
+							   (y (random-in-range y1 y2)))
+						   (predicate x y))))))
+	(* area passed-ratio)))
 
 ; racket@> (estimate-integral
 ; 		  (lambda (x y)
 ; 			(<= (+ (square (- x 5)) (square (- y 7))) (square 3)))
 ; 		  2 4 8 10 1000000)
-; 21.288636
+; => 21.000096
 
 ; racket@> (* (square 3) pi)
 ; 28.274333882308138			 
 
 ; 精度がいまいちなのは小数の領域を拾っていないから
+
+;;
+;; monte-carlo を使わないベタ書き版
+;;
+;; (define (estimate-integral predicate x1 y1 x2 y2 trials)
+;;   (define (iter remain passed)
+;; 	(let ((x (random-in-range x1 x2))
+;; 		  (y (random-in-range y1 y2)))
+;; 	  (cond ((= remain 0)
+;; 			 (/ (* (- x2 x1) (- y2 y1) passed 1.0) trials))
+;; 			((predicate x y)
+;; 			 (iter (- remain 1) (+ passed 1)))
+;; 			(else
+;; 			 (iter (- remain 1) passed)))))
+;;   (iter trials 0))
+
+
+
+;;; ex 3.6
+
+(define rand-ex
+  (let ((x random-init))
+	(define (generate)
+	  (set! x (rand-update x))
+	  x)
+	(define (reset)
+	  (set! x random-init)
+	  x)
+	(define (dispatch m)
+	  (cond ((eq? m 'generate) generate)
+			((eq? m 'reset) reset)
+			(else (error "Unknown request -- RAND" m))))
+	dispatch))
+
+;; racket@> ((rand-ex 'reset))
+;; => 7
+;; racket@> ((rand-ex 'generate))
+;; => 41
+;; racket@> ((rand-ex 'generate))
+;; => 95
+;; racket@> ((rand-ex 'generate))
+;; => 21
+;; racket@> ((rand-ex 'reset))
+;; => 7
+;; racket@> ((rand-ex 'generate))
+;; => 41
+;; racket@> ((rand-ex 'generate))
+;; => 95
+;; racket@> ((rand-ex 'generate))
+;; => 21
 
 
 ;;;; ex 3.7
