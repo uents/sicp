@@ -24,16 +24,12 @@
 (load "streams.scm")
 
 
-(define random-init 7)
-
+;; §3.1から転用
 (define (rand-update x)
   (modulo (+ (* 13 x) 47) 97))
 
-(define rand
-  (let ((x random-init))
-    (lambda ()
-      (set! x (rand-update x))
-      x)))
+(define random-init 7)
+
 
 (define random-numbers
   (stream-cons random-init
@@ -60,35 +56,37 @@
 ;; => '(#t #t #t #t #f #t #f #t #t #f #t #f #f #f #t #f #f #t #t #t #t)
 
 
-(define (monte-carlo experiment-stream passed failed)
+(define (monte-carlo-stream experiment-stream passed failed)
   (define (next passed failed)
     (stream-cons
-     (/ passed (+ passed failed))
-     (monte-carlo
+     (* (/ passed (+ passed failed) 1.0)) ;;小数にするため1.0を掛ける
+     (monte-carlo-stream
       (stream-cdr experiment-stream) passed failed)))
   (if (stream-car experiment-stream)
       (next (+ passed 1) failed)
       (next passed (+ failed 1))))
 
-(define pi
+(define pi-stream
    (stream-map (lambda (p) (sqrt (/ 6 p)))
-               (monte-carlo cesaro-stream 0 0)))
+               (monte-carlo-stream cesaro-stream 0 0)))
 
-;; racket@> (stream-ref pi 0)
+;; racket@> (stream-ref pi-stream 0)
 ;; => 2.449489742783178
-;; racket@> (stream-ref pi 100)
+;; racket@> (stream-ref pi-stream 100)
 ;; => 3.1780497164141406
-;; racket@> (stream-ref pi 1000)
+;; racket@> (stream-ref pi-stream 1000)
 ;; => 3.2041639575194445
-;; racket@> (stream-ref pi 10000)
+;; racket@> (stream-ref pi-stream 10000)
 ;; => 3.2073868966203145
-;; racket@> (stream-ref pi 100000)
+;; racket@> (stream-ref pi-stream 100000)
 ;; => 3.2071601019111857
-;; racket@> (stream-ref pi 1000000)
+;; racket@> (stream-ref pi-stream 1000000)
 ;; => 3.207137422841252
 
 
-;;; ex 3.6
+;;; ex 3.81
+
+;; rand-exはex 3.6を流用
 (define rand-ex
   (let ((x random-init))
 	(define (generate)
@@ -103,25 +101,6 @@
 			(else (error "Unknown request -- RAND" m))))
 	dispatch))
 
-;; racket@> ((rand-ex 'reset))
-;; => 7
-;; racket@> ((rand-ex 'generate))
-;; => 41
-;; racket@> ((rand-ex 'generate))
-;; => 95
-;; racket@> ((rand-ex 'generate))
-;; => 21
-;; racket@> ((rand-ex 'reset))
-;; => 7
-;; racket@> ((rand-ex 'generate))
-;; => 41
-;; racket@> ((rand-ex 'generate))
-;; => 95
-;; racket@> ((rand-ex 'generate))
-;; => 21
-
-
-;;; ex 3.81
 (define (rand-stream s)
   (let ((item (stream-car s)))
 	(stream-cons
@@ -142,20 +121,30 @@
 
 
 ;;; ex 3.82
-(define (random-in-range low high)
-  (let ((seed (+ (- high low) 1)))
-	(+ low (random seed))))
 
+(define (range low high x)
+  (+ low (modulo x (+ 1 (- high low)))))
 
 (define (random-in-range-stream low high)
-  (define ones (stream-cons 1 ones))
-  (stream-map
-   (lambda (i) (random-in-range low high)) ones))
+  (stream-map (lambda (x) (range low high x))
+			  random-numbers))
 
-;; racket@> (map (lambda (i) (stream-ref (random-in-range-stream 2 4) i))
+;; racket@> (map (lambda (i) (stream-ref (random-in-range-stream 2 8) i))
 ;; 			  (enumerate-interval 0 20))
-;; => '(2 3 3 4 2 3 4 3 2 4 3 3 2 4 2 2 2 4 4 4 4)
+;; => '(5 3 6 5 2 2 5 6 6 8 3 2 7 8 4 7 5 4 3 6 4)
 
+
+(define (estimate-integral-stream predicate x1 y1 x2 y2)
+  (let* ((area (* (- x2 x1) (- y2 y1)))
+		 (x-stream (random-in-range-stream x1 x2))
+		 (y-stream (random-in-range-stream y1 y2))
+		 (passed-ratio-stream (monte-carlo-stream
+							   (high-stream-map predicate
+												x-stream
+												y-stream)
+							   0 0)))
+	(scale-stream passed-ratio-stream area)))
+	
 
 ;(define (estimate-integral-ex predicate x1 y1 x2 y2)
 ;  (let ((x-stream (random-in-range-stream x1 x2))
