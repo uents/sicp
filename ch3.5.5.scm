@@ -146,7 +146,12 @@
 	(scale-stream passed-ratio-stream area)))
 	
 
-;(define (estimate-integral-ex predicate x1 y1 x2 y2)
-;  (let ((x-stream (random-in-range-stream x1 x2))
-;		(y-stream (random-in-range-stream y1 y2)))
-;	))
+;; racket@> (stream-ref s 100)
+;; => 25.306930693069305
+;; racket@> (stream-ref s 1000)
+;; => 25.858141858141856
+;; racket@> (stream-ref s 10000)
+;; => 25.867013298670134
+;; racket@> (stream-ref s 100000)
+;; => 25.875821241787584
+
