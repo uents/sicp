@@ -30,7 +30,6 @@
 
 (define random-init 7)
 
-
 (define random-numbers
   (stream-cons random-init
                (stream-map rand-update random-numbers)))
@@ -86,7 +85,7 @@
 
 ;;; ex 3.81
 
-;; rand-exはex 3.6を流用
+;; rand-exは問題3.6を流用
 (define rand-ex
   (let ((x random-init))
 	(define (generate)
@@ -110,11 +109,10 @@
 				((rand-ex 'reset))))
 	 (rand-stream (stream-cdr s)))))
 
-(define s
-  (rand-stream
-   (list->stream (list 100 'generate 'generate 'generate
-					   100 'generate 'generate 'generate))))
-
+;; racket@> (define s
+;; 		   (rand-stream
+;; 			(list->stream (list 100 'generate 'generate 'generate
+;; 								100 'generate 'generate 'generate))))
 ;; racket@> (map (lambda (i) (stream-ref s i))
 ;; 			  (enumerate-interval 0 7))
 ;; => '(100 86 1 60 100 86 1 60)
@@ -145,7 +143,10 @@
 							   0 0)))
 	(scale-stream passed-ratio-stream area)))
 	
-
+;; racket@> (define s (estimate-integral-stream
+;; 					(lambda (x y)
+;; 					  (<= (+ (square (- x 5)) (square (- y 7))) (square 3)))
+;; 					2 4 8 10))
 ;; racket@> (stream-ref s 100)
 ;; => 25.306930693069305
 ;; racket@> (stream-ref s 1000)
@@ -154,4 +155,5 @@
 ;; => 25.867013298670134
 ;; racket@> (stream-ref s 100000)
 ;; => 25.875821241787584
-
+;; racket@> (stream-ref s 1000000)
+;; => 25.875082124917874
