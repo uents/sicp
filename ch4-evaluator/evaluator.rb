@@ -46,21 +46,6 @@ def _apply(procedure, arguments)
   end
 end
 
-def cons(x, y)
-  [a] + b
-end
-
-def car(list)
-  list[0]
-end
-
-def cdr(list)
-  list[1..-1]
-end
-
-def pair?(list)
-  list.is_a?(Array) && list.length >= 2
-end
 
 # 手続きの引数
 def list_of_values(exps, env)
@@ -96,13 +81,15 @@ def eval_assignment(exp, env)
   var = assignment_variable(exp)
   value = _eval(assignment_value(exp), env)
   set_variable_value!(var, value, env)
+  :ok
 end
 
 # 定義
 def eval_definition(exp, env)
   var = definition_variable(exp)
   value = _eval(definition_value(exp), env)
-  definition_variable!(var, value, env)
+  define_variable!(var, value, env)
+  :ok
 end
 
 # 数値/文字列
@@ -139,7 +126,7 @@ def quoted?(exp)
 end
 
 def text_of_quotation(exp)
-  car(cdr(exp))
+  cadr(exp)
 end
 
 def tagged_list?(exp, tag)
@@ -151,3 +138,93 @@ def tagged_list?(exp, tag)
 end
 
 # 代入
+def assignment?(exp)
+  tagged_list?(exp, :set!)
+end  
+
+def assignment_variable(exp)
+  cadr(exp)
+end
+
+def assignment_value(exp)
+  caddr(exp)
+end
+
+# 定義
+def definition?(exp)
+  tagged_list?(exp, :define)
+end
+
+def definition_variable(exp)
+  if symbol?(cadr(exp))
+    cadr(exp)
+  else
+    caddr(exp)
+  end
+end
+
+def definition_value(exp)
+  if symbol?(cadr(exp))
+    caddr(exp)
+  else
+    params = cdadr(exp)
+    body = cddr(exp)
+    make_lambda(params, body)
+  end
+end
+
+# lambda式
+def lambda?(exp)
+  tagged_list?(exp, :lambda)
+end
+
+def lambda_parameters(exp)
+  cadr(exp)
+end
+
+def lambda_body(exp)
+  cddr(exp)
+end
+
+def make_lambda(params, body)
+  cons(:lambda, cons(params, body))
+end
+
+# if式
+def if?(exp)
+  tagged_list?(exp, :if)
+end
+
+def if_predicate(exp)
+  cadr(exp)
+end
+
+def if_consequent(exp)
+  caddr(exp)
+end
+
+def if_alternative(exp)
+  unless null?(cdddr(exp))
+    cadddr(exp)
+  else
+    :false
+  end
+end
+
+def make_if(predicate, consequent, alternative)
+  list(:if, predicate, consequent, alternative)
+end
+
+# begin式
+def begin?(exp)
+  tagged_list?(exp, :begin)
+end
+
+def begin_actions(exp)
+  cdr(exp)
+end
+
+def last_exp?(seq)
+  null?(cdr(seq))
+end
+
