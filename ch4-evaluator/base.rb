@@ -1,3 +1,45 @@
+# coding: utf-8
+
+## Extend modules and classes
+
+module Enumerable
+  def foldr(*args, &block)
+
+    case args.length
+    when 2
+      init, proc = args
+    when 1
+      if block_given?
+        init = args.first
+      else
+        init = false
+        proc = args.first
+      end
+    when 0
+      init = false
+    else
+      raise "..."
+    end
+
+    lst = self.clone
+    if init == false
+      init = self.last
+      lst.pop
+    end
+
+#    p "lst:" + lst.to_s + " init:" + init.to_s + " proc:" + proc.to_s + " block:" + block.to_s
+
+    memo = init
+    lst.reverse_each do |item|
+      if proc
+        memo = item.send(proc, memo)
+      else
+        memo = block.call(item, memo)
+      end
+    end      
+    memo
+  end
+end
 
 ## Pair Constructors and Selectors
 
@@ -22,14 +64,8 @@ def cdr(p)
 end
 
 def list(*v)
-  if v.empty?
-    nil
-  else
-    p "@@@"
-    cons(v.shift, list(v))
-  end
+  v.foldr(nil) { |x, y| cons(x, y) }
 end
-
 
 ## Pair Accessor Shorthands
 
@@ -41,12 +77,45 @@ def cadr(p)
   car(cdr(p))
 end
 
+def cdar(p)
+  cdr(car(p))
+end
+
 def cddr(p)
   cdr(cdr(p))
+end
+
+def caaar(p)
+  car(car(car(p)))
+end
+
+def caadr(p)
+  car(car(cdr(p)))
+end
+
+def cadar(p)
+  car(cdr(car(p)))
 end
 
 def caddr(p)
   car(cdr(cdr(p)))
 end
+
+def cdaar(p)
+  cdr(car(car(p)))
+end
+
+def cdadr(p)
+  cdr(car(cdr(p)))
+end
+
+def cddar(p)
+  cdr(cdr(car(p)))
+end
+
+def cdddr(p)
+  cdr(cdr(cdr(p)))
+end
+
 
 
