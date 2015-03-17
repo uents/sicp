@@ -12,17 +12,17 @@ module Enumerable
       if block_given?
         init = args.first
       else
-        init = false
+        init = :nil
         proc = args.first
       end
     when 0
-      init = false
+      init = :nil
     else
       raise "..."
     end
 
     lst = self.clone
-    if init == false
+    if init == :nil
       init = self.last
       lst.pop
     end
