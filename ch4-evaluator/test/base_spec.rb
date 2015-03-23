@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-load "./base.rb"
+require_relative "../base"
 
 describe Enumerable do
+
   before do
     @lst = [1,2,3]
   end
@@ -35,6 +36,8 @@ describe Enumerable do
   after do
   end
 end
+
+include Base
 
 describe Kernel do
   before do

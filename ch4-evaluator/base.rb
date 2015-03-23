@@ -41,81 +41,98 @@ module Enumerable
   end
 end
 
-## Pair Constructors and Selectors
 
-def pair?(p)
-  p.is_a?(Array) && p.length >= 2
+module Base
+
+  ## Pair Constructors and Selectors
+
+  def pair?(p)
+    p.is_a?(Array) && p.length >= 2
+  end
+
+  def null?(x)
+    x == nil
+  end
+
+  def cons(a, d)
+    [a].push(d)
+  end
+
+  def car(p)
+    p[0]
+  end
+
+  def cdr(p)
+    p[1..-1][0]
+  end
+
+  def list(*v)
+    v.foldr(nil) { |x, y| cons(x, y) }
+  end
+
+  ## Pair Accessor Shorthands
+
+  def caar(p)
+    car(car(p))
+  end
+
+  def cadr(p)
+    car(cdr(p))
+  end
+
+  def cdar(p)
+    cdr(car(p))
+  end
+
+  def cddr(p)
+    cdr(cdr(p))
+  end
+
+  def caaar(p)
+    car(car(car(p)))
+  end
+
+  def caadr(p)
+    car(car(cdr(p)))
+  end
+
+  def cadar(p)
+    car(cdr(car(p)))
+  end
+
+  def caddr(p)
+    car(cdr(cdr(p)))
+  end
+
+  def cdaar(p)
+    cdr(car(car(p)))
+  end
+
+  def cdadr(p)
+    cdr(car(cdr(p)))
+  end
+
+  def cddar(p)
+    cdr(cdr(car(p)))
+  end
+
+  def cdddr(p)
+    cdr(cdr(cdr(p)))
+  end
+
+
+  ###
+
+  def number?(exp)
+    exp.is_a?(Numeric)
+  end
+
+  def string?(exp)
+    exp.is_a?(String)
+  end
+
+  def symbol?(exp)
+    exp.is_a?(Symbol)
+  end
+
 end
-
-def null?(x)
-  x == nil
-end
-
-def cons(a, d)
-  [a].push(d)
-end
-
-def car(p)
-  p[0]
-end
-
-def cdr(p)
-  p[1..-1][0]
-end
-
-def list(*v)
-  v.foldr(nil) { |x, y| cons(x, y) }
-end
-
-## Pair Accessor Shorthands
-
-def caar(p)
-  car(car(p))
-end
-
-def cadr(p)
-  car(cdr(p))
-end
-
-def cdar(p)
-  cdr(car(p))
-end
-
-def cddr(p)
-  cdr(cdr(p))
-end
-
-def caaar(p)
-  car(car(car(p)))
-end
-
-def caadr(p)
-  car(car(cdr(p)))
-end
-
-def cadar(p)
-  car(cdr(car(p)))
-end
-
-def caddr(p)
-  car(cdr(cdr(p)))
-end
-
-def cdaar(p)
-  cdr(car(car(p)))
-end
-
-def cdadr(p)
-  cdr(car(cdr(p)))
-end
-
-def cddar(p)
-  cdr(cdr(car(p)))
-end
-
-def cdddr(p)
-  cdr(cdr(cdr(p)))
-end
-
-
-
