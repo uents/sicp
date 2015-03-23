@@ -66,7 +66,7 @@ def eval_if(exp, env)
   end
 end
 
-# シーケンス
+# 並び
 def eval_sequence(exps, env)
   if last_exp?(exps)
     _eval(first_exp(exps), env)
@@ -103,21 +103,14 @@ def self_evaluating?(exp)
   end
 end
 
-def number?(exp)
-  exp.is_a?(Numeric)
-end
-
-def string?(exp)
-  exp.is_a?(String)
-end
-
 # 変数
 def variable?(exp)
   symbol?(exp)
 end
 
-def symbol?(exp)
-  exp.is_a?(Symbol)
+# タグ付きリストのチェック
+def tagged_list?(exp, tag)
+  pair?(exp) && car(exp) == tag
 end
 
 # クオート
@@ -127,14 +120,6 @@ end
 
 def text_of_quotation(exp)
   cadr(exp)
-end
-
-def tagged_list?(exp, tag)
-  if pair?(exp)
-    car(exp) == tag
-  else
-    false
-  end
 end
 
 # 代入
@@ -228,3 +213,98 @@ def last_exp?(seq)
   null?(cdr(seq))
 end
 
+def first_exp(seq)
+  car(seq)
+end
+
+def rest_exps(seq)
+  cdr(seq)
+end
+
+def sequence_to_exp(seq)
+  if null?(seq)
+    seq
+  elsif last_exp?(seq)
+    first_exp(seq)
+  else
+    make_begin(seq)
+  end
+end
+
+def make_begin(seq)
+  cons(:begin, seq)
+end
+
+# 手続きの適用
+# 式(expression)のcarはオペレータ、cdrはオペランドのリスト
+def application?(exp)
+  pair?(exp)
+end
+
+def operator(exp)
+  car(exp)
+end
+
+def operands(exp)
+  cdr(exp)
+end
+
+def no_operands?(ops)
+  null?(ops)
+end
+
+def first_operand(ops)
+  car(ops)
+end
+
+def rest_operands(ops)
+  cdr(ops)
+end
+
+
+# 派生式
+# cond式はif式から派生できる
+
+def cond?(exp)
+  tagged_list?(exp, :cond)
+end
+
+def cond_clauses(exp)
+  cdr(exp)
+end
+
+def cond_else_clause?(clause)
+  cond_predicate(clause) == :else
+end
+
+def cond_predicate(clause)
+  car(clause)
+end
+
+def cond_actions(clause)
+  cdr(clause)
+end
+
+def cont_to_if(exp)
+  expand_clauses(cond_clauses(exp))
+end
+
+def expand_clauses(clauses)
+  if null?(clauses)
+    :false                # no else clause
+  else
+    first = car(clauses)
+    rest = cdr(clauses)
+    if cond_else_clause?(first)
+      if null?(rest)
+        sequence_to_exp(cond_actions(first))
+      else
+        raise "else clauses isn't last: cond_to_if " + clauses.to_s
+      end
+
+      make_if(cond_predicate(first)
+              sequence_to_exp(cond_actions(first))
+              expand_clauses(rest))
+    end                              
+  end
+end
