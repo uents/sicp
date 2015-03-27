@@ -44,6 +44,10 @@ end
 
 module Base
 
+  def true?(exp)
+    exp == :true
+  end
+
   ## Pair Constructors and Selectors
 
   def pair?(p)
@@ -120,6 +124,69 @@ module Base
     cdr(cdr(cdr(p)))
   end
 
+  def caaaar(p)
+    car(car(car(car(p))))
+  end
+
+  def caaadr(p)
+    car(car(car(cdr(p))))
+  end
+
+  def caadar(p)
+    car(car(cdr(car(p))))
+  end
+
+  def caaddr(p)
+    car(car(cdr(cdr(p))))
+  end
+
+  def cadaar(p)
+    car(cdr(car(car(p))))
+  end
+
+  def cadadr(p)
+    car(cdr(car(cdr(p))))
+  end
+
+  def caddar(p)
+    car(cdr(cdr(car(p))))
+  end
+
+  def cadddr(p)
+    car(cdr(cdr(cdr(p))))
+  end
+
+  def cdaaar(p)
+    cdr(car(car(car(p))))
+  end
+  
+  def cdaadr(p)
+    cdr(car(car(cdr(p))))
+  end
+
+  def cdadar(p)
+    cdr(car(cdr(car(p))))
+  end
+
+  def cdaddr(p)
+    cdr(car(cdr(cdr(p))))
+  end
+
+  def cddaar(p)
+    cdr(cdr(car(car(p))))
+  end
+
+  def cddadr(p)
+    cdr(cdr(car(cdr(p))))
+  end
+
+  def cdddar(p)
+    cdr(cdr(cdr(car(p))))
+  end
+
+  def cddddr(p)
+    cdr(cdr(cdr(cdr(p))))
+  end
 
   ###
 
