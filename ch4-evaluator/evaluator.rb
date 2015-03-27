@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-require_relative "base"
+load "base.rb"
 
 class Evaluator
   include Base
@@ -34,7 +34,7 @@ class Evaluator
       arguments = list_of_values(operands(exp), env)
       apply(procedure, arguments)
     else
-      raise "eval: unknown expression type: " + exp
+      raise "eval: unknown expression type: " + exp.to_s
     end
   end
 
@@ -57,7 +57,7 @@ class Evaluator
       nil
     else
       cons(eval(first_operand(exps), env),
-           list_of_values(rest_operand(exps), env))
+           list_of_values(rest_operands(exps), env))
     end
   end
 
@@ -312,5 +312,11 @@ class Evaluator
         make_if(predicate, consequent, alternative)
       end                              
     end
+  end
+
+  ### stub
+
+  def lookup_variable_value(var, env)
+    var
   end
 end
