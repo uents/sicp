@@ -44,6 +44,10 @@ end
 
 module Base
 
+  def eq?(a, b)
+    a == b
+  end
+
   def true?(exp)
     exp == :true
   end

@@ -27,8 +27,12 @@ class Evaluator
       exps = begin_actions(exp)
       eval_sequence(exps, env)
     elsif cond?(exp)
-      exp_if = cond_to_if(exp)
-      eval_if(exp_if, env)
+      eval(cond_to_if(exp), env)
+    # ex 4.4
+    elsif and?(exp)
+      eval_and(exp, env)
+    elsif or?(exp)
+      eval_or(exp, env)
     elsif application?(exp)
       procedure = eval(operator(exp), env)
       arguments = list_of_values(operands(exp), env)
@@ -61,7 +65,7 @@ class Evaluator
     end
   end
 
-  # 条件文
+  # if文
   def eval_if(exp, env)
     if true?(eval(if_predicate(exp), env))
       eval(if_consequent(exp), env)
@@ -278,7 +282,7 @@ class Evaluator
   end
 
   def cond_else_clause?(clause)
-    cond_predicate(clause) == :else
+    eq?(cond_predicate(clause), :else)
   end
 
   def cond_predicate(clause)
@@ -314,6 +318,29 @@ class Evaluator
     end
   end
 
+  ### ex 4.3
+
+  # and式
+  def and?(exp)
+    tagged_list?(exp, :and)
+  end
+  
+  def eval_and(exp, env)
+    def iter(exp, memo)
+      if null?(exp)
+        memo
+      else
+        if true?(car(exp))
+          iter(cdr(exp), car(exp))
+        else
+          :false
+        end
+      end
+    end
+    iter(exp, :true)
+  end
+  
+  
   ### stub
 
   def lookup_variable_value(var, env)
