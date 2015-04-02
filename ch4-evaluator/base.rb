@@ -4,7 +4,6 @@
 
 module Enumerable
   def foldr(*args, &block)
-
     case args.length
     when 2
       init, proc = args
@@ -42,17 +41,41 @@ module Enumerable
 end
 
 
+## Emulate racket/base module
+
 module Base
 
-  def eq?(a, b)
-    a == b
+  ## 4.1 Booleans and Equality
+
+  def not(v)
+    v == false
+  end
+  
+  def eq?(v1, v2)
+    v1.equal?(v2)
   end
 
-  def true?(exp)
-    exp == :true
+  ## 4.2 Numbers
+
+  def number?(exp)
+    exp.is_a?(Numeric)
   end
 
-  ## Pair Constructors and Selectors
+  ## 4.3 Strings
+  
+  def string?(exp)
+    exp.is_a?(String)
+  end
+
+  ## 4.6 Symbols?
+  
+  def symbol?(exp)
+    exp.is_a?(Symbol)
+  end
+
+  ## 4.9 Pairs and Lists
+  
+  ### Pair Constructors and Selectors
 
   def pair?(p)
     p.is_a?(Array) && p.length >= 2
@@ -78,7 +101,7 @@ module Base
     v.foldr(nil) { |x, y| cons(x, y) }
   end
 
-  ## Pair Accessor Shorthands
+  ### Pair Accessor Shorthands
 
   def caar(p)
     car(car(p))
@@ -190,20 +213,6 @@ module Base
 
   def cddddr(p)
     cdr(cdr(cdr(cdr(p))))
-  end
-
-  ###
-
-  def number?(exp)
-    exp.is_a?(Numeric)
-  end
-
-  def string?(exp)
-    exp.is_a?(String)
-  end
-
-  def symbol?(exp)
-    exp.is_a?(Symbol)
   end
 
 end

@@ -43,6 +43,37 @@ describe Kernel do
   before do
   end
 
+  it "not" do
+    expect(not(false)).to eq(true)
+    expect(not(true)).to eq(false)
+    expect(not(:we_have_no_bananas)).to eq(false)
+  end
+
+  it "eq?" do
+    expect(eq?(:yes, :yes)).to eq(true)
+    expect(eq?(:yes, :no)).to eq(false)
+    v = cons(1, 2)
+    expect(eq?(v, v)).to eq(true)
+    u = cons(1, 2)
+    expect(eq?(v, u)).to eq(false)
+    expect(eq?("zzz", "zzz")).to eq(false)
+  end
+
+  it "number?" do
+    expect(number?(1)).to eq(true)
+    expect(number?("hello")).to eq(false)
+  end
+
+  it "string?" do
+    expect(string?("Apple")).to eq(true)
+    expect(string?(:apple)).to eq(false)
+  end
+
+  it "symbol?" do
+    expect(symbol?(:Apple)).to eq(true)
+    expect(symbol?(10)).to eq(false)
+  end
+
   it "pair?" do
     expect(pair?(1)).to eq(false)
     expect(pair?(cons(1, 2))).to eq(true)
@@ -152,6 +183,90 @@ describe Kernel do
     x = cdddr(list(3, 2, 1))
     y = nil
     expect(x).to eq(y)
+  end
+
+  it "caaaar" do
+    x = caaaar(list(list(list(list(5, 4, 3, 2, 1), 6), 7), 8, 9))
+    y = 5
+    expect(x).to eq(y)
+  end
+
+  it "caaadr" do
+    x = caaadr(list(9, list(list(6, 5, 4, 3, 2, 1), 7), 8))
+    y = 6
+    expect(x).to eq(y)    
+  end
+
+  it "caadar" do
+    x = caadar(list(list(7, list(5, 4, 3, 2, 1), 6), 8, 9))
+    y = 5
+    expect(x).to eq(y)
+  end
+
+  it "caaddr" do
+    x = caaddr(list(9, 8, list(6, 5, 4, 3, 2, 1), 7))
+    y = 6
+    expect(x).to eq(y)
+  end
+
+  it "cadaar" do
+    x = cadaar(list(list(list(6, 5, 4, 3, 2, 1), 7), 8, 9))
+    y = 5
+    expect(x).to eq(y)
+  end
+
+  it "cadadr" do
+    x = cadadr(list(9, list(7, 6, 5, 4, 3, 2, 1), 8))
+    y = 6
+    expect(x).to eq(y)
+  end
+
+  it "caddar" do
+    x = caddar(list(list(7, 6, 5, 4, 3, 2, 1), 8, 9))
+    y = 5
+    expect(x).to eq(y)
+  end
+
+  it "cadddr" do
+    x = cadddr(list(4, 3, 2, 1))
+    y = 1
+    expect(x).to eq(y)    
+  end
+
+  it "cdaaar" do
+    x = cdaaar(list(list(list(list(5, 4, 3, 2, 1), 6), 7), 8, 9))
+    y = list(4, 3, 2, 1)
+    expect(x).to eq(y)
+  end
+
+  it "cdaadr" do
+    x = cdaadr(list(9, list(list(6, 5, 4, 3, 2, 1), 7), 8))
+    y = list(5, 4, 3, 2, 1)
+    expect(x).to eq(y)
+  end
+
+  it "cdaddr" do
+    x = cdaddr(list(9, 8, list(6, 5, 4, 3, 2, 1), 7))
+    y = list(5, 4, 3, 2, 1)
+    expect(x).to eq(y)    
+  end
+
+  it "cddaar" do
+    x = cddaar(list(list(list(6, 5, 4, 3, 2, 1), 7), 8, 9))
+    y = list(4, 3, 2, 1)
+    expect(x).to eq(y)
+  end
+
+  it "cdddar" do
+    x = cdddar(list(list(7, 6, 5, 4, 3, 2, 1), 8, 9))
+    y = list(4, 3, 2, 1)
+    expect(x).to eq(y)    
+  end
+  
+  it "cddddr" do
+    x = cddddr(list(4, 3, 2, 1))
+    y = nil
+    expect(x).to eq(y)    
   end
   
   after do
