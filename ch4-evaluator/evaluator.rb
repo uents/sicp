@@ -200,7 +200,7 @@ class Evaluator
     unless null?(cdddr(exp))
       cadddr(exp)
     else
-      :false
+      false
     end
   end
 
@@ -299,7 +299,7 @@ class Evaluator
 
   def expand_clauses(clauses)
     if null?(clauses)
-      :false                # no else clause
+      false                # no else clause
     else
       first = car(clauses)
       rest = cdr(clauses)
@@ -333,11 +333,11 @@ class Evaluator
         if true?(car(exp))
           iter(cdr(exp), car(exp))
         else
-          :false
+          false
         end
       end
     end
-    iter(exp, :true)
+    iter(exp, true)
   end
   
   
