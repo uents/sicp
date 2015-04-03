@@ -6,6 +6,8 @@ load "base.rb"
 class Evaluator
   include Base
 
+  ## 4.1.1 評価機の核
+  
   def eval(exp, env)
     if self_evaluating?(exp)
       exp
@@ -28,11 +30,13 @@ class Evaluator
       eval_sequence(exps, env)
     elsif cond?(exp)
       eval(cond_to_if(exp), env)
-    # ex 4.4
+
+    #### ex 4.4
     elsif and?(exp)
       eval_and(exp, env)
     elsif or?(exp)
       eval_or(exp, env)
+      
     elsif application?(exp)
       procedure = eval(operator(exp), env)
       arguments = list_of_values(operands(exp), env)
@@ -55,7 +59,7 @@ class Evaluator
     end
   end
 
-  # 手続きの引数
+  #### 手続きの引数
   def list_of_values(exps, env)
     if no_operands?(exps)
       nil
@@ -65,7 +69,7 @@ class Evaluator
     end
   end
 
-  # if文
+  #### if文
   def eval_if(exp, env)
     if true?(eval(if_predicate(exp), env))
       eval(if_consequent(exp), env)
@@ -74,7 +78,7 @@ class Evaluator
     end
   end
 
-  # 並び
+  #### 並び
   def eval_sequence(exps, env)
     if last_exp?(exps)
       eval(first_exp(exps), env)
@@ -84,7 +88,7 @@ class Evaluator
     end
   end
 
-  # 代入
+  #### 代入
   def eval_assignment(exp, env)
     var = assignment_variable(exp)
     value = eval(assignment_value(exp), env)
@@ -92,7 +96,7 @@ class Evaluator
     :ok
   end
 
-  # 定義
+  #### 定義
   def eval_definition(exp, env)
     var = definition_variable(exp)
     value = eval(definition_value(exp), env)
@@ -100,7 +104,10 @@ class Evaluator
     :ok
   end
 
-  # 数値/文字列
+  
+  ## 4.1.2 式の表現
+  
+  #### 数値/文字列
   def self_evaluating?(exp)
     if number?(exp)
       true
@@ -111,17 +118,17 @@ class Evaluator
     end
   end
 
-  # 変数
+  #### 変数
   def variable?(exp)
     symbol?(exp)
   end
 
-  # タグ付きリストのチェック
+  #### タグ付きリストのチェック
   def tagged_list?(exp, tag)
     pair?(exp) && car(exp) == tag
   end
 
-  # クオート
+  #### クオート
   def quoted?(exp)
     tagged_list?(exp, :quote)
   end
@@ -130,7 +137,7 @@ class Evaluator
     cadr(exp)
   end
 
-  # 代入
+  #### 代入
   def assignment?(exp)
     tagged_list?(exp, :set!)
   end  
@@ -143,7 +150,7 @@ class Evaluator
     caddr(exp)
   end
 
-  # 定義
+  #### 定義
   def definition?(exp)
     tagged_list?(exp, :define)
   end
@@ -166,7 +173,7 @@ class Evaluator
     end
   end
 
-  # lambda式
+  #### lambda式
   def lambda?(exp)
     tagged_list?(exp, :lambda)
   end
@@ -183,7 +190,7 @@ class Evaluator
     cons(:lambda, cons(params, body))
   end
 
-  # if式
+  #### if
   def if?(exp)
     tagged_list?(exp, :if)
   end
@@ -208,7 +215,7 @@ class Evaluator
     list(:if, predicate, consequent, alternative)
   end
 
-  # begin式
+  #### begin
   def begin?(exp)
     tagged_list?(exp, :begin)
   end
@@ -243,8 +250,8 @@ class Evaluator
     cons(:begin, seq)
   end
 
-  # 手続きの適用
-  # 式(expression)のcarはオペレータ、cdrはオペランドのリスト
+  #### 手続きの適用
+  #### 式(expression)のcarはオペレータ、cdrはオペランドのリスト
   def application?(exp)
     pair?(exp)
   end
@@ -270,9 +277,9 @@ class Evaluator
   end
 
 
-  # 派生式
-  # cond式はif式から派生できる
+  ### 派生式
 
+  #### cond (ifから派生できる)
   def cond?(exp)
     tagged_list?(exp, :cond)
   end
@@ -318,9 +325,9 @@ class Evaluator
     end
   end
 
-  ### ex 4.3
+  #### ex 4.3
 
-  # and式
+  ##### and
   def and?(exp)
     tagged_list?(exp, :and)
   end
@@ -339,10 +346,29 @@ class Evaluator
     end
     iter(exp, true)
   end
-  
-  
-  ### stub
 
+  #### or
+  def or?(exp)
+    tagged_list?(exp, :or)
+  end
+
+  def eval_or(exp, env)
+
+  end
+
+
+  ## 4.1.3 
+
+  ### 述語のテスト
+  def true?(x)
+    not(eq?(x, false))
+  end
+
+  def false?(x)
+    eq?(x, false)
+  end
+  
+  ### 環境に対する操作
   def lookup_variable_value(var, env)
     var
   end
