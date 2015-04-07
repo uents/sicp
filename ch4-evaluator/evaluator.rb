@@ -242,11 +242,76 @@ class Evaluator
   end
 
   #### 手続きの適用
+  def application?(exp)
+    exp.is_a?(Array) && exp.length >= 2
+  end
 
+  def operator(exp)
+    exp.first
+  end
+
+  def operands(exp)
+    exp.rest
+  end
+
+  def no_operands?(ops)
+    ops == nil
+  end
+
+  def first_operand(ops)
+    ops.first
+  end
+
+  def rest_operands(exp)
+    ops.rest
+  end
+  
   
   ### 派生式
 
   #### cond (ifから派生)
-  
+  def cond?(exp)
+    tagged_list?(exp, :cond)
+  end
 
+  def cond_clauses(exp)
+    exp.rest
+  end
+
+  def cond_else_clause?(calause)
+    cond_predicate(clause) == :else
+  end
+
+  def cond_predicate(clause)
+    clause.first
+  end
+
+  def cond_actions(clause)
+    clause.rest.first
+  end
+
+  def cond_to_if(exp)
+    expand_clauses(cond_clauses(exp))
+  end
+
+  def expand_clauses(clauses)
+    if clauses == nil
+      false                # no else clause
+    else
+      first = clauses.first
+      rest = clauses.rest
+      if cond_else_clause?(first)
+        if rest == nil
+          sequence_to_exp(cond_actions(first))
+        else
+          raise "else clauses isn't last: cond_to_if " + clauses.to_s
+        end
+
+        predicate = cond_predicate(first)
+        consequent = sequence_to_exp(cond_actions(first))
+        alternative = expand_clauses(rest)
+        make_if(predicate, consequent, alternative)
+      end
+    end
+  end
 end
