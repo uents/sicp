@@ -1,13 +1,10 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-load "base.rb"
-
 class Evaluator
-  include Base
-
   ## 4.1.1 評価機の核
-  
+
+  #### eval
   def eval(exp, env)
     if self_evaluating?(exp)
       exp
@@ -30,13 +27,6 @@ class Evaluator
       eval_sequence(exps, env)
     elsif cond?(exp)
       eval(cond_to_if(exp), env)
-
-    #### ex 4.4
-    elsif and?(exp)
-      eval_and(exp, env)
-    elsif or?(exp)
-      eval_or(exp, env)
-      
     elsif application?(exp)
       procedure = eval(operator(exp), env)
       arguments = list_of_values(operands(exp), env)
@@ -46,6 +36,7 @@ class Evaluator
     end
   end
 
+  #### apply
   def apply(procedure, arguments)
     if primitive_procedure?(procedure)
       apply_primitive_prodecure(procedure, arguments)
@@ -64,14 +55,13 @@ class Evaluator
     if no_operands?(exps)
       nil
     else
-      cons(eval(first_operand(exps), env),
-           list_of_values(rest_operands(exps), env))
+      exps.map { |exp| eval(exp, env) }
     end
   end
 
-  #### if文
+  #### if
   def eval_if(exp, env)
-    if true?(eval(if_predicate(exp), env))
+    if eval(if_predicate(exp), env)
       eval(if_consequent(exp), env)
     else
       eval(if_alternative(exp), env)
@@ -104,14 +94,14 @@ class Evaluator
     :ok
   end
 
-  
-  ## 4.1.2 式の表現
-  
+
+  ## 4.1.2 式の定義
+
   #### 数値/文字列
   def self_evaluating?(exp)
-    if number?(exp)
+    if exp.is_a?(Number)
       true
-    elsif string?(exp)
+    elsif exp.is_a?(String)
       true
     else
       false
@@ -125,7 +115,7 @@ class Evaluator
 
   #### タグ付きリストのチェック
   def tagged_list?(exp, tag)
-    pair?(exp) && car(exp) == tag
+    exp.is_a?(Array) && exp.first == tag
   end
 
   #### クオート
@@ -134,7 +124,7 @@ class Evaluator
   end
 
   def text_of_quotation(exp)
-    cadr(exp)
+    exp.rest
   end
 
   #### 代入
@@ -143,11 +133,11 @@ class Evaluator
   end  
 
   def assignment_variable(exp)
-    cadr(exp)
+    exp.rest.first
   end
 
   def assignment_value(exp)
-    caddr(exp)
+    exp.rest.rest.first
   end
 
   #### 定義
@@ -156,38 +146,38 @@ class Evaluator
   end
 
   def definition_variable(exp)
-    if symbol?(cadr(exp))
-      cadr(exp)
-    else
-      caddr(exp)
+    if symbol?(exp.rest.first) # 変数定義
+      exp.rest.first
+    else                       # 手続きを定義
+      exp.rest.first.first
     end
   end
 
   def definition_value(exp)
-    if symbol?(cadr(exp))
-      caddr(exp)
+    if symbol?(exp.first)
+      exp.rest.first
     else
-      params = cdadr(exp)
-      body = cddr(exp)
+      params = exp.rest.first.rest
+      body = exp.rest.rest.first
       make_lambda(params, body)
     end
   end
 
-  #### lambda式
+  #### lambda
   def lambda?(exp)
     tagged_list?(exp, :lambda)
   end
 
   def lambda_parameters(exp)
-    cadr(exp)
+    exp.rest.first
   end
 
   def lambda_body(exp)
-    cddr(exp)
+    exp.rest.rest.first
   end
 
   def make_lambda(params, body)
-    cons(:lambda, cons(params, body))
+    [:lambda, params, body]
   end
 
   #### if
@@ -196,23 +186,36 @@ class Evaluator
   end
 
   def if_predicate(exp)
-    cadr(exp)
+    exp.rest.first
   end
 
   def if_consequent(exp)
-    caddr(exp)
+    exp.rest.rest.first
   end
 
   def if_alternative(exp)
-    unless null?(cdddr(exp))
-      cadddr(exp)
+    unless exp.rest.rest.rest.first
+      exp.rest.rest.rest.first
     else
       false
     end
   end
 
   def make_if(predicate, consequent, alternative)
-    list(:if, predicate, consequent, alternative)
+    [:if, predicate, consequent, alternative]
+  end
+
+  #### 並び
+  def last_exp?(exps)
+    exps.rest == nil
+  end
+
+  def first_exp(exps)
+    exps.first
+  end
+
+  def rest_exps(exps)
+    exps.rest
   end
 
   #### begin
@@ -221,23 +224,11 @@ class Evaluator
   end
 
   def begin_actions(exp)
-    cdr(exp)
-  end
-
-  def last_exp?(seq)
-    null?(cdr(seq))
-  end
-
-  def first_exp(seq)
-    car(seq)
-  end
-
-  def rest_exps(seq)
-    cdr(seq)
+    exp.rest
   end
 
   def sequence_to_exp(seq)
-    if null?(seq)
+    if seq == nil
       seq
     elsif last_exp?(seq)
       first_exp(seq)
@@ -247,129 +238,15 @@ class Evaluator
   end
 
   def make_begin(seq)
-    cons(:begin, seq)
+    [:begin] + seq
   end
 
   #### 手続きの適用
-  #### 式(expression)のcarはオペレータ、cdrはオペランドのリスト
-  def application?(exp)
-    pair?(exp)
-  end
 
-  def operator(exp)
-    car(exp)
-  end
-
-  def operands(exp)
-    cdr(exp)
-  end
-
-  def no_operands?(ops)
-    null?(ops)
-  end
-
-  def first_operand(ops)
-    car(ops)
-  end
-
-  def rest_operands(ops)
-    cdr(ops)
-  end
-
-
+  
   ### 派生式
 
-  #### cond (ifから派生できる)
-  def cond?(exp)
-    tagged_list?(exp, :cond)
-  end
-
-  def cond_clauses(exp)
-    cdr(exp)
-  end
-
-  def cond_else_clause?(clause)
-    eq?(cond_predicate(clause), :else)
-  end
-
-  def cond_predicate(clause)
-    car(clause)
-  end
-
-  def cond_actions(clause)
-    cdr(clause)
-  end
-
-  def cond_to_if(exp)
-    expand_clauses(cond_clauses(exp))
-  end
-
-  def expand_clauses(clauses)
-    if null?(clauses)
-      false                # no else clause
-    else
-      first = car(clauses)
-      rest = cdr(clauses)
-      if cond_else_clause?(first)
-        if null?(rest)
-          sequence_to_exp(cond_actions(first))
-        else
-          raise "else clauses isn't last: cond_to_if " + clauses.to_s
-        end
-
-        predicate = cond_predicate(first)
-        consequent = sequence_to_exp(cond_actions(first))
-        alternative = expand_clauses(rest)
-        make_if(predicate, consequent, alternative)
-      end                              
-    end
-  end
-
-  #### ex 4.3
-
-  ##### and
-  def and?(exp)
-    tagged_list?(exp, :and)
-  end
+  #### cond (ifから派生)
   
-  def eval_and(exp, env)
-    def iter(exp, memo)
-      if null?(exp)
-        memo
-      else
-        if true?(car(exp))
-          iter(cdr(exp), car(exp))
-        else
-          false
-        end
-      end
-    end
-    iter(exp, true)
-  end
 
-  #### or
-  def or?(exp)
-    tagged_list?(exp, :or)
-  end
-
-  def eval_or(exp, env)
-
-  end
-
-
-  ## 4.1.3 
-
-  ### 述語のテスト
-  def true?(x)
-    not(eq?(x, false))
-  end
-
-  def false?(x)
-    eq?(x, false)
-  end
-  
-  ### 環境に対する操作
-  def lookup_variable_value(var, env)
-    var
-  end
 end
