@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+require_relative "./base"
+
 class Evaluator
   ## 4.1.1 評価機の核
 
@@ -99,7 +101,7 @@ class Evaluator
 
   #### 数値/文字列
   def self_evaluating?(exp)
-    if exp.is_a?(Number)
+    if exp.is_a?(Numeric)
       true
     elsif exp.is_a?(String)
       true
@@ -110,7 +112,7 @@ class Evaluator
 
   #### 変数
   def variable?(exp)
-    symbol?(exp)
+    exp.is_a?(Symbol)
   end
 
   #### タグ付きリストのチェック
@@ -194,7 +196,7 @@ class Evaluator
   end
 
   def if_alternative(exp)
-    unless exp.rest.rest.rest.first
+    if exp.rest.rest.rest.first
       exp.rest.rest.rest.first
     else
       false
@@ -207,7 +209,7 @@ class Evaluator
 
   #### 並び
   def last_exp?(exps)
-    exps.rest == nil
+    exps.empty?
   end
 
   def first_exp(exps)
@@ -255,7 +257,7 @@ class Evaluator
   end
 
   def no_operands?(ops)
-    ops == nil
+    ops.empty?
   end
 
   def first_operand(ops)
@@ -278,7 +280,7 @@ class Evaluator
     exp.rest
   end
 
-  def cond_else_clause?(calause)
+  def cond_else_clause?(clause)
     cond_predicate(clause) == :else
   end
 
@@ -287,7 +289,7 @@ class Evaluator
   end
 
   def cond_actions(clause)
-    clause.rest.first
+    clause.rest
   end
 
   def cond_to_if(exp)
@@ -295,18 +297,19 @@ class Evaluator
   end
 
   def expand_clauses(clauses)
-    if clauses == nil
+    if clauses.empty?
       false                # no else clause
     else
       first = clauses.first
       rest = clauses.rest
+
       if cond_else_clause?(first)
-        if rest == nil
+        if rest.empty?
           sequence_to_exp(cond_actions(first))
         else
           raise "else clauses isn't last: cond_to_if " + clauses.to_s
         end
-
+      else
         predicate = cond_predicate(first)
         consequent = sequence_to_exp(cond_actions(first))
         alternative = expand_clauses(rest)
