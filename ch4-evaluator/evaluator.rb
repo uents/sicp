@@ -29,6 +29,11 @@ class Evaluator
       eval_sequence(exps, env)
     elsif cond?(exp)
       eval(cond_to_if(exp), env)
+    #### ex 4.4
+    elsif and?(exp)
+      eval_and(exp, env)
+    elsif or?(exp)
+      eval_or(exp, env)
     elsif application?(exp)
       procedure = eval(operator(exp), env)
       arguments = list_of_values(operands(exp), env)
@@ -268,10 +273,7 @@ class Evaluator
     ops.rest
   end
   
-  
-  ### 派生式
-
-  #### cond (ifから派生)
+  #### cond
   def cond?(exp)
     tagged_list?(exp, :cond)
   end
@@ -317,4 +319,57 @@ class Evaluator
       end
     end
   end
+
+  #### ex 4.4
+  def and?(exp)
+    tagged_list?(exp, :and)
+  end
+  
+  def eval_and(exps, env)
+    if exps.rest.empty?
+      eval(:true, env)
+    else
+      exps.rest.each do |exp|
+        if false?(eval(exp, env))
+          return eval(:false, env)
+        end
+      end
+      exps.rest.last
+    end
+  end
+    
+  def or?(exp)
+    tagged_list?(exp, :or)
+  end
+
+  def eval_or(exps, env)
+    if exps.rest.empty?
+      eval(:false, env)
+    else
+      exps.rest.each do |exp|
+        unless false?(eval(exp, env))
+          return eval(exp, env)
+        end
+      end
+      eval(:false, env)
+    end
+  end
+
+  
+  ## 4.1.3
+
+  ### 述語のテスト
+  
+  def true?(x)
+    !false?(x)
+  end
+
+  def false?(x)
+    x.equal?(:false)
+  end
+
+  def lookup_variable_value(exp, env)
+    exp
+  end
+  
 end

@@ -30,7 +30,7 @@ describe Evaluator do
   end
 
   it "if expression" do
-    exp = [:if, [:eq?, :foo, true],
+    exp = [:if, [:eq?, :foo, :true],
            "foo",
            "bar"]
 
@@ -39,7 +39,7 @@ describe Evaluator do
     alternative = @e.if_alternative(exp)
     
     expect(@e.if?(exp)).to eq(true)
-    expect(predicate).to eq([:eq?, :foo, true])
+    expect(predicate).to eq([:eq?, :foo, :true])
     expect(consequent).to eq("foo")
     expect(alternative).to eq("bar")
     expect(@e.make_if(predicate, consequent, alternative)).to eq(exp)
@@ -47,41 +47,45 @@ describe Evaluator do
 
   it "cond_to_if" do
     exp = [:cond,
-           [[:eq?, :foo, true], "foo"],
-           [[:eq?, :bar, true], "bar"],
-           [[:eq?, :baz, true], "baz"]]
+           [[:eq?, :foo, :true], "foo"],
+           [[:eq?, :bar, :true], "bar"],
+           [[:eq?, :baz, :true], "baz"]]
 
     derived = [:if,
-               [:eq?, :foo, true],
+               [:eq?, :foo, :true],
                [:begin, "foo"],
                [:if,
-                [:eq?, :bar, true],
+                [:eq?, :bar, :true],
                 [:begin, "bar"],
                 [:if,
-                 [:eq?, :baz, true],
+                 [:eq?, :baz, :true],
                  [:begin, "baz"],
                  false]]]
     
     expect(@e.cond_to_if(exp)).to eq(derived)
     
     exp = [:cond,
-           [[:eq?, :foo, true], "foo"],
-           [[:eq?, :bar, true], "bar"],
-           [[:eq?, :baz, true], "baz"],
+           [[:eq?, :foo, :true], "foo"],
+           [[:eq?, :bar, :true], "bar"],
+           [[:eq?, :baz, :true], "baz"],
            [:else, "otherwise"]]
 
     
     derived = [:if,
-               [:eq?, :foo, true],
+               [:eq?, :foo, :true],
                [:begin, "foo"],
                [:if,
-                [:eq?, :bar, true],
+                [:eq?, :bar, :true],
                 [:begin, "bar"],
-                [:if, [:eq?, :baz, true],
+                [:if, [:eq?, :baz, :true],
                  [:begin, "baz"],
                  [:begin, "otherwise"]]]]
     
     expect(@e.cond_to_if(exp)).to eq(derived)
+  end
+
+  it "and" do
+
 
   end
 
