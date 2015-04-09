@@ -324,17 +324,23 @@ class Evaluator
   def and?(exp)
     tagged_list?(exp, :and)
   end
+
+  def and_clauses(exp)
+    exp.rest
+  end
   
-  def eval_and(exps, env)
-    if exps.rest.empty?
-      eval(:true, env)
+  def eval_and(exp, env)
+    clauses = and_clauses(exp)
+    
+    if clauses.empty?
+      true
     else
-      exps.rest.each do |exp|
-        if false?(eval(exp, env))
-          return eval(:false, env)
+      clauses.each do |clause|
+        if false?(eval(clause, env))
+          return false
         end
       end
-      exps.rest.last
+      eval(clauses.last, env)
     end
   end
     
@@ -342,18 +348,26 @@ class Evaluator
     tagged_list?(exp, :or)
   end
 
-  def eval_or(exps, env)
-    if exps.rest.empty?
-      eval(:false, env)
+  def or_clauses(exp)
+    exp.rest
+  end
+
+  def eval_or(exp, env)
+    clauses = or_clauses(exp)
+
+    if clauses.empty?
+      false
     else
-      exps.rest.each do |exp|
-        unless false?(eval(exp, env))
-          return eval(exp, env)
+      clauses.each do |clause|
+        unless false?(eval(clause, env))
+          return eval(clause, env)
         end
       end
-      eval(:false, env)
+      false
     end
   end
+
+  #### ex 4.6
 
   
   ## 4.1.3
@@ -365,11 +379,19 @@ class Evaluator
   end
 
   def false?(x)
-    x.equal?(:false)
+    x.equal?(false)
   end
 
   def lookup_variable_value(exp, env)
-    exp
+    # @@@TODO 暫定
+    case exp
+    when :true
+      true
+    when :false
+      false
+    else
+      exp
+    end
   end
   
 end

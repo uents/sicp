@@ -84,9 +84,36 @@ describe Evaluator do
     expect(@e.cond_to_if(exp)).to eq(derived)
   end
 
-  it "and" do
+  it "eval_and" do
+    env = {}
 
+    exp = [:and]
+    expect(@e.eval_and(exp, env)).to eq(true)
 
+    exp = [:and, 1]
+    expect(@e.eval_and(exp, env)).to eq(1)
+
+    exp = [:and, :true, 5]
+    expect(@e.eval_and(exp, env)).to eq(5)
+
+    exp = [:and, :false]
+    expect(@e.eval_and(exp, env)).to eq(false)
+  end
+
+  it "eval_or" do
+    env = {}
+
+    exp = [:or]
+    expect(@e.eval_or(exp, env)).to eq(false)
+
+    exp = [:or, 1]
+    expect(@e.eval_or(exp, env)).to eq(1)
+
+    exp = [:or, :false, 5]
+    expect(@e.eval_or(exp, env)).to eq(5)
+
+    exp = [:or, :false]
+    expect(@e.eval_or(exp, env)).to eq(false)
   end
 
   after do
