@@ -116,6 +116,35 @@ describe Evaluator do
     expect(@e.eval_or(exp, env)).to eq(false)
   end
 
+  it "let_to_combination" do
+    exp = [:let,
+           [[:var1, :exp1],
+            [:var2, :exp2],
+            [:var3, :exp3]],
+           :body]
+
+    derived = [[:lambda, [:var1, :var2, :var3],
+                :body],
+               :exp1, :exp2, :exp3]
+
+    expect(@e.let_to_combination(exp)).to eq(derived)
+  end
+
+  it "lets_to_nested_let" do
+    exp = [:lets,
+           [[:var1, :exp1],
+            [:var2, :exp2],
+            [:var3, :exp3]],
+           :body]
+
+    derived = [:let, [[:var1, :exp1]],
+               [:let, [[:var2, :exp2]],
+                [:let, [[:var3, :exp3]],
+                 :body]]]
+
+    expect(@e.lets_to_nested_let(exp)).to eq(derived)
+  end
+
   after do
   end
 end

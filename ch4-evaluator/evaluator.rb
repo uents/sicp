@@ -24,15 +24,18 @@ class Evaluator
       params = lambda_parameters(exp)
       body = lambda_body(exp)
       make_procedure(params, body, env)
+    elsif let?(exp) ## ex 4.6
+      eval(let_to_combination(exp), env)
+    elsif lets?(exp) ## ex 4.7
+      eval(lets_to_nested_let(exp), env)
     elsif begin?(exp)
       exps = begin_actions(exp)
       eval_sequence(exps, env)
     elsif cond?(exp)
       eval(cond_to_if(exp), env)
-    #### ex 4.4
-    elsif and?(exp)
+    elsif and?(exp) ## ex 4.4
       eval_and(exp, env)
-    elsif or?(exp)
+    elsif or?(exp)  ## ex 4.4
       eval_or(exp, env)
     elsif application?(exp)
       procedure = eval(operator(exp), env)
@@ -368,7 +371,65 @@ class Evaluator
   end
 
   #### ex 4.6
+  def let?(exp)
+    tagged_list?(exp, :let)
+  end
 
+  def let_variables(exp)
+    bindings = exp.rest.first
+    bindings.map do |pair|
+      pair.first
+    end
+  end
+
+  def let_expressions(exp)
+    bindings = exp.rest.first
+    bindings.map do |pair|
+      pair.last
+    end
+  end
+
+  def let_body(exp)
+    exp.rest.rest.first
+  end
+
+  def let_to_combination(exp)
+    variables = let_variables(exp)
+    expressions = let_expressions(exp)
+    body = let_body(exp)
+    [make_lambda(variables, body)] + expressions
+  end
+
+  #### ex 4.7
+  def lets?(exp)
+    tagged_list?(exp, :lets)
+  end
+
+  def lets_bindngs(exp)
+    exp.rest.first
+  end
+
+  def lets_body(exp)
+    exp.rest.rest.first
+  end
+
+  def lets_to_nested_let(exp)
+    bindings = lets_bindngs(exp)
+    body = lets_body(exp)
+
+    expand = ->(bindings) do
+      p bindings
+      if bindings.empty?
+        body
+      else
+        [:let, [bindings.first],
+         expand.call(bindings.rest)]
+      end
+    end
+
+    expand.call(bindings)
+  end
+  
   
   ## 4.1.3
 
