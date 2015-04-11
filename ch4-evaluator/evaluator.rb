@@ -312,7 +312,8 @@ class Evaluator
         if rest.empty?
           sequence_to_exp(cond_actions(first))
         else
-          raise "else clauses isn't last: cond_to_if " + clauses.to_s
+          raise "cond_to_if: else clauses isn't last " +
+                clauses.to_s
         end
       else
         predicate = cond_predicate(first)
@@ -375,15 +376,19 @@ class Evaluator
     tagged_list?(exp, :let)
   end
 
+  def let_bindings(exp)
+    exp.rest.first
+  end
+
   def let_variables(exp)
-    bindings = exp.rest.first
+    bindings = let_bindings(exp)
     bindings.map do |pair|
       pair.first
     end
   end
 
   def let_expressions(exp)
-    bindings = exp.rest.first
+    bindings = let_bindings(exp)
     bindings.map do |pair|
       pair.last
     end
@@ -418,7 +423,6 @@ class Evaluator
     body = lets_body(exp)
 
     expand = ->(bindings) do
-      p bindings
       if bindings.empty?
         body
       else
@@ -426,10 +430,70 @@ class Evaluator
          expand.call(bindings.rest)]
       end
     end
-
     expand.call(bindings)
   end
   
+  #### ex 4.10
+  def let?(exp)
+    tagged_list?(exp, :let)
+  end
+
+  def named_let?(exp)
+    !exp.rest.first.is_a?(Array)
+  end
+
+  def let_bindings(exp)
+    if named_let?(exp)
+      exp.rest.rest.first
+    else
+      exp.rest.first
+    end
+  end
+
+  def let_variables(exp)
+    bindings = let_bindings(exp)
+    bindings.map do |pair|
+      pair.first
+    end
+  end
+
+  def let_expressions(exp)
+    bindings = let_bindings(exp)
+    bindings.map do |pair|
+      pair.last
+    end
+  end
+
+  def let_body(exp)
+    if named_let?(exp)
+      exp.rest.rest.rest.first
+    else
+      exp.rest.rest.first
+    end
+  end
+
+  def let_var(exp)
+    if named_let?(exp)
+      exp.rest.first
+    else
+      false # no var clause
+    end
+  end
+
+  def let_to_combination(exp)
+    variables = let_variables(exp)
+    expressions = let_expressions(exp)
+    body = let_body(exp)
+    var = let_var(exp)
+
+    if named_let?(exp)
+      [:begin,
+       [:define, [var] + variables, body],
+       [var] + expressions]
+    else
+      [make_lambda(variables, body)] + expressions
+    end
+  end
   
   ## 4.1.3
 

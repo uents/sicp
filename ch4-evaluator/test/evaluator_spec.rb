@@ -145,6 +145,25 @@ describe Evaluator do
     expect(@e.lets_to_nested_let(exp)).to eq(derived)
   end
 
+  it "named_let_to_combination" do
+    exp = [:let, :fib_iter,
+           [[:a, 1],
+            [:b, 0],
+            [:count, :n]],
+           [:if, [:equal?, :count, 0],
+            :b,
+            [:fib_iter, [:+, :a, :b], :a, [:-, :count, 1]]]]
+
+    derived = [:begin,
+               [:define, [:fib_iter, :a, :b, :count],
+                [:if, [:equal?, :count, 0],
+                 :b,
+                 [:fib_iter, [:+, :a, :b], :a, [:-, :count, 1]]]],
+               [:fib_iter, 1, 0, :n]]
+
+    expect(@e.let_to_combination(exp)).to eq(derived)
+  end
+
   after do
   end
 end
