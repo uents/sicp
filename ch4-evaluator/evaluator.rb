@@ -433,7 +433,7 @@ class Evaluator
     expand.call(bindings)
   end
   
-  #### ex 4.10
+  #### ex 4.8
   def let?(exp)
     tagged_list?(exp, :let)
   end
