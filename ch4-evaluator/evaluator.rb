@@ -125,7 +125,7 @@ class Evaluator
 
   #### タグ付きリストのチェック
   def tagged_list?(exp, tag)
-    exp.is_a?(Array) && exp.first == tag
+    exp.is_a?(Array) && exp[0] == tag
   end
 
   #### クオート
@@ -143,11 +143,11 @@ class Evaluator
   end  
 
   def assignment_variable(exp)
-    exp.rest.first
+    exp[1]
   end
 
   def assignment_value(exp)
-    exp.rest.rest.first
+    exp[2]
   end
 
   #### 定義
@@ -157,18 +157,18 @@ class Evaluator
 
   def definition_variable(exp)
     if symbol?(exp.rest.first) # 変数定義
-      exp.rest.first
+      exp[1]
     else                       # 手続きを定義
-      exp.rest.first.first
+      exp[1][0]
     end
   end
 
   def definition_value(exp)
     if symbol?(exp.first)
-      exp.rest.first
+      exp[2]
     else
-      params = exp.rest.first.rest
-      body = exp.rest.rest.first
+      params = exp[1][1..-1]
+      body = exp[2]
       make_lambda(params, body)
     end
   end
@@ -179,11 +179,11 @@ class Evaluator
   end
 
   def lambda_parameters(exp)
-    exp.rest.first
+    exp[1]
   end
 
   def lambda_body(exp)
-    exp.rest.rest.first
+    exp[2]
   end
 
   def make_lambda(params, body)
@@ -196,16 +196,16 @@ class Evaluator
   end
 
   def if_predicate(exp)
-    exp.rest.first
+    exp[1]
   end
 
   def if_consequent(exp)
-    exp.rest.rest.first
+    exp[2]
   end
 
   def if_alternative(exp)
-    if exp.rest.rest.rest.first
-      exp.rest.rest.rest.first
+    if exp[3]
+      exp[3]
     else
       false
     end
@@ -221,11 +221,11 @@ class Evaluator
   end
 
   def first_exp(exps)
-    exps.first
+    exps[0]
   end
 
   def rest_exps(exps)
-    exps.rest
+    exps[1..-1]
   end
 
   #### begin
@@ -234,7 +234,7 @@ class Evaluator
   end
 
   def begin_actions(exp)
-    exp.rest
+    exp[1..-1]
   end
 
   def sequence_to_exp(seq)
@@ -257,11 +257,11 @@ class Evaluator
   end
 
   def operator(exp)
-    exp.first
+    exp[0]
   end
 
   def operands(exp)
-    exp.rest
+    exp[1..-1]
   end
 
   def no_operands?(ops)
@@ -269,11 +269,11 @@ class Evaluator
   end
 
   def first_operand(ops)
-    ops.first
+    ops[0]
   end
 
   def rest_operands(exp)
-    ops.rest
+    ops[1..-1]
   end
   
   #### cond
@@ -282,7 +282,7 @@ class Evaluator
   end
 
   def cond_clauses(exp)
-    exp.rest
+    exp[1..-1]
   end
 
   def cond_else_clause?(clause)
@@ -290,11 +290,11 @@ class Evaluator
   end
 
   def cond_predicate(clause)
-    clause.first
+    clause[0]
   end
 
   def cond_actions(clause)
-    clause.rest
+    clause[1..-1]
   end
 
   def cond_to_if(exp)
@@ -305,8 +305,8 @@ class Evaluator
     if clauses.empty?
       false                # no else clause
     else
-      first = clauses.first
-      rest = clauses.rest
+      first = clauses[0]
+      rest = clauses[1..-1]
 
       if cond_else_clause?(first)
         if rest.empty?
@@ -330,7 +330,7 @@ class Evaluator
   end
 
   def and_clauses(exp)
-    exp.rest
+    exp[1..-1]
   end
   
   def eval_and(exp, env)
@@ -353,7 +353,7 @@ class Evaluator
   end
 
   def or_clauses(exp)
-    exp.rest
+    exp[1..-1]
   end
 
   def eval_or(exp, env)
@@ -377,25 +377,25 @@ class Evaluator
   end
 
   def let_bindings(exp)
-    exp.rest.first
+    exp[1]
   end
 
   def let_variables(exp)
     bindings = let_bindings(exp)
     bindings.map do |pair|
-      pair.first
+      pair[0]
     end
   end
 
   def let_expressions(exp)
     bindings = let_bindings(exp)
     bindings.map do |pair|
-      pair.last
+      pair[1]
     end
   end
 
   def let_body(exp)
-    exp.rest.rest.first
+    exp[2]
   end
 
   def let_to_combination(exp)
@@ -411,11 +411,11 @@ class Evaluator
   end
 
   def lets_bindngs(exp)
-    exp.rest.first
+    exp[1]
   end
 
   def lets_body(exp)
-    exp.rest.rest.first
+    exp[2]
   end
 
   def lets_to_nested_let(exp)
@@ -426,8 +426,8 @@ class Evaluator
       if bindings.empty?
         body
       else
-        [:let, [bindings.first],
-         expand.call(bindings.rest)]
+        [:let, [bindings[0]],
+         expand.call(bindings[1..-1])]
       end
     end
     expand.call(bindings)
@@ -439,42 +439,42 @@ class Evaluator
   end
 
   def named_let?(exp)
-    !exp.rest.first.is_a?(Array)
+    !exp[1].is_a?(Array)
   end
 
   def let_bindings(exp)
     if named_let?(exp)
-      exp.rest.rest.first
+      exp[2]
     else
-      exp.rest.first
+      exp[1]
     end
   end
 
   def let_variables(exp)
     bindings = let_bindings(exp)
     bindings.map do |pair|
-      pair.first
+      pair[0]
     end
   end
 
   def let_expressions(exp)
     bindings = let_bindings(exp)
     bindings.map do |pair|
-      pair.last
+      pair[1]
     end
   end
 
   def let_body(exp)
     if named_let?(exp)
-      exp.rest.rest.rest.first
+      exp[3]
     else
-      exp.rest.rest.first
+      exp[2]
     end
   end
 
   def let_var(exp)
     if named_let?(exp)
-      exp.rest.first
+      exp[1]
     else
       false # no var clause
     end
