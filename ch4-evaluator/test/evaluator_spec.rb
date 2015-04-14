@@ -164,6 +164,26 @@ describe Evaluator do
     expect(@e.let_to_combination(exp)).to eq(derived)
   end
 
+  it "while_to_named_let" do
+    exp = [:while, [:<, :i, 10],
+           [:begin,
+            [:display, :i],
+            [:newline],
+            [:set!, :i, [:+, :i, 1]]]]
+
+    derived = [:let, :while_loop, [],
+               [:if, [:<, :i, 10],
+                [:begin,
+                 [:begin,
+                  [:display, :i],
+                  [:newline],
+                  [:set!, :i, [:+, :i, 1]]],
+                 [:while_loop]],
+                :false]]
+
+    expect(@e.while_to_named_let(exp)).to eq(derived)
+  end
+  
   after do
   end
 end

@@ -28,6 +28,8 @@ class Evaluator
       eval(let_to_combination(exp), env)
     elsif lets?(exp) ## ex 4.7
       eval(lets_to_nested_let(exp), env)
+    elsif while?(exp) ## ex 4.9
+      eval(while_to_named_let(exp), env)
     elsif begin?(exp)
       exps = begin_actions(exp)
       eval_sequence(exps, env)
@@ -494,11 +496,35 @@ class Evaluator
       [make_lambda(variables, body)] + expressions
     end
   end
+
+  #### 4.9
+  def while_to_named_let(exp)
+    predicate = while_predicate(exp)
+    body = while_body(exp)
+
+    [:let, :while_loop, [],
+     make_if(predicate,
+             [:begin,
+              body,
+              [:while_loop]],
+             :false)]
+  end
+
+  def while?(exp)
+    tagged_list?(exp, :while)
+  end
+
+  def while_predicate(exp)
+    exp[1]
+  end
+
+  def while_body(exp)
+    exp[2]
+  end
   
   ## 4.1.3
 
   ### 述語のテスト
-  
   def true?(x)
     !false?(x)
   end

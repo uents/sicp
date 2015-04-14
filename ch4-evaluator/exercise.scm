@@ -44,3 +44,24 @@
 		  (fib-iter (+ a b) a (- count 1))))
 	(fib-iter 1 0 n)))
 
+
+;;; ex 4.9
+
+(let ((i 0))
+  (while (< i 10)
+	(begin
+	  (display i)
+	  (newline)
+	  (set! i (+ i 1)))))
+
+(let ((i 0))
+  (let while-loop ()
+	(if (< i 10)
+		(begin
+		  (begin
+			(display i)
+			(newline)
+			(set! i (+ i 1)))
+		  (while-loop))
+		false)))
+		
