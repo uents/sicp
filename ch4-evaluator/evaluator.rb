@@ -61,7 +61,7 @@ class Evaluator
       raise "apply: unknown procedure type: " + procedure
     end
   end
-
+  
   #### 手続きの引数
   def list_of_values(exps, env)
     if no_operands?(exps)
@@ -71,7 +71,7 @@ class Evaluator
     end
   end
 
-  #### if
+  #### 条件式
   def eval_if(exp, env)
     if eval(if_predicate(exp), env)
       eval(if_consequent(exp), env)
@@ -82,11 +82,8 @@ class Evaluator
 
   #### 並び
   def eval_sequence(exps, env)
-    if last_exp?(exps)
-      eval(first_exp(exps), env)
-    else
-      eval(first_exp(exps), env)
-      eval_sequence(rest_exps(exps), env)
+    exps.each do |exp|
+      eval(exp, env)
     end
   end
 
