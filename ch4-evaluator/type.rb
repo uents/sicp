@@ -46,7 +46,7 @@ module Type
 
   class Quote < Object
     def initialize(operands)
-      @list = operands[0].map { |item| Translater.do(item) }
+      @list = operands[0].map { |item| Mapper.do(item) }
     end
 
     def eval(env)
@@ -56,8 +56,8 @@ module Type
 
   class Assignment < Object
     def initialize(operands)
-      @variable = Translater.do(operands[0])
-      @value = Translater.do(operands[1])      
+      @variable = Mapper.do(operands[0])
+      @value = Mapper.do(operands[1])      
     end
 
     def eval(env)
@@ -67,8 +67,8 @@ module Type
 
   class Definition < Object
     def initialize(operands)
-      @variable = Translater.do(operands[0])
-      @value = Translater.do(operands[1])      
+      @variable = Mapper.do(operands[0])
+      @value = Mapper.do(operands[1])      
     end
 
     def eval(env)
@@ -78,9 +78,9 @@ module Type
 
   class If < Object
     def initialize(operands)
-      @predicate = Translater.do(operands[0])
-      @consequent = Translater.do(operands[1])
-      @alternative = Translater.do(operands[2])
+      @predicate = Mapper.do(operands[0])
+      @consequent = Mapper.do(operands[1])
+      @alternative = Mapper.do(operands[2])
     end
 
     def eval(env)
@@ -90,8 +90,8 @@ module Type
 
   class Lambda < Object
     def initialize(operands)
-      @params = operands[0].map { |param| Translater.do(param) }
-      @body = Translater.do(operands[1])
+      @params = operands[0].map { |param| Mapper.do(param) }
+      @body = Mapper.do(operands[1])
     end
 
     def eval(env)
@@ -101,7 +101,7 @@ module Type
 
   class Begin < Object
     def initialize(operands)
-      @exps = operands[0].map { |operand| Translater.do(operand) }
+      @exps = operands[0].map { |operand| Mapper.do(operand) }
     end
 
     def eval(env)
@@ -116,7 +116,7 @@ module Type
       else # String
         @operator = operator
       end
-      @operands = operands.map { |operand| Translater.do(operand) }
+      @operands = operands.map { |operand| Mapper.do(operand) }
     end
 
     def eval(env)
@@ -144,7 +144,7 @@ module Type
   end
 end
 
-class Translater
+class Mapper
   include Type
   
   def self.do(nodes)
