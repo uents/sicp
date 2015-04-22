@@ -3,6 +3,15 @@
 
 module Type
   class Object
+#    attr_getter: type
+
+    def eval_sequence(exps, env)
+      if exps.class == Array
+        exps.each { |exp| exp.eval(env) }
+      else
+        exps.eval(env)
+      end
+    end
   end
   
   class Number < Object
@@ -10,8 +19,8 @@ module Type
       @value = value
     end
 
-    def eval()
-      value
+    def eval(env)
+      @value
     end
   end
 
@@ -20,8 +29,8 @@ module Type
       @value = value
     end
 
-    def eval()
-      value
+    def eval(env)
+      @value
     end
   end
 
@@ -30,90 +39,112 @@ module Type
       @name = name
     end
 
-    def eval()
-      name
+    def eval(env)
+      @name
     end    
   end
 
   class Quote < Object
     def initialize(operands)
-      @list = operands[0].map { |item| Translator.do(item) }
+      @list = operands[0].map { |item| Translater.do(item) }
     end
 
-    def eval()
+    def eval(env)
       @list
     end
   end
 
   class Assignment < Object
     def initialize(operands)
-      @variable = Translator.do(operands[0])
-      @value = Translator.do(operands[1])      
+      @variable = Translater.do(operands[0])
+      @value = Translater.do(operands[1])      
     end
 
-    def eval()
+    def eval(env)
       # todo
     end
   end
 
   class Definition < Object
     def initialize(operands)
-      @variable = Translator.do(operands[0])
-      @value = Translator.do(operands[1])      
+      @variable = Translater.do(operands[0])
+      @value = Translater.do(operands[1])      
     end
 
-    def eval()
+    def eval(env)
       # todo
     end
   end
 
   class If < Object
     def initialize(operands)
-      @predicate = Translator.do(operands[0])
-      @consequent = Translator.do(operands[1])
-      @alternative = Translator.do(operands[2])
+      @predicate = Translater.do(operands[0])
+      @consequent = Translater.do(operands[1])
+      @alternative = Translater.do(operands[2])
     end
 
-    def eval()
+    def eval(env)
       # todo
     end
   end
 
   class Lambda < Object
     def initialize(operands)
-      @params = operands[0].map { |param| Translator.do(param) }
-      p operands[1]
-      @body = Translator.do(operands[1])
+      @params = operands[0].map { |param| Translater.do(param) }
+      @body = Translater.do(operands[1])
     end
 
-    def eval()
-      # todo
+    def eval(env)
+      Procedure.new(@params, @body, env)
     end
   end
 
   class Begin < Object
     def initialize(operands)
-      @exps = operands[0].map { |operand| Translator.do(operand) }
+      @exps = operands[0].map { |operand| Translater.do(operand) }
     end
 
-    def eval()
+    def eval(env)
       # todo
     end
   end
 
   class Application < Object
     def initialize(operator, operands)
-      @operator = operator
-      @operands = operands.map { |operand| Translator.do(operand) }
+      if operator.class == Array
+        @operator = Lambda.new(operator[1..-1])
+      else # String
+        @operator = operator
+      end
+      @operands = operands.map { |operand| Translater.do(operand) }
     end
 
-    def eval()
-      # todo
+    def eval(env)
+      procedure = @operator.eval(env)
+      arguments = @operands.map { |operand| operand.eval(env) }
+      self.apply(procedure, arguments)
+    end
+
+    def apply(procedure, arguments)
+      procedure.eval(arguments)
+    end
+  end
+
+  class Procedure < Object
+    def initialize(params, body, env)
+      @params = params
+      @body = body
+      @env = env
+    end
+
+    def eval(arguments)
+#      env.extend(@params, arguments)
+      self.eval_sequence(@body, @env)
     end
   end
 end
 
-class Translator
+class Translater
   include Type
   
   def self.do(nodes)

@@ -5,11 +5,11 @@ load "type.rb"
 
 class Evaluator
   def initialize()
-
+    @environment = Environment.new
   end
 
-  def eval(exp, env)
-    exp
+  def eval(object)
+    object.eval(@environment)
   end
 end
 

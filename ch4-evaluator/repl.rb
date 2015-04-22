@@ -3,13 +3,14 @@
 
 load "parser.rb"
 load "type.rb"
-#load "evaluator.rb"
+load "evaluator.rb"
 
 class REPLServer
   @@in_prompt = '> '
   @@out_prompt = '=> '
 
   def initialize()
+    @evaluator = Evaluator.new
   end
 
   def run()
@@ -24,12 +25,11 @@ class REPLServer
       begin
         tokens = Parser.tokenize(input)
         nodes = Parser.parse(tokens)
-#        output = nodes
+#        p "nodes : " + nodes.to_s
+        object = Translater.do(nodes)
+#        p "object : " + object.to_s
 
-        exp = Translator.do(nodes)
-        output = exp
-        
-#        output = @evaluator.eval(nodes, @environment)
+        output = @evaluator.eval(object)
         
       rescue Exception => e
         p e.to_s
