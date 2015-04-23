@@ -46,7 +46,7 @@ module Type
 
   class Quote < Object
     def initialize(operands)
-      @list = operands[0].map { |item| Mapper.do(item) }
+      @list = operands[0].map { |item| Mapper.map(item) }
     end
 
     def eval(env)
@@ -56,8 +56,8 @@ module Type
 
   class Assignment < Object
     def initialize(operands)
-      @variable = Mapper.do(operands[0])
-      @value = Mapper.do(operands[1])      
+      @variable = Mapper.map(operands[0])
+      @value = Mapper.map(operands[1])      
     end
 
     def eval(env)
@@ -67,8 +67,8 @@ module Type
 
   class Definition < Object
     def initialize(operands)
-      @variable = Mapper.do(operands[0])
-      @value = Mapper.do(operands[1])      
+      @variable = Mapper.map(operands[0])
+      @value = Mapper.map(operands[1])      
     end
 
     def eval(env)
@@ -78,9 +78,9 @@ module Type
 
   class If < Object
     def initialize(operands)
-      @predicate = Mapper.do(operands[0])
-      @consequent = Mapper.do(operands[1])
-      @alternative = Mapper.do(operands[2])
+      @predicate = Mapper.map(operands[0])
+      @consequent = Mapper.map(operands[1])
+      @alternative = Mapper.map(operands[2])
     end
 
     def eval(env)
@@ -90,8 +90,8 @@ module Type
 
   class Lambda < Object
     def initialize(operands)
-      @params = operands[0].map { |param| Mapper.do(param) }
-      @body = Mapper.do(operands[1])
+      @params = operands[0].map { |param| Mapper.map(param) }
+      @body = Mapper.map(operands[1])
     end
 
     def eval(env)
@@ -101,7 +101,7 @@ module Type
 
   class Begin < Object
     def initialize(operands)
-      @exps = operands[0].map { |operand| Mapper.do(operand) }
+      @exps = operands[0].map { |operand| Mapper.map(operand) }
     end
 
     def eval(env)
@@ -116,7 +116,7 @@ module Type
       else # String
         @operator = operator
       end
-      @operands = operands.map { |operand| Mapper.do(operand) }
+      @operands = operands.map { |operand| Mapper.map(operand) }
     end
 
     def eval(env)
@@ -147,7 +147,7 @@ end
 class Mapper
   include Type
   
-  def self.do(nodes)
+  def self.map(nodes)
     if nodes.class == Hash
       case nodes.keys[0]
       when :NUMBER
@@ -157,7 +157,7 @@ class Mapper
       when :SYMBOL
         return Type::Variable.new(nodes.values[0])
       else
-        raise "do: unknown atom type: " + nodes.to_s
+        raise "map: unknown atom type: " + nodes.to_s
       end
     elsif nodes.class == Array
       if nodes[0].class == Hash
@@ -165,7 +165,7 @@ class Mapper
       elsif nodes[0].class == Array
         operator = nodes[0] # 即時関数の場合
       else
-        raise "do: unknown list type: " + nodes.to_s
+        raise "map: unknown list type: " + nodes.to_s
       end
       operands = nodes[1..-1]
 
@@ -186,7 +186,7 @@ class Mapper
         return Type::Application.new(operator, operands)
       end
     else
-      raise "do: illgual expression: " + nodes.to_s
+      raise "map: illgual expression: " + nodes.to_s
     end
   end
 end
