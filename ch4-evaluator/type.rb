@@ -5,12 +5,8 @@ module Type
   class Object
 #    attr_getter: type
 
-    def eval_sequence(exps, env)
-      if exps.class == Array
-        exps.each { |exp| exp.eval(env) }
-      else
-        exps.eval(env)
-      end
+    def eval_sequence(seq, env)
+      seq.map { |exp| exp.eval(env) }.last
     end
   end
   
@@ -91,7 +87,7 @@ module Type
   class Lambda < Object
     def initialize(operands)
       @params = operands[0].map { |param| Mapper.map(param) }
-      @body = Mapper.map(operands[1])
+      @body = operands[1..-1].map { |exp| Mapper.map(exp) }
     end
 
     def eval(env)
@@ -111,11 +107,7 @@ module Type
 
   class Application < Object
     def initialize(operator, operands)
-      if operator.class == Array
-        @operator = Lambda.new(operator[1..-1])
-      else # String
-        @operator = operator
-      end
+      @operator = operator
       @operands = operands.map { |operand| Mapper.map(operand) }
     end
 
@@ -162,8 +154,8 @@ class Mapper
     elsif nodes.class == Array
       if nodes[0].class == Hash
         operator = nodes[0].values[0]
-      elsif nodes[0].class == Array
-        operator = nodes[0] # 即時関数の場合
+      elsif nodes[0].class == Array # 即時関数パターンの場合
+        operator = Type::Lambda.new(nodes[0][1..-1])
       else
         raise "map: unknown list type: " + nodes.to_s
       end
