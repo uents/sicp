@@ -26,10 +26,8 @@ class Parser
       when ')'
         :RIGHT_PAREN
       when /^[+-]?[0-9]*[\.]?[0-9]+$/
-#        { :NUMBER => numeric(token) }
         { :NUMBER => token }        
       when /\"/
-#        { :STRING => token.gsub(/\"/, '') }
         { :STRING => token }
       else
         { :SYMBOL => token }        
@@ -67,18 +65,6 @@ class Parser
       token = tokens.shift
     end
     nodes
-  end
-
-  def self.numeric(str)
-    begin
-      return Integer(str)
-    rescue
-      begin
-        return Float(str)
-      rescue
-        return str
-      end
-    end
   end
 end
 
