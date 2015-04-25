@@ -120,9 +120,9 @@ module Form
 
   class Application < Base
     def initialize(operator, operands)
-      begin
-        @operator = operator.value
-      rescue
+      if operator.class == Parser::Node
+        @operator = Type::Variable.new(operator.value)
+      else
         @operator = Form::Lambda.new(operator[1..-1])
       end
       @operands = operands.map { |operand| Mapper.map(operand) }
