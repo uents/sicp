@@ -2,17 +2,32 @@
 # -*- coding: utf-8 -*-
 
 module Type
-  class Object
-#    attr_getter: type
+  class Number
+    def initialize(value)
+      @value = Number::numeric(value)
+    end
 
-    def eval_sequence(seq, env)
-      seq.map { |exp| exp.eval(env) }.last
+    def eval(env)
+      @value
+    end
+
+    private
+    def self.numeric(str)
+      begin
+        return Integer(str)
+      rescue
+        begin
+          return Float(str)
+        rescue
+          return str
+        end
+      end
     end
   end
-  
-  class Number < Object
+      
+  class String
     def initialize(value)
-      @value = value
+      @value = value.gsub(/\"/, '')
     end
 
     def eval(env)
@@ -20,17 +35,7 @@ module Type
     end
   end
 
-  class String < Object
-    def initialize(value)
-      @value = value
-    end
-
-    def eval(env)
-      @value
-    end
-  end
-
-  class Variable < Object
+  class Variable
     def initialize(name)
       @name = name
     end
@@ -39,8 +44,16 @@ module Type
       @name
     end    
   end
+end
 
-  class Quote < Object
+module Form
+  class Base
+    def eval_sequence(seq, env)
+      seq.map { |exp| exp.eval(env) }.last
+    end
+  end
+  
+  class Quote < Base
     def initialize(operands)
       @list = operands[0].map { |item| Mapper.map(item) }
     end
@@ -50,7 +63,7 @@ module Type
     end
   end
 
-  class Assignment < Object
+  class Assignment < Base
     def initialize(operands)
       @variable = Mapper.map(operands[0])
       @value = Mapper.map(operands[1])      
@@ -61,7 +74,7 @@ module Type
     end
   end
 
-  class Definition < Object
+  class Definition < Base
     def initialize(operands)
       @variable = Mapper.map(operands[0])
       @value = Mapper.map(operands[1])      
@@ -72,7 +85,7 @@ module Type
     end
   end
 
-  class If < Object
+  class If < Base
     def initialize(operands)
       @predicate = Mapper.map(operands[0])
       @consequent = Mapper.map(operands[1])
@@ -84,7 +97,7 @@ module Type
     end
   end
 
-  class Lambda < Object
+  class Lambda < Base
     def initialize(operands)
       @params = operands[0].map { |param| Mapper.map(param) }
       @body = operands[1..-1].map { |exp| Mapper.map(exp) }
@@ -95,7 +108,7 @@ module Type
     end
   end
 
-  class Begin < Object
+  class Begin < Base
     def initialize(operands)
       @exps = operands[0].map { |operand| Mapper.map(operand) }
     end
@@ -105,9 +118,13 @@ module Type
     end
   end
 
-  class Application < Object
+  class Application < Base
     def initialize(operator, operands)
-      @operator = operator
+      begin
+        @operator = operator.value
+      rescue
+        @operator = Form::Lambda.new(operator[1..-1])
+      end
       @operands = operands.map { |operand| Mapper.map(operand) }
     end
 
@@ -122,7 +139,7 @@ module Type
     end
   end
 
-  class Procedure < Object
+  class Procedure < Base
     def initialize(params, body, env)
       @params = params
       @body = body
@@ -138,48 +155,35 @@ end
 
 class Mapper
   include Type
-  
-  def self.map(nodes)
-    if nodes.class == Hash
-      case nodes.keys[0]
-      when :NUMBER
-        return Type::Number.new(nodes.values[0])
-      when :STRING
-        return Type::String.new(nodes.values[0])
-      when :SYMBOL
-        return Type::Variable.new(nodes.values[0])
-      else
-        raise "map: unknown atom type: " + nodes.to_s
-      end
-    elsif nodes.class == Array
-      if nodes[0].class == Hash
-        operator = nodes[0].values[0]
-      elsif nodes[0].class == Array # 即時関数パターンの場合
-        operator = Type::Lambda.new(nodes[0][1..-1])
-      else
-        raise "map: unknown list type: " + nodes.to_s
-      end
-      operands = nodes[1..-1]
 
-      case operator
-      when "quote"
-        return Type::Quote.new(operands)
-      when "set!"
-        return Type::Assignment.new(operands)
-      when "define"
-        return Type::Definition.new(operands)
-      when "if"
-        return Type::If.new(operands)
-      when "lambda"
-        return Type::Lambda.new(operands)
-      when "begin"
-        return Type::Begin.new(operands)
-      else
-        return Type::Application.new(operator, operands)
+  @@TYPES = {
+    :NUMBER => Type::Number,
+    :STRING => Type::String,
+    :SYMBOL => Type::Variable
+  }
+
+  @@FORMS = {
+    # special forms
+    "quote" => Form::Quote,
+    "set!" =>  Form::Assignment,
+    "define" =>  Form::Definition,
+    "if" => Form::If,
+    "lambda" => Form::Lambda,
+    "begin" => Form::Begin
+  }
+
+  def self.map(node)
+    begin
+      @@TYPES[node.key].new(node.value)
+    rescue
+      operator = node[0]
+      operands = node[1..-1]
+      begin
+        @@FORMS[operator.value].new(operands)
+      rescue
+        Form::Application.new(operator, operands)
       end
-    else
-      raise "map: illgual expression: " + nodes.to_s
-    end
+    end        
   end
 end
 

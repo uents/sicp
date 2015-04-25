@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-load "type.rb"
-
 class Evaluator
   def initialize()
     @environment = Environment.new

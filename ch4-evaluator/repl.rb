@@ -25,9 +25,9 @@ class REPLServer
       begin
         tokens = Parser.tokenize(input)
         nodes = Parser.parse(tokens)
-#        p "nodes : " + nodes.to_s
+#        pp "nodes : " + nodes.to_s
         object = Mapper.map(nodes)
-#        p "object : " + object.to_s
+#        pp "object : " + object.to_s
 
         output = @evaluator.eval(object)
         
