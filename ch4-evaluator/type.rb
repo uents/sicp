@@ -131,11 +131,7 @@ module Form
     def eval(env)
       procedure = @operator.eval(env)
       arguments = @operands.map { |operand| operand.eval(env) }
-      self.apply(procedure, arguments)
-    end
-
-    def apply(procedure, arguments)
-      procedure.eval(arguments)
+      procedure.apply(arguments)
     end
   end
 
@@ -146,8 +142,8 @@ module Form
       @env = env
     end
 
-    def eval(arguments)
-#      env.extend(@params, arguments)
+    def apply(arguments)
+#      @env.extend_environment(@params, arguments)
       self.eval_sequence(@body, @env)
     end
   end
