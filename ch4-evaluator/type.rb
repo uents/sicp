@@ -36,12 +36,14 @@ module Type
   end
 
   class Variable
+    attr_reader :name
+
     def initialize(name)
       @name = name
     end
 
     def eval(env)
-      @name
+      env.lookup_variable_value(@name)
     end    
   end
 end
@@ -70,7 +72,8 @@ module Form
     end
 
     def eval(env)
-      # todo
+      env.set_variable_value!(@variable.name, @value.eval(env))
+      :ok
     end
   end
 
@@ -81,7 +84,8 @@ module Form
     end
 
     def eval(env)
-      # todo
+      env.define_variable!(@variable.name, @value.eval(env))
+      :ok
     end
   end
 
@@ -143,7 +147,7 @@ module Form
     end
 
     def apply(arguments)
-#      @env.extend_environment(@params, arguments)
+      @env.extend_environment(@params, arguments)
       self.eval_sequence(@body, @env)
     end
   end

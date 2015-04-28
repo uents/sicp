@@ -36,8 +36,7 @@ class REPLServer
         redo
       end
 
-      print @@out_prompt
-      p output
+      pretty_print(output)
     end
   end
 
@@ -51,5 +50,12 @@ class REPLServer
     end
 
     input
+  end
+
+  def pretty_print(output) # todo
+    if output != :ok
+      print @@out_prompt
+      pp output
+    end
   end
 end
