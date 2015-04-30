@@ -225,7 +225,7 @@ module Primitive
       begin
         operands[0][1]
       rescue
-        raise "car: contract violation; " + operands.to_s
+        raise "cdr: contract violation; " + operands.to_s
       end
     end
   end

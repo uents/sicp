@@ -24,14 +24,14 @@ class Environment
     @frames.each do |frame|
       return frame[var] if frame[var] != nil
     end
-    raise "lookup_variable_value : unbound variable " + var.to_s
+    raise "lookup_variable_value: unbound variable; " + var.to_s
   end
 
   def extend_environment(vars, values)
     begin
       return Environment.new([make_frame(vars, values)] + @frames)
     rescue
-      raise "extend_envronment : fatal error " +
+      raise "extend_envronment: arguments error; " +
             vars.to_s + " " + values.to_s
     end
   end
@@ -44,7 +44,7 @@ class Environment
     @frames.each do |frame|
       return frame[var] = value if frame[var] != nil
     end
-    raise "set_variable_value! : unbound variable " + var.to_s
+    raise "set_variable_value!: unbound variable; " + var.to_s
   end
 
   private

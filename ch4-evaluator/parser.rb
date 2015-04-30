@@ -42,7 +42,7 @@ class Parser
     when :LEFT_PAREN
       return make_nodes(tokens)
     when :RIGHT_PAREN
-      raise "parse: unexpected tokens " + t.to_s
+      raise "parse: unexpected tokens; " + t.to_s
     else
       return Node.new(token)
     end
