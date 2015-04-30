@@ -53,7 +53,18 @@ class REPLServer
   end
 
   def pretty_print(output) # todo
-    print @@out_prompt
-    pp output
+    def iter(exps)
+      if exps.is_a?(Array)
+        exps.flatten!
+        '(' + (exps.map { |exp| iter(exp) }.join(' ')).strip + ')'
+      else
+        exps.to_s
+      end
+    end
+
+    if output != nil
+      print @@out_prompt
+      print iter(output) + "\n"
+    end
   end
 end
