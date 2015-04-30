@@ -3,10 +3,11 @@
 
 class Evaluator
   attr_reader :environment
+
   def initialize()
-    @environment = Environment.new
-    @environment.extend_environment(Primitive::CATALOG.keys,
-                                    Primitive::CATALOG.values)
+    @environment = Environment.new([])
+    @environment = @environment.extend_environment(Primitive::CATALOG.keys,
+                                                   Primitive::CATALOG.values)
   end
 
   def eval(object)
@@ -15,8 +16,8 @@ class Evaluator
 end
 
 class Environment
-  def initialize()
-    @frames = []
+  def initialize(frames)
+    @frames = frames
   end
 
   def lookup_variable_value(var)
@@ -28,7 +29,7 @@ class Environment
 
   def extend_environment(vars, values)
     begin
-      @frames = [make_frame(vars, values)] + @frames
+      return Environment.new([make_frame(vars, values)] + @frames)
     rescue
       raise "extend_envronment : fatal error " +
             vars.to_s + " " + values.to_s

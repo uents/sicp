@@ -154,9 +154,9 @@ module Form
     end
 
     def apply(arguments)
-      @env.extend_environment(@params.map { |param| param.name },
-                              arguments)
-      self.eval_sequence(@body, @env)
+      env = @env.extend_environment(@params.map { |param| param.name },
+                                    arguments)
+      self.eval_sequence(@body, env)
     end
   end
 end
