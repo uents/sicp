@@ -50,6 +50,7 @@ module Type
   end
 end
 
+
 module Form
   class Base
     def eval_sequence(seq, env)
@@ -59,7 +60,7 @@ module Form
   
   class Quote < Base
     def initialize(operands)
-      @list = operands[0].map { |item| Mapper.map(item) }
+      @list = operands[0].map { |item| Generator.generate(item) }
     end
 
     def eval(env)
@@ -69,8 +70,8 @@ module Form
 
   class Assignment < Base
     def initialize(operands)
-      @variable = Mapper.map(operands[0])
-      @value = Mapper.map(operands[1])      
+      @variable = Generator.generate(operands[0])
+      @value = Generator.generate(operands[1])      
     end
 
     def eval(env)
@@ -81,8 +82,8 @@ module Form
 
   class Definition < Base
     def initialize(operands)
-      @variable = Mapper.map(operands[0])
-      @value = Mapper.map(operands[1])      
+      @variable = Generator.generate(operands[0])
+      @value = Generator.generate(operands[1])      
     end
 
     def eval(env)
@@ -93,9 +94,9 @@ module Form
 
   class If < Base
     def initialize(operands)
-      @predicate = Mapper.map(operands[0])
-      @consequent = Mapper.map(operands[1])
-      @alternative = Mapper.map(operands[2])
+      @predicate = Generator.generate(operands[0])
+      @consequent = Generator.generate(operands[1])
+      @alternative = Generator.generate(operands[2])
     end
 
     def eval(env)
@@ -105,8 +106,8 @@ module Form
 
   class Lambda < Base
     def initialize(operands)
-      @params = operands[0].map { |param| Mapper.map(param) }
-      @body = operands[1..-1].map { |exp| Mapper.map(exp) }
+      @params = operands[0].map { |param| Generator.generate(param) }
+      @body = operands[1..-1].map { |exp| Generator.generate(exp) }
     end
 
     def eval(env)
@@ -116,7 +117,7 @@ module Form
 
   class Begin < Base
     def initialize(operands)
-      @exps = operands[0].map { |operand| Mapper.map(operand) }
+      @exps = operands[0].map { |operand| Generator.generate(operand) }
     end
 
     def eval(env)
@@ -131,7 +132,7 @@ module Form
       else
         @operator = Form::Lambda.new(operator[1..-1])
       end
-      @operands = operands.map { |operand| Mapper.map(operand) }
+      @operands = operands.map { |operand| Generator.generate(operand) }
     end
 
     def eval(env)
@@ -153,6 +154,12 @@ module Form
       self.eval_sequence(@body, @env)
     end
   end
+end
+
+
+begin
+  Primitive.class_eval { remove_const(:CATALOG) }
+rescue
 end
 
 module Primitive
@@ -230,9 +237,8 @@ module Primitive
   }
 end
 
-class Mapper
-  include Type
 
+class Generator
   @@TYPES = {
     :NUMBER => Type::Number,
     :STRING => Type::String,
@@ -249,7 +255,7 @@ class Mapper
     "begin" => Form::Begin
   }
 
-  def self.map(node)
+  def self.generate(node)
     begin
       @@TYPES[node.key].new(node.value)
     rescue
@@ -263,4 +269,5 @@ class Mapper
     end        
   end
 end
+
 

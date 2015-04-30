@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 load "parser.rb"
-load "type.rb"
+load "generator.rb"
 load "evaluator.rb"
 
 class REPLServer
@@ -26,7 +26,7 @@ class REPLServer
         tokens = Parser.tokenize(input)
         nodes = Parser.parse(tokens)
 #        pp "nodes : " + nodes.to_s
-        object = Mapper.map(nodes)
+        object = Generator.generate(nodes)
 #        pp "object : " + object.to_s
 
         output = @evaluator.eval(object)
@@ -37,6 +37,21 @@ class REPLServer
       end
 
       pretty_print(output)
+    end
+  end
+
+  def debug(*args)
+    case args.length
+    when 1
+      symbol = args.first
+      case symbol
+      when :env
+        @evaluator.environment
+      else
+        self.inspect
+      end
+    else
+      self.inspect
     end
   end
 
@@ -57,6 +72,8 @@ class REPLServer
       if exps.is_a?(Array)
         exps.flatten!
         '(' + (exps.map { |exp| iter(exp) }.join(' ')).strip + ')'
+      elsif exps.is_a?(Type::Variable)
+        exps.name
       else
         exps.to_s
       end

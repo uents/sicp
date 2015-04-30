@@ -12,7 +12,7 @@ class Parser
   end
   
   def self.tokenize(input)
-    tokens = input.strip()
+    tokens = input.strip
              .gsub(/\n/, ' ')
              .gsub('\'(', '(quote (')
              .gsub('(', '( ')

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 class Evaluator
+  attr_reader :environment
   def initialize()
     @environment = Environment.new
-
     @environment.extend_environment(Primitive::CATALOG.keys,
                                     Primitive::CATALOG.values)
   end
@@ -16,7 +16,7 @@ end
 
 class Environment
   def initialize()
-    @frames = [{}]
+    @frames = []
   end
 
   def lookup_variable_value(var)
