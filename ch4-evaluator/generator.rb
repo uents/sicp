@@ -100,7 +100,11 @@ module Form
     end
 
     def eval(env)
-      # todo
+      if @predicate.eval(env)
+        @consequent.eval(env)
+      else
+        @alternative.eval(env)
+      end
     end
   end
 
@@ -121,7 +125,7 @@ module Form
     end
 
     def eval(env)
-      # todo
+      self.eval_sequence(@exps, env)
     end
   end
 
@@ -150,7 +154,8 @@ module Form
     end
 
     def apply(arguments)
-      @env.extend_environment(@params, arguments)
+      @env.extend_environment(@params.map { |param| param.name },
+                              arguments)
       self.eval_sequence(@body, @env)
     end
   end
@@ -163,6 +168,12 @@ rescue
 end
 
 module Primitive
+  class Equal
+    def self.apply(operands)
+      operands[0] == operands[1]
+    end
+  end
+  
   class Add
     def self.apply(operands)
       operands.reduce(:+)
@@ -226,6 +237,7 @@ module Primitive
   end
 
   CATALOG = {
+    "=" => Equal,
     "+" => Add,
     "-" => Sub,
     "*" => Multiply,
