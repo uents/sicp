@@ -4,6 +4,9 @@
 class Evaluator
   def initialize()
     @environment = Environment.new
+
+    @environment.extend_environment(Primitive::CATALOG.keys,
+                                    Primitive::CATALOG.values)
   end
 
   def eval(object)

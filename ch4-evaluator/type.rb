@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+load "base.rb"
+
 module Type
   class Number
     def initialize(value)
@@ -151,6 +153,81 @@ module Form
       self.eval_sequence(@body, @env)
     end
   end
+end
+
+module Primitive
+  class Add
+    def self.apply(operands)
+      operands.reduce(:+)
+    end
+  end
+
+  class Sub
+    def self.apply(operands)
+      operands.reduce(:-)
+    end
+  end
+
+  class Multiply
+    def self.apply(operands)
+      operands.reduce(:*)
+    end
+  end
+
+  class Devide
+    def self.apply(operands)
+      operands.reduce(:/)
+    end
+  end
+
+  class Cons
+    def self.apply(operands)
+      begin
+        first = operands[0]
+        last = operands[1]
+        [first, last]
+      rescue
+        raise "cons: airty mistatch; " + operands.to_s
+      end
+    end
+  end
+
+  class Car
+    def self.apply(operands)
+      begin
+        operands[0][0]
+      rescue
+        raise "car: contract violation; " + operands.to_s
+      end
+    end
+  end
+
+  class Cdr
+    def self.apply(operands)
+      begin
+        operands[0][1]
+      rescue
+        raise "car: contract violation; " + operands.to_s
+      end
+    end
+  end
+
+  class List
+    def self.apply(operands)
+      operands.foldr(nil) { |x, y| Cons.apply([x, y]) }
+    end
+  end
+
+  CATALOG = {
+    "+" => Add,
+    "-" => Sub,
+    "*" => Multiply,
+    "/" => Devide,
+    "cons" => Cons,
+    "car" => Car,
+    "cdr" => Cdr,
+    "list" => List,
+  }
 end
 
 class Mapper
