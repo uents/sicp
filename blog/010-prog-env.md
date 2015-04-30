@@ -1,92 +1,106 @@
 SICP 読書ノート#10 - Racket/Emacsによるプログラミング環境構築
 ======================================
 
-「§2.2.4 図形言語」に入る前にグラフィックスまわりの環境設定が必要だったので、
-遅ればせながらScheme処理系であるRacketやEmacsの設定も含めてまとめてみた。
+「§2.2.4 図形言語」に入る前にグラフィックスまわりの環境設定が必要だったので、遅ればせながらScheme処理系であるRacketやEmacsの設定も含めてまとめてみた。
+
+*(2015/04/29追記) 内容が古くなってきたので全体的に加筆/修正しました。*
 
 PC環境
 --------------------------------
 
-Mac OS X 10.7.5 (Lion) です。
+- Mac OS X Yosemite 10.10.2
+- Homebrew 0.9.5
+- GNU Emacs 24.4.1
 
-- Homebrew
-```
-$ brew --version
-0.9.5
-```
+ここまでの環境構築は以下を参照ください。
 
-- Emacs (Homebrewでインストール済み)
-```
-% emacs --version
-GNU Emacs 24.3.1
-```
+- [/entry/2015/01/19/OSXYosemiteにHomebrewをインストール:title]
+- [/entry/2015/01/26/OSXYosemiteにHomebrewでGNUEmacsをインストール:title]
+
 
 Scheme処理系
 --------------------------------
 
 [最近のMITの推奨はRacket（旧PLT-Scheme/DrScheme）](http://cl.naist.jp/index.php?SICP%CA%D9%B6%AF%B2%F1)らしい。
 
-Homebrewで取得しようとするが、
+Homebrew Caskで取得しました。
 
+```sh
+% brew cask install racket
+==> Downloading http://mirror.racket-lang.org/installers/6.1.1/racket-6.1.1-x86_64-macosx.dmg
+...
+==> Symlinking App Suite 'Racket v6.1.1' to '/Users/uents/Applications/Racket v6.1.1'
+==> Symlinking Binary 'drracket' to '/usr/local/bin/drracket'
+==> Symlinking Binary 'gracket' to '/usr/local/bin/gracket'
+==> Symlinking Binary 'gracket-text' to '/usr/local/bin/gracket-text'
+==> Symlinking Binary 'mred' to '/usr/local/bin/mred'
+==> Symlinking Binary 'mred-text' to '/usr/local/bin/mred-text'
+==> Symlinking Binary 'mzc' to '/usr/local/bin/mzc'
+==> Symlinking Binary 'mzpp' to '/usr/local/bin/mzpp'
+==> Symlinking Binary 'mzscheme' to '/usr/local/bin/mzscheme'
+==> Symlinking Binary 'mztext' to '/usr/local/bin/mztext'
+==> Symlinking Binary 'pdf-slatex' to '/usr/local/bin/pdf-slatex'
+==> Symlinking Binary 'plt-games' to '/usr/local/bin/plt-games'
+==> Symlinking Binary 'plt-help' to '/usr/local/bin/plt-help'
+==> Symlinking Binary 'plt-r5rs' to '/usr/local/bin/plt-r5rs'
+==> Symlinking Binary 'plt-r6rs' to '/usr/local/bin/plt-r6rs'
+==> Symlinking Binary 'plt-web-server' to '/usr/local/bin/plt-web-server'
+==> Symlinking Binary 'racket' to '/usr/local/bin/racket'
+==> Symlinking Binary 'raco' to '/usr/local/bin/raco'
+==> Symlinking Binary 'scribble' to '/usr/local/bin/scribble'
+==> Symlinking Binary 'setup-plt' to '/usr/local/bin/setup-plt'
+==> Symlinking Binary 'slatex' to '/usr/local/bin/slatex'
+==> Symlinking Binary 'slideshow' to '/usr/local/bin/slideshow'
+==> Symlinking Binary 'swindle' to '/usr/local/bin/swindle'
+🍺  racket staged at '/opt/homebrew-cask/Caskroom/racket/6.1.1' (22059 files, 448M)
 ```
- brew install plt-racket
-==> Downloading https://github.com/plt/racket/archive/v6.0.1.tar.gz
-Already downloaded: /Users/uents/Library/Caches/Homebrew/plt-racket-6.0.1.tar.gz
-==> ./configure --enable-macprefix --prefix=/usr/local/Cellar/plt-racket/6.0.1 --man=/usr/local/Cellar/plt-r
-==> make
-make[4]: *** [xsrc/precomp.h] Segmentation fault: 11
-make[3]: *** [all] Error 2
-make[2]: *** [3m] Error 2
-make[1]: *** [3m] Error 2
-make: *** [all] Error 2
-
-READ THIS: https://github.com/Homebrew/homebrew/wiki/troubleshooting
-
-These open issues may also help:
-plt-racket formula perhaps too minimal (https://github.com/Homebrew/homebrew/issues/29914)
-```
-
-ビルドの途中でSIGSEGVで落ちる。
-
-よくわからないので、
-
-1. 公式サイト(http://download.racket-lang.org/)からdmgを取得
-2. dmgをオープンしてApplicationフォルダにコピー
-
-で、インストール完了。
-
 
 Emacsの設定
 --------------------------------
 
-Racketのエディタが使いづらかったので、Emacsをセットアップ。
+RacketをインストールするとDrRacketという結構本格的なIDEが付属しています。
 
-EmacsでScheme処理系を動かすためのmajor/minor-modeとしてGeiserを導入した。
+僕にはどうも合わなかったので、EmacsでRacketを動かすためのmajor/minor-modeとしてGeiserを導入した。
 
 ### Geiserのインストール
 
-EmacsでELPAの設定まで済んでいる前提で、```M-x package-list-packages```し、geiserを選択。
+Emacs Caskで取得できます。Caskファイルに以下を追加し、
+
+```elisp
+(source gnu)
+(source melpa)
+
+(depends-on "geiser")
+```
+
+ターミナルでインストールを実行。
+
+```sh
+% cask install
+```
 
 ### .emacs.elの設定
 
-Racketへのパスを通す。
+geiserの設定を追加します。
 
 ```elisp
-(setq geiser-racket-binary "/Applications/Racket6.0.1/bin/racket")
+(setq geiser-racket-binary "/opt/homebrew-cask/Caskroom/racket/6.1.1/Racket v6.1.1/bin/racket")
 (setq geiser-active-implementations '(racket))
 ```
 
 ### Racket REPLを起動
 
-- 拡張子が.scmの場合、major-modeはScheme、minor-modeはRacketとなる
-- Auto Complete Modeを事前に導入していると、minor-modeにAuto Completeが追加される
-
-この状態で```M-x run-racket```とすると、Racketが起動する。
+Emacsを開き```M-x run-racket```とすると、Racketが起動する。
 
 ![RacketをEmacsで起動](https://farm3.staticflickr.com/2929/14423624370_8f74e98a57_o_d.png)
 
-後は、Schemeのコードを書いていけば良いし、
-ファイルを読み込みたい場合は```(load "foo.scm")``` とすればOK。
+あとはSchemeのコードを書いていけば良いし、ファイルを読み込みたい場合は```(load "foo.scm")``` とすればよいです。
+
+また、
+
+- 拡張子が.scmの場合、major-modeはScheme、minor-modeはRacketとなる
+- Auto Complete Modeを事前に導入していると、minor-modeにAuto Completeが追加される
+
 
 ### デバッグ
 
@@ -107,21 +121,18 @@ Racketへのパスを通す。
 (trace <procedure name>)
 ```
 
-とすればよい。
-
 http://docs.racket-lang.org/reference/debugging.html
 
 
 その他
 --------------------------------
 
-### HomebrewやEmacsの導入
+### Auto Complete Modeについて
 
-以前に書いた記事が参考になるかもしれません。(少し古いです)
+以前に書いた記事が参考になるかもしれません。(かなり古いです)
 
-- [MacでHomebrewを使ってCocoa Emacsを導入する](/entry/20120303/1330745761)
 - [EmacsでAnything＋Auto Complete Mode＋YASnippetによる快適コーディング](/entry/20120311/1331468314)
- + ELPAに触れてないので、そろそろ書き直さないと...
+ + Emacs Caskを使った場合に書き直さないと...
 
 --------------------------------
 
