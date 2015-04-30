@@ -53,9 +53,7 @@ class REPLServer
   end
 
   def pretty_print(output) # todo
-    if output != :ok
-      print @@out_prompt
-      pp output
-    end
+    print @@out_prompt
+    pp output
   end
 end

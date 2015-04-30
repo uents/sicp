@@ -73,7 +73,7 @@ module Form
 
     def eval(env)
       env.set_variable_value!(@variable.name, @value.eval(env))
-      :ok
+      nil
     end
   end
 
@@ -85,7 +85,7 @@ module Form
 
     def eval(env)
       env.define_variable!(@variable.name, @value.eval(env))
-      :ok
+      nil
     end
   end
 
