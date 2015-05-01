@@ -1,13 +1,14 @@
-#!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
+
+load "primitive_procedure.rb"
 
 class Evaluator
   attr_reader :environment
 
   def initialize()
     @environment = Environment.new([])
-    @environment = @environment.extend_environment(Primitive::CATALOG.keys,
-                                                   Primitive::CATALOG.values)
+    @environment = @environment.extend_environment(PrimProc::CATALOG.keys,
+                                                   PrimProc::CATALOG.values)
     @environment.define_variable!("true", true)
     @environment.define_variable!("false", false)
   end
