@@ -10,68 +10,68 @@ end
 
 module PrimProc
   class Equal
-    def self.apply(operands)
-      operands[0] == operands[1]
+    def self.apply(arguments)
+      arguments[0] == arguments[1]
     end
   end
   
   class Add
-    def self.apply(operands)
-      operands.reduce(:+)
+    def self.apply(arguments)
+      arguments.reduce(:+)
     end
   end
 
   class Sub
-    def self.apply(operands)
-      operands.reduce(:-)
+    def self.apply(arguments)
+      arguments.reduce(:-)
     end
   end
 
   class Multiply
-    def self.apply(operands)
-      operands.reduce(:*)
+    def self.apply(arguments)
+      arguments.reduce(:*)
     end
   end
 
   class Devide
-    def self.apply(operands)
-      operands.reduce(:/)
+    def self.apply(arguments)
+      arguments.reduce(:/)
     end
   end
 
   class Cons
-    def self.apply(operands)
+    def self.apply(arguments)
       begin
-        BuiltIn::Pair.new(operands[0], operands[1])
+        BuiltIn::Pair.new(arguments[0], arguments[1])
       rescue
-        raise "cons: airty mistatch; " + operands.to_s
+        raise "cons: airty mistatch; " + arguments.to_s
       end
     end
   end
 
   class Car
-    def self.apply(operands)
+    def self.apply(arguments)
       begin
-        operands[0].first
+        arguments[0].first
       rescue
-        raise "car: contract violation; " + operands.to_s
+        raise "car: contract violation; " + arguments.to_s
       end
     end
   end
 
   class Cdr
-    def self.apply(operands)
+    def self.apply(arguments)
       begin
-        operands[0].last
+        arguments[0].last
       rescue
-        raise "cdr: contract violation; " + operands.to_s
+        raise "cdr: contract violation; " + arguments.to_s
       end
     end
   end
 
   class List
-    def self.apply(operands)
-      operands.foldr(nil) { |x, y| Cons.apply([x, y]) }
+    def self.apply(arguments)
+      arguments.foldr(nil) { |x, y| Cons.apply([x, y]) }
     end
   end
 

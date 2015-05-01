@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
 load "parser.rb"
@@ -6,8 +5,8 @@ load "generator.rb"
 load "evaluator.rb"
 
 class REPLServer
-  @@in_prompt = '> '
-  @@out_prompt = '=> '
+  IN_PROMPT = '> '
+  OUT_PROMPT = '=> '
 
   def initialize()
     @evaluator = Evaluator.new
@@ -15,8 +14,6 @@ class REPLServer
 
   def run()
     while true
-      print @@in_prompt
-
       input = read_line()
       if input == "quit\n"
         return "good bye!!"
@@ -57,6 +54,7 @@ class REPLServer
 
   private
   def read_line()
+    print IN_PROMPT
     input = gets or return
     while (count = input.count('(') - input.count(')')) > 0
       print "  " * (1 + count)
@@ -69,7 +67,7 @@ class REPLServer
 
   def pretty_print(output)
     if output != nil
-      print @@out_prompt
+      print OUT_PROMPT
       print output.to_s + "\n"
     end
   end
