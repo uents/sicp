@@ -8,6 +8,8 @@ class Evaluator
     @environment = Environment.new([])
     @environment = @environment.extend_environment(Primitive::CATALOG.keys,
                                                    Primitive::CATALOG.values)
+    @environment.define_variable!("true", true)
+    @environment.define_variable!("false", false)
   end
 
   def eval(object)
