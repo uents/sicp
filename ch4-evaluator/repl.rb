@@ -58,7 +58,7 @@ class REPLServer
   private
   def read_line()
     input = gets or return
-    while (count = input.count('(') -input.count(')')) > 0
+    while (count = input.count('(') - input.count(')')) > 0
       print "  " * (1 + count)
       next_input = gets or return
       input += next_input
@@ -68,20 +68,9 @@ class REPLServer
   end
 
   def pretty_print(output) # todo
-    def iter(exps)
-      if exps.is_a?(Array)
-        exps.flatten!
-        '(' + (exps.map { |exp| iter(exp) }.join(' ')).strip + ')'
-      elsif exps.is_a?(Type::Variable)
-        exps.name
-      else
-        exps.to_s
-      end
-    end
-
     if output != nil
       print @@out_prompt
-      print iter(output) + "\n"
+      print output.to_s + "\n"
     end
   end
 end
