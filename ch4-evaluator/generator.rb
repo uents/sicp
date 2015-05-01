@@ -231,7 +231,7 @@ module Primitive
       elsif self.last.is_a?(Cell)
         str += ' ' + self.last.to_s(false)
       else
-        str += ' ' + self.last.to_s
+        str += ' . ' + self.last.to_s
       end
       str += ')' if paren
       str

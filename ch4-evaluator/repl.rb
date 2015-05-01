@@ -67,7 +67,7 @@ class REPLServer
     input
   end
 
-  def pretty_print(output) # todo
+  def pretty_print(output)
     if output != nil
       print @@out_prompt
       print output.to_s + "\n"
