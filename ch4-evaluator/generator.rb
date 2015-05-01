@@ -141,6 +141,40 @@ module Form
     end
   end
 
+  class And < Base ## ex 4.4
+    def initialize(operands)
+      @predicates = operands.map { |predicate| Generator.generate(predicate) }
+    end
+
+    def eval(env)
+      if @predicates.empty?
+        true
+      else
+        @predicates.each do |predicate|
+          return false if predicate.eval(env) == false
+        end
+        @predicates.last
+      end
+    end
+  end
+
+  class Or < Base ## ex 4.4
+    def initialize(operands)
+      @predicates = operands.map { |predicate| Generator.generate(predicate) }
+    end
+
+    def eval(env)
+      if @predicates.empty?
+        false
+      else
+        @predicates.each do |predicate|
+          return predicate if predicate.eval(env) != false
+        end
+        @predicates.last
+      end
+    end
+  end
+
   class Application < Base
     def initialize(operator, operands)
       if operator.class == Parser::Node
@@ -302,7 +336,9 @@ class Generator
     "define" =>  Form::Definition,
     "if" => Form::If,
     "lambda" => Form::Lambda,
-    "begin" => Form::Begin
+    "begin" => Form::Begin,
+    "and" => Form::And,
+    "or" => Form::Or,
   }
 
   def self.generate(node)
