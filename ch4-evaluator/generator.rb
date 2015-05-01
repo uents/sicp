@@ -13,6 +13,10 @@ module Type
       @value
     end
 
+    def to_s()
+      @value.to_s
+    end
+
     private
     def self.numeric(str)
       begin
@@ -35,6 +39,10 @@ module Type
     def eval(env)
       @value
     end
+
+    def to_s()
+      @value
+    end
   end
 
   class Variable
@@ -46,7 +54,11 @@ module Type
 
     def eval(env)
       env.lookup_variable_value(@name)
-    end    
+    end
+
+    def to_s()
+      @name.to_s
+    end
   end
 end
 
@@ -198,12 +210,38 @@ module Primitive
     end
   end
 
+  class Cell
+    attr_reader :first, :last
+
+    def initialize(first, last)
+      @first = first
+      @last = last
+    end
+
+    def to_s(paren=true)
+      str = ''
+      str += '(' if paren
+      if self.first.is_a?(Cell)
+        str += self.first.to_s(true)
+      else
+        str += self.first.to_s
+      end
+      if self.last == nil
+        # do nothing
+      elsif self.last.is_a?(Cell)
+        str += ' ' + self.last.to_s(false)
+      else
+        str += ' ' + self.last.to_s
+      end
+      str += ')' if paren
+      str
+    end
+  end
+
   class Cons
     def self.apply(operands)
       begin
-        first = operands[0]
-        last = operands[1]
-        [first, last]
+        return Cell.new(operands[0], operands[1])
       rescue
         raise "cons: airty mistatch; " + operands.to_s
       end
@@ -213,7 +251,7 @@ module Primitive
   class Car
     def self.apply(operands)
       begin
-        operands[0][0]
+        operands[0].first
       rescue
         raise "car: contract violation; " + operands.to_s
       end
@@ -223,7 +261,7 @@ module Primitive
   class Cdr
     def self.apply(operands)
       begin
-        operands[0][1]
+        operands[0].last
       rescue
         raise "cdr: contract violation; " + operands.to_s
       end
