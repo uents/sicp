@@ -54,8 +54,12 @@ class Generator
       when "cond"
         predicates = operands.map { |pred, seq| self.generate(pred) }
         sequences = operands.map { |pred, seq| self.generate(seq) }
-        clauses = predicates.zip(sequences)
-        return DerivedExp::Cond.new(clauses)
+        return DerivedExp::Cond.new(predicates, sequences)
+      when "let"
+        variables = operands[0].map { |var, exp| self.generate(var) }
+        expressions = operands[0].map { |var, exp| self.generate(exp) }
+        body = operands[1..-1].map { |exp| self.generate(exp) }
+        return DerivedExp::Let.new(variables, expressions, body)
       else
         if operator.class == Parser::Node
           procedure = Builtin::Variable.new(operator.value)

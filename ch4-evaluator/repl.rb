@@ -4,6 +4,12 @@ load "parser.rb"
 load "generator.rb"
 load "evaluator.rb"
 
+begin
+  REPLServer.class_eval { remove_const(:IN_PROMPT) }
+  REPLServer.class_eval { remove_const(:OUT_PROMPT) }  
+rescue
+end
+
 class REPLServer
   IN_PROMPT = '> '
   OUT_PROMPT = '=> '
