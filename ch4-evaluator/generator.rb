@@ -39,8 +39,6 @@ class Generator
         alternative = self.generate(operands[2])
         return SpecialForm::If.new(predicate, consequent, alternative)
       when "lambda"
-        p operands[0]
-        p operands[1..-1]
         params = operands[0].map { |param| self.generate(param) }
         body = operands[1..-1].map { |exp| self.generate(exp) }
         return SpecialForm::Lambda.new(params, body)
@@ -53,6 +51,11 @@ class Generator
       when "or"
         predicates = operands.map { |predicate| self.generate(predicate) }
         return SpecialForm::Or.new(predicates)
+      when "cond"
+        predicates = operands.map { |pred, seq| self.generate(pred) }
+        sequences = operands.map { |pred, seq| self.generate(seq) }
+        clauses = predicates.zip(sequences)
+        return DerivedExp::Cond.new(clauses)
       else
         if operator.class == Parser::Node
           procedure = Builtin::Variable.new(operator.value)
