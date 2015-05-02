@@ -3,7 +3,11 @@
 module SpecialForm
   class Base
     def eval_sequence(seq, env)
-      seq.map { |exp| exp.eval(env) }.last
+      if seq.class == Array
+        seq.map { |exp| exp.eval(env) }.last
+      else
+        seq.eval(env)
+      end
     end
   end
   
@@ -120,7 +124,7 @@ module SpecialForm
 
     def eval(env)
       procedure = @procedure.eval(env)
-      arguments = @arguments.map { |operand| operand.eval(env) }
+      arguments = @arguments.map { |arg| arg.eval(env) }
       procedure.apply(arguments)
     end
   end

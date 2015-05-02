@@ -67,6 +67,11 @@ class Generator
         expressions = operands[0].map { |var, exp| self.generate(exp) }
         body = operands[1..-1].map { |exp| self.generate(exp) }
         return DerivedExp::Let.new(variables, expressions, body)
+      when "let*"
+        variables = operands[0].map { |var, exp| self.generate(var) }
+        expressions = operands[0].map { |var, exp| self.generate(exp) }
+        body = operands[1..-1].map { |exp| self.generate(exp) }
+        return DerivedExp::LetAster.new(variables, expressions, body)
       else
         if operator.class == Parser::Node
           procedure = Builtin::Variable.new(operator.value)

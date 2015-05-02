@@ -46,4 +46,28 @@ module DerivedExp
                                    @expressions)
     end
   end
+
+  class LetAster
+    def initialize(variables, expressions, body)
+      @clauses = variables.zip(expressions)
+      @body = body
+    end
+
+    def eval(env)
+      let_aster_to_nested_let(@clauses).eval(env)
+    end
+
+    private
+    def let_aster_to_nested_let(clauses)
+      if clauses.empty?
+        @body
+      else
+        variable = clauses[0][0]
+        expression = clauses[0][1]
+        DerivedExp::Let.new([variable],
+                            [expression],
+                            let_aster_to_nested_let(clauses[1..-1]))
+      end
+    end
+  end
 end
