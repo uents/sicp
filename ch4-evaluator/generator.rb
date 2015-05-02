@@ -30,8 +30,15 @@ class Generator
         value = self.generate(operands[1])
         return SpecialForm::Assignment.new(variable, value)
       when "define"
-        variable = self.generate(operands[0])
-        value = self.generate(operands[1])
+        if operands[0].class == Parser::Node
+          variable = self.generate(operands[0])
+          value = self.generate(operands[1])
+        else
+          variable = self.generate(operands[0][0])
+          params = operands[0][1..-1].map { |param| self.generate(param) }
+          body = operands[1..-1].map { |exp| self.generate(exp) }
+          value = SpecialForm::Lambda.new(params, body)
+        end
         return SpecialForm::Definition.new(variable, value)
       when "if"
         predicate = self.generate(operands[0])

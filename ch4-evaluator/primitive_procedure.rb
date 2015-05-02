@@ -14,7 +14,19 @@ module PrimProc
       arguments[0] == arguments[1]
     end
   end
-  
+
+  class LessThan
+    def self.apply(arguments)
+      arguments[0] < arguments[1]
+    end
+  end
+
+  class GreaterThan
+    def self.apply(arguments)
+      arguments[0] > arguments[1]
+    end
+  end
+
   class Add
     def self.apply(arguments)
       arguments.reduce(:+)
@@ -77,6 +89,8 @@ module PrimProc
 
   CATALOG = {
     "=" => Equal,
+    "<" => LessThan,
+    ">" => GreaterThan,    
     "+" => Add,
     "-" => Sub,
     "*" => Multiply,
