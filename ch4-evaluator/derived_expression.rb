@@ -30,7 +30,8 @@ module DerivedExp
   end
 
   class Let
-    def initialize(variables, expressions, body)
+    def initialize(name, variables, expressions, body)
+      @name = name
       @variables = variables
       @expressions = expressions
       @body = body
@@ -42,8 +43,15 @@ module DerivedExp
 
     private
     def let_to_combination()
-      SpecialForm::Application.new(SpecialForm::Lambda.new(@variables, @body),
-                                   @expressions)
+      if @name != nil
+        SpecialForm::Begin.new(
+          [SpecialForm::Definition.new(@name,
+                                       SpecialForm::Lambda.new(@variables, @body)),
+           SpecialForm::Application.new(@name, @expressions)])
+      else
+        SpecialForm::Application.new(SpecialForm::Lambda.new(@variables, @body),
+                                     @expressions)
+      end
     end
   end
 

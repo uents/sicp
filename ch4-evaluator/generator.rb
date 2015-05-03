@@ -63,10 +63,18 @@ class Generator
         sequences = operands.map { |pred, seq| self.generate(seq) }
         return DerivedExp::Cond.new(predicates, sequences)
       when "let"
-        variables = operands[0].map { |var, exp| self.generate(var) }
-        expressions = operands[0].map { |var, exp| self.generate(exp) }
-        body = operands[1..-1].map { |exp| self.generate(exp) }
-        return DerivedExp::Let.new(variables, expressions, body)
+        if operands[0].class == Parser::Node
+          name = self.generate(operands[0])
+          variables = operands[1].map { |var, exp| self.generate(var) }
+          expressions = operands[1].map { |var, exp| self.generate(exp) }
+          body = operands[2..-1].map { |exp| self.generate(exp) }
+        else
+          name = nil
+          variables = operands[0].map { |var, exp| self.generate(var) }
+          expressions = operands[0].map { |var, exp| self.generate(exp) }
+          body = operands[1..-1].map { |exp| self.generate(exp) }
+        end
+        return DerivedExp::Let.new(name, variables, expressions, body)
       when "let*"
         variables = operands[0].map { |var, exp| self.generate(var) }
         expressions = operands[0].map { |var, exp| self.generate(exp) }
