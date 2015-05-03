@@ -69,14 +69,14 @@ module Builtin
     def to_s(paren=true)
       str = ''
       str += '(' if paren
-      if self.first.is_a?(Cell)
+      if self.first.is_a?(Pair)
         str += self.first.to_s(true)
       else
         str += self.first.to_s
       end
       if self.last == nil
         # do nothing
-      elsif self.last.is_a?(Cell)
+      elsif self.last.is_a?(Pair)
         str += ' ' + self.last.to_s(false)
       else
         str += ' . ' + self.last.to_s

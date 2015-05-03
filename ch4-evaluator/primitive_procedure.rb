@@ -54,7 +54,7 @@ module PrimProc
   class Cons
     def self.apply(arguments)
       begin
-        BuiltIn::Pair.new(arguments[0], arguments[1])
+        Builtin::Pair.new(arguments[0], arguments[1])
       rescue
         raise "cons: airty mistatch; " + arguments.to_s
       end
@@ -87,6 +87,14 @@ module PrimProc
     end
   end
 
+  class Print
+    def self.apply(arguments)
+      arguments.each { |arg| print arg.to_s + " "}
+      print "\n"
+      nil
+    end
+  end
+
   CATALOG = {
     "=" => Equal,
     "<" => LessThan,
@@ -99,6 +107,7 @@ module PrimProc
     "car" => Car,
     "cdr" => Cdr,
     "list" => List,
+    "print" => Print,
   }
 end
 
