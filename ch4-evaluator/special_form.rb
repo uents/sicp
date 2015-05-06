@@ -82,7 +82,7 @@ module SpecialForm
     end
   end
 
-  class And < Base ## ex 4.4
+  class And < Base
     def initialize(predicates)
       @predicates = predicates
     end
@@ -99,7 +99,7 @@ module SpecialForm
     end
   end
 
-  class Or < Base ## ex 4.4
+  class Or < Base
     def initialize(predicates)
       @predicates = predicates
     end

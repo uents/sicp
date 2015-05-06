@@ -50,7 +50,7 @@ class Generator
         body = operands[1..-1].map { |exp| self.generate(exp) }
         return SpecialForm::Lambda.new(params, body)
       when "begin"
-        exps = operands[0].map { |operand| self.generate(operand) }
+        exps = operands.map { |operand| self.generate(operand) }
         return SpecialForm::Begin.new(exps)
       when "and"
         predicates = operands.map { |predicate| self.generate(predicate) }
@@ -80,6 +80,10 @@ class Generator
         expressions = operands[0].map { |var, exp| self.generate(exp) }
         body = operands[1..-1].map { |exp| self.generate(exp) }
         return DerivedExp::LetAster.new(variables, expressions, body)
+      when "while"
+        predicate = self.generate(operands[0])
+        body = operands[1..-1].map { |exp| self.generate(exp) }
+        return DerivedExp::While.new(predicate, body)
       else
         if operator.class == Parser::Node
           procedure = Builtin::Variable.new(operator.value)

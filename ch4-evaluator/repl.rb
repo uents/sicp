@@ -35,7 +35,7 @@ class REPLServer
         output = @evaluator.eval(object)
         
       rescue Exception => e
-        p e.to_s
+        pp e
         redo
       end
 

@@ -78,4 +78,31 @@ module DerivedExp
       end
     end
   end
+
+  class While
+    def initialize(predicate, body)
+      @predicate = predicate
+      @body = body
+    end
+
+    def eval(env)
+      exp = while_to_named_let()
+      exp.eval(env)
+    end
+
+    private
+    def while_to_named_let()
+      DerivedExp::Let.new(Builtin::Variable.new("loop"),
+                          [],
+                          [],
+                          SpecialForm::If.new(
+                            @predicate,
+                            SpecialForm::Begin.new(
+                              @body + [SpecialForm::Application.new(
+                                        Builtin::Variable.new("loop"),
+                                        [])]
+                            ),
+                            Builtin::Variable.new("false")))
+    end
+  end
 end
