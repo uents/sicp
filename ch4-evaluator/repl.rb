@@ -78,3 +78,6 @@ class REPLServer
     end
   end
 end
+
+repl = REPLServer.new
+repl.run

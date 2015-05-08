@@ -75,17 +75,17 @@ module Builtin
     def to_s(paren=true)
       str = ''
       str += '(' if paren
-      if self.first.is_a?(Pair)
-        str += self.first.to_s(true)
+      if self.car.is_a?(Pair)
+        str += self.car.to_s(true)
       else
-        str += self.first.to_s
+        str += self.car.to_s
       end
-      if self.rest == nil
+      if self.cdr == nil
         # do nothing
-      elsif self.rest.is_a?(Pair)
-        str += ' ' + self.rest.to_s(false)
+      elsif self.cdr.is_a?(Pair)
+        str += ' ' + self.cdr.to_s(false)
       else
-        str += ' . ' + self.rest.to_s
+        str += ' . ' + self.cdr.to_s
       end
       str += ')' if paren
       str
