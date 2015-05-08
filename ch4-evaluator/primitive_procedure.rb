@@ -9,19 +9,19 @@ rescue
 end
 
 module PrimProc
-  class Equal
+  class IsEqual
     def self.apply(arguments)
       arguments[0] == arguments[1]
     end
   end
 
-  class LessThan
+  class IsLessThan
     def self.apply(arguments)
       arguments[0] < arguments[1]
     end
   end
 
-  class GreaterThan
+  class IsGreaterThan
     def self.apply(arguments)
       arguments[0] > arguments[1]
     end
@@ -64,7 +64,7 @@ module PrimProc
   class Car
     def self.apply(arguments)
       begin
-        arguments[0].first
+        arguments[0].car
       rescue
         raise "car: contract violation; " + arguments.to_s
       end
@@ -74,7 +74,7 @@ module PrimProc
   class Cdr
     def self.apply(arguments)
       begin
-        arguments[0].last
+        arguments[0].cdr
       rescue
         raise "cdr: contract violation; " + arguments.to_s
       end
@@ -96,9 +96,9 @@ module PrimProc
   end
 
   CATALOG = {
-    "=" => Equal,
-    "<" => LessThan,
-    ">" => GreaterThan,    
+    "=" => IsEqual,
+    "<" => IsLessThan,
+    ">" => IsGreaterThan,    
     "+" => Add,
     "-" => Sub,
     "*" => Multiply,

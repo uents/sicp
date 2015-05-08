@@ -59,11 +59,17 @@ module Builtin
   end
 
   class Pair
-    attr_reader :first, :last
-
-    def initialize(first, last)
+    def initialize(first, rest)
       @first = first
-      @last = last
+      @rest = rest
+    end
+
+    def car()
+      @first
+    end
+
+    def cdr()
+      @rest
     end
 
     def to_s(paren=true)
@@ -74,12 +80,12 @@ module Builtin
       else
         str += self.first.to_s
       end
-      if self.last == nil
+      if self.rest == nil
         # do nothing
-      elsif self.last.is_a?(Pair)
-        str += ' ' + self.last.to_s(false)
+      elsif self.rest.is_a?(Pair)
+        str += ' ' + self.rest.to_s(false)
       else
-        str += ' . ' + self.last.to_s
+        str += ' . ' + self.rest.to_s
       end
       str += ')' if paren
       str
