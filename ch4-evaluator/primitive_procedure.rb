@@ -53,11 +53,10 @@ module PrimProc
 
   class Cons
     def self.apply(arguments)
-      begin
-        Builtin::Pair.new(arguments[0], arguments[1])
-      rescue
+      if arguments.length != 2
         raise "cons: airty mistatch; " + arguments.to_s
       end
+      Builtin::Pair.new(arguments[0], arguments[1])
     end
   end
 
@@ -95,6 +94,16 @@ module PrimProc
     end
   end
 
+  class Apply
+    def self.apply(arguments)
+      proc = arguments[0]
+      list = arguments[-1].class == Array ?
+               arguments[1..-2] + argments[-1] :
+               arguments[1..-1]
+      proc.apply(list)
+    end
+  end
+
   CATALOG = {
     "=" => IsEqual,
     "<" => IsLessThan,
@@ -107,6 +116,7 @@ module PrimProc
     "car" => Car,
     "cdr" => Cdr,
     "list" => List,
+    "apply" => Apply,
     "print" => Print,
   }
 end
