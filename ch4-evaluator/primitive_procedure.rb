@@ -104,6 +104,29 @@ module PrimProc
     end
   end
 
+  class Map
+    def self.apply(arguments)
+      if arguments.length < 2
+        raise "map: airty mistatch; " + arguments.to_s
+      end
+      proc = arguments[0]
+      lists = arguments[1..-1]
+      self.iter(proc, lists)
+    end
+
+    private
+    def self.iter(proc, lists)
+      if lists[0] == nil
+        nil
+      else
+        firsts = lists.map { |list| list.car }
+        rests = lists.map { |list| list.cdr }
+        Builtin::Pair.new(proc.apply(firsts),
+                          self.iter(proc, rests))
+      end
+    end
+  end
+  
   CATALOG = {
     "=" => IsEqual,
     "<" => IsLessThan,
@@ -117,6 +140,7 @@ module PrimProc
     "cdr" => Cdr,
     "list" => List,
     "apply" => Apply,
+    "map" => Map,
     "print" => Print,
   }
 end
