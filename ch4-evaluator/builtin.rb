@@ -72,17 +72,35 @@ module Builtin
       @rest
     end
 
+    def to_a()
+      list = []
+      if self.car.class == Pair
+        list.push(self.car.to_a)
+      else
+        list.push(self.car)
+      end
+      if self.cdr == nil
+        # do nothing
+      elsif self.cdr.class == Pair
+        list += self.cdr.to_a
+      else
+        list.push(self.cdr.to_a)
+      end
+      pp list
+      list
+    end
+
     def to_s(paren=true)
       str = ''
       str += '(' if paren
-      if self.car.is_a?(Pair)
+      if self.car.class == Pair
         str += self.car.to_s(true)
       else
         str += self.car.to_s
       end
       if self.cdr == nil
         # do nothing
-      elsif self.cdr.is_a?(Pair)
+      elsif self.cdr.class == Pair
         str += ' ' + self.cdr.to_s(false)
       else
         str += ' . ' + self.cdr.to_s

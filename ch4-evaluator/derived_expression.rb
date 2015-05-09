@@ -86,8 +86,7 @@ module DerivedExp
     end
 
     def eval(env)
-      exp = while_to_named_let()
-      exp.eval(env)
+      while_to_named_let().eval(env)
     end
 
     private

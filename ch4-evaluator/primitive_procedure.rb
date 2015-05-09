@@ -96,9 +96,9 @@ module PrimProc
 
   class Apply
     def self.apply(arguments)
-      proc = arguments[0]
-      list = arguments[-1].class == Array ?
-               arguments[1..-2] + argments[-1] :
+      proc = arguments[0] 
+      list = arguments[-1].class == Builtin::Pair ? 
+               arguments[1..-2] + arguments[-1].to_a :
                arguments[1..-1]
       proc.apply(list)
     end
