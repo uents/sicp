@@ -13,11 +13,24 @@ module SpecialForm
   
   class Quote < Base
     def initialize(list)
-      @list = list
+      @list = list.foldr(nil) { |x, y| Builtin::Pair.new(x, y) }
     end
 
     def eval(env)
-      @list
+      iter(@list, env)
+    end
+
+    private
+    def iter(list, env)
+      if list == nil
+        nil
+      else
+        item = list.car.dup
+        if item.class == Builtin::Number || item.class == Builtin::String
+          item = item.eval(env)
+        end
+        Builtin::Pair.new(item, iter(list.cdr, env))
+      end
     end
   end
 

@@ -86,7 +86,6 @@ module Builtin
       else
         list.push(self.cdr.to_a)
       end
-      pp list
       list
     end
 

@@ -82,7 +82,7 @@ module PrimProc
 
   class List
     def self.apply(arguments)
-      arguments.foldr(nil) { |x, y| Cons.apply([x, y]) }
+      arguments.foldr(nil) { |x, y| Builtin::Pair.new(x, y) }
     end
   end
 
