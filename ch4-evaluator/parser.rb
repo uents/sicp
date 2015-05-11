@@ -14,7 +14,7 @@ class Parser
   def self.tokenize(input)
     tokens = input.strip
              .gsub(/\n/, ' ')
-             .gsub('\'(', '(quote (')
+             .gsub(/\'\(([0-9A-Za-z_\+\-\*\/\<\>\s]*)\)/, '(quote (\1))')
              .gsub('(', '( ')
              .gsub(')', ' )')
              .split(' ')
