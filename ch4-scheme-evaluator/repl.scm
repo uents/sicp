@@ -1,15 +1,18 @@
 
 (load "../misc.scm")
-(load "./parser.scm")
+(load "./data_types.scm")
+(load "./environment.scm")
 (load "./evaluator.scm")
+(load "./special_forms.scm")
+(load "./parser.scm")
 
 (define the-global-environment (setup-environment))
 
 (define (repl)
   (input-prompt)
   (let* ((input (read))
-		 (output (eval (parse input)
-					   the-global-environment)))
+		 (output (eval-proc (parse input)
+							the-global-environment)))
 	(output-prompt)
 	(user-print output))
   (repl))
