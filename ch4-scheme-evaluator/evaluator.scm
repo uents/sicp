@@ -1,9 +1,15 @@
 
+;;;; Evaluator
 
 (define (eval proc env)
-  proc)
-;  (proc env))
+  (proc env))
 
+
+;;;; Environment
 
 (define (setup-environment)
-  nil)
+  nil) ;; @@@TODO
+
+(define (lookup-variable-value var env)
+  nil) ;; @@@TODO
+
