@@ -1,9 +1,11 @@
 
-(define (setup-environment)
-  (let ((frame (make-hash)))
-	(define-variable! 'true true)
-	(define-variable! 'false false)
-	(list frame)))
+(define (setup-environment handler)
+  (let* ((frame (make-hash))
+		 (env (list frame)))
+	(if (eq? handler nil)
+		false
+		(handler env))
+	env))
 
 (define (extend-environment vars vals env)
   (with-handlers

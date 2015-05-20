@@ -14,7 +14,7 @@
   (display (format "apply-proc: ~A ~A ~%" proc arguments))
   (let ((tag (car proc)))
 	(cond ((eq? tag 'primitive)
-		   nil) ;; @@@TODO
+		   (apply (primitive-object-proc proc) arguments))
 		  ((eq? tag 'procedure)
 		   (let ((params (cadr proc))
 				 (body   (caddr proc))
