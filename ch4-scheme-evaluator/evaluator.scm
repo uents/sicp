@@ -1,4 +1,9 @@
 
+(define (tagged-list? exp tag)
+  (if (pair? exp)
+	  (eq? (car exp) tag)
+	  false))
+
 ;;; evaluation
 (define (eval-proc proc env)
   (display (format "eval-proc: ~A ~%" proc))
@@ -12,17 +17,16 @@
 ;;; application
 (define (apply-proc proc arguments)
   (display (format "apply-proc: ~A ~A ~%" proc arguments))
-  (let ((tag (car proc)))
-	(cond ((eq? tag 'primitive)
-		   (apply (primitive-object-proc proc) arguments))
-		  ((eq? tag 'procedure)
-		   (let ((params (cadr proc))
-				 (body   (caddr proc))
-				 (env    (cadddr proc)))
-			 (eval-sequence body
-							(extend-environment params arguments env))))
-		  (else
-		   (error "apply: unknown procedure: " proc)))))
+  (cond ((tagged-list? proc 'primitive)
+		 (apply (primitive-object-proc proc) arguments))
+		((tagged-list? proc 'procedure)
+		 (let ((params (cadr proc))
+			   (body   (caddr proc))
+			   (env    (cadddr proc)))
+		   (eval-sequence body
+						  (extend-environment params arguments env))))
+		(else
+		 (error "apply: unknown procedure: " proc))))
 
 (define (make-application exp)
   (let ((proc (parse (car exp)))
