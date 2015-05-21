@@ -1,10 +1,10 @@
 
 (load "../misc.scm")
-(load "./data_types.scm")
+(load "./data-types.scm")
 (load "./environment.scm")
 (load "./evaluator.scm")
-(load "./primitive_procedures.scm")
-(load "./special_forms.scm")
+(load "./primitive-procedures.scm")
+(load "./special-forms.scm")
 (load "./parser.scm")
 
 (define (setup-environment)

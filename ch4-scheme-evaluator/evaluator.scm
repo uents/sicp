@@ -21,8 +21,8 @@
 		 (apply (primitive-object-proc proc) arguments))
 		((tagged-list? proc 'procedure)
 		 (let ((params (cadr proc))
-			   (body   (caddr proc))
-			   (env    (cadddr proc)))
+			   (body (caddr proc))
+			   (env (cadddr proc)))
 		   (eval-sequence body
 						  (extend-environment params arguments env))))
 		(else
