@@ -29,7 +29,7 @@
 		(arguments (map parse (cdr exp))))
 	(lambda (env)
 	  (apply-proc (eval-proc proc env)
-				  (eval-sequence arguments env)))))
+				  (map (lambda (arg) (eval-proc arg env)) arguments)))))
 
 ;;; compound procedure
 (define (make-procedure params body env)
