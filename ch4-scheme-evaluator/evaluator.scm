@@ -28,7 +28,7 @@
 		(else
 		 (error "apply: unknown procedure: " proc))))
 
-(define (make-application exp)
+(define (analyze-application exp)
   (let ((proc (parse (car exp)))
 		(arguments (map parse (cdr exp))))
 	(lambda (env)

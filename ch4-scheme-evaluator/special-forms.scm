@@ -36,7 +36,7 @@
   (let ((params (map analyze (cadr exp)))
 		(body (map analyze (cddr exp))))
 	(lambda (env)
-	  (analyze-procedure params body env))))
+	  (make-procedure params body env))))
 
 ;;; sequence
 (define (analyze-sequence exp)
