@@ -40,7 +40,7 @@
 
 ;;; sequence
 (define (analyze-sequence exp)
-  (analyze-sequence-original exp))
+   (analyze-sequence-original exp))
 ;  (analyze-sequence-by-alyssa exp))
 
 (define (analyze-sequence-original exps)
