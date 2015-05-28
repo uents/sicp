@@ -8,32 +8,32 @@
 ;;          (lambda ()
 ;;            (cc 'no-choise)))))
 
-(define amb-fail
+(define amb-cont
   (lambda ()
 	"there are no more values"))
 
 (define (amb . lst)
   (if (null? lst)
-	  (amb-fail)
-	  (let ((fail amb-fail))
+	  (amb-cont)
+	  (let ((cont amb-cont))
 		(call/cc
 		 (lambda (cc)
-		   (set! amb-fail
+		   (set! amb-cont
 				 (lambda ()
-				   (set! amb-fail fail)
-				   (cc (apply amb (cdr lst)))))
-		   (cc (car lst)))))))
+				   (set! amb-cont cont)
+				   (cc (apply amb (cdr lst))))) ;; 継続に残りの選択子を渡す
+		   (cc (car lst)))))))                  ;; 継続の外に最初の選択肢を出す
 
 ;; (define-syntax amb
 ;;   (syntax-rules ()
-;;     ((_) (amb-fail))
+;;     ((_) (amb-cont))
 ;;     ((_ a) a)
 ;;     ((_ a b ...)
-;;      (let ((fail amb-fail))
+;;      (let ((cont amb-cont))
 ;;        (call/cc
 ;; 		(lambda (cc)
-;; 		  (set! amb-fail
+;; 		  (set! amb-cont
 ;; 				(lambda ()
-;; 				  (set! amb-fail fail)
+;; 				  (set! amb-cont cont)
 ;; 				  (cc (amb b ...))))
 ;; 		  (cc a)))))))
