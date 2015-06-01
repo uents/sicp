@@ -1,39 +1,33 @@
 
-;; (define fail #f)
+;; (define fail false)
 
-;;; initialize fail
 ;; (call/cc
-;;  (lambda (cc)
+;;  (lambda (cont)
 ;;    (set! fail
-;;          (lambda ()
-;;            (cc 'no-choise)))))
+;; 		 (lambda ()
+;; 		   "there are no more values"))))
 
-(define amb-cont
+(define fail-init
   (lambda ()
 	"there are no more values"))
 
-(define (amb . lst)
-  (if (null? lst)
-	  (amb-cont)
-	  (let ((cont amb-cont))
-		(call/cc
-		 (lambda (cc)
-		   (set! amb-cont
-				 (lambda ()
-				   (set! amb-cont cont)
-				   (cc (apply amb (cdr lst))))) ;; 継続に残りの選択子を渡す
-		   (cc (car lst)))))))                  ;; 継続の外に最初の選択肢を出す
+(define fail fail-init)
 
-;; (define-syntax amb
-;;   (syntax-rules ()
-;;     ((_) (amb-cont))
-;;     ((_ a) a)
-;;     ((_ a b ...)
-;;      (let ((cont amb-cont))
-;;        (call/cc
-;; 		(lambda (cc)
-;; 		  (set! amb-cont
-;; 				(lambda ()
-;; 				  (set! amb-cont cont)
-;; 				  (cc (amb b ...))))
-;; 		  (cc a)))))))
+(define-syntax amb
+  (syntax-rules ()
+    ((_)
+	 (begin (set! fail fail-init)
+			"there is no current program"))
+    ((_ first) first)
+    ((_ first second ...)
+     (let ((former-fail fail))
+       (call/cc (lambda (cont)
+				  (set! fail
+						(lambda ()
+						  (set! fail former-fail)
+						  (cont (amb second ...))))
+				  (cont first)))))))
+
+(define-syntax try-again
+  (syntax-rules ()
+	((_) (fail))))
