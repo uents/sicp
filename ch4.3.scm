@@ -1,15 +1,5 @@
 
 
-(define jump false)
-
-(call/cc (lambda (cont)
-		   (set! jump cont)))
-
-(define (require p)
-  (if (not p)
-	  (jump (try-again))
-	  false))
-
 (define (an-element-of items)
   (require (not (null? items)))
   (amb (car items) (an-element-of (cdr items))))
