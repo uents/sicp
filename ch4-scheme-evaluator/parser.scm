@@ -1,6 +1,6 @@
 
 (define (analyze exp)
-  (display (format "parse: ~A ~%" exp))
+  (display (format "analize: ~A ~%" exp))
   (cond ((number? exp) (analyze-number-value exp))
 		((string? exp) (analyze-string-value exp))
 		((symbol? exp) (analyze-variable exp))
@@ -16,4 +16,4 @@
 		;; application
 		((pair? exp) (analyze-application exp))
 		(else
-		 (error "parse: unknown expression: " exp))))
+		 (error "; anaylize: unknown expression: " exp))))

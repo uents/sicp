@@ -18,14 +18,14 @@
 
 (define the-global-environment (setup-environment))
 
-(define (repl)
+(define (driver-loop)
   (input-prompt)
   (let* ((input (read))
-		 (output (eval-proc (parse input)
+		 (output (eval-proc (analyze input)
 							the-global-environment)))
 	(output-prompt)
 	(user-print output))
-  (repl))
+  (driver-loop))
 
 (define (input-prompt)
   (newline)
