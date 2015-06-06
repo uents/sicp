@@ -12,8 +12,8 @@
 		 (env (extend-environment (primitive-procedure-names)
 								  (primitive-procedure-objects)
 								  (list frame))))
-	(define-variable! 'true true env)
-	(define-variable! 'false false env)
+	(define-variable! 'true (lambda (env) true) env)
+	(define-variable! 'false (lambda (env) false) env)
 	env))
 
 (define the-global-environment (setup-environment))

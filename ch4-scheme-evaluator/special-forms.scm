@@ -14,10 +14,12 @@
 ;;; definition
 (define (analyze-definition exp)
   (let ((var (if (symbol? (cadr exp))
-				 (cadr exp) (caadr exp)))
-		(val (analyze (if (symbol? (cadr exp))
-						  (caddr exp)
-						  (analyze-lambda (cdadr exp) (cddr exp))))))
+				 (cadr exp)
+				 (caadr exp)))
+		(val (analyze
+			  (if (symbol? (cadr exp))
+				  (caddr exp)
+				  (cons 'lambda (cons (cdadr exp) (cddr exp)))))))
 	(lambda (env)
 	  (define-variable! var val env))))
 
