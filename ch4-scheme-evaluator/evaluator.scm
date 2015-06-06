@@ -11,8 +11,8 @@
 
 (define (eval-sequence exps env)
   (if (pair? exps)
-	  (last (map (lambda (exp) (eval-proc exp env)) exps))
-	  (eval-proc exps env)))
+	  (last (map (lambda (exp) (exp env)) exps))
+	  (exps env)))
 
 ;;; application
 (define (apply-proc proc arguments)
@@ -32,8 +32,8 @@
   (let ((proc (analyze (car exp)))
 		(arguments (map analyze (cdr exp))))
 	(lambda (env)
-	  (apply-proc (eval-proc proc env)
-				  (map (lambda (arg) (eval-proc arg env)) arguments)))))
+	  (apply-proc (proc env)
+				  (map (lambda (arg) (arg env)) arguments)))))
 
 ;;; compound procedure
 (define (make-procedure params body env)
