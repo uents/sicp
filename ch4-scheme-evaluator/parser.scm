@@ -16,4 +16,12 @@
 		;; application
 		((pair? exp) (analyze-application exp))
 		(else
-		 (error "; anaylize: unknown expression: " exp))))
+		 (analyze-error exp))))
+
+(define (analyze-error exp)
+		 (error "anaylize: unknown expression: " exp))
+
+;; for backtrace
+(require racket/trace)
+(trace analyze-error)
+

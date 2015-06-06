@@ -10,4 +10,5 @@
 ;;; variable
 (define (analyze-variable exp)
   (lambda (env)
-	((lookup-variable-value exp env) env)))
+	(lookup-variable-value exp env)))
+;	((lookup-variable-value exp env) env)))

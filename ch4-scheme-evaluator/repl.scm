@@ -7,6 +7,9 @@
 (load "./special-forms.scm")
 (load "./parser.scm")
 
+(define (true? x) (not (eq? x false)))
+(define (false? x) (eq? x false))
+
 (define (setup-environment)
   (let* ((frame (make-hash))
 		 (env (extend-environment (primitive-procedure-names)
