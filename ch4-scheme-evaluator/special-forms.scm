@@ -9,7 +9,7 @@
   (let ((var (cadr exp))
 		(val (analyze (caddr exp))))
 	(lambda (env)
-	  (set-variable-value! var val env))))
+	  (set-variable-value! var (val env) env))))
 
 ;;; definition
 (define (analyze-definition exp)
@@ -21,7 +21,7 @@
 				  (caddr exp)
 				  (cons 'lambda (cons (cdadr exp) (cddr exp)))))))
 	(lambda (env)
-	  (define-variable! var val env))))
+	  (define-variable! var (val env) env))))
 
 ;;; condition
 (define (analyze-if exp)
