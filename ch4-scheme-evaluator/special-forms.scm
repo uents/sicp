@@ -42,8 +42,8 @@
 
 ;;; sequence
 (define (analyze-sequence exp)
-   (analyze-sequence-original exp))
-;  (analyze-sequence-by-alyssa exp))
+  (analyze-sequence-original (cdr exp)))
+;  (analyze-sequence-by-alyssa (cdr exp)))
 
 (define (analyze-sequence-original exps)
   (define (sequentially proc1 proc2)
