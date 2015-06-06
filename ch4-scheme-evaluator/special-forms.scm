@@ -25,9 +25,9 @@
 
 ;;; condition
 (define (analyze-if exp)
-  (let ((predicate (cadr exp))
-		(consequent (caddr exp))
-		(alternative (cadddr exp)))
+  (let ((predicate (analyze (cadr exp)))
+		(consequent (analyze (caddr exp)))
+		(alternative (analyze (cadddr exp))))
 	(lambda (env)
 	  (if (true? (eval-proc predicate env))
 		  (eval-proc consequent env)
@@ -35,7 +35,7 @@
 
 ;;; lambda
 (define (analyze-lambda exp)
-  (let ((params (map analyze (cadr exp)))
+  (let ((params (cadr exp))
 		(body (map analyze (cddr exp))))
 	(lambda (env)
 	  (make-procedure params body env))))
