@@ -1,14 +1,17 @@
 
 ;;; number
 (define (analyze-number-value exp)
-  (lambda (env) exp))
+  (define (eval-number-value env) exp)
+  eval-number-value)
 
 ;;; string
 (define (analyze-string-value exp)
-  (lambda (env) exp))
+  (define (eval-string-value env) exp)
+  eval-string-value)
 
 ;;; variable
 (define (analyze-variable exp)
-  (lambda (env)
-	(lookup-variable-value exp env)))
-;	((lookup-variable-value exp env) env)))
+  (define (eval-variable env)
+	(lookup-variable-value exp env))
+  eval-variable)
+

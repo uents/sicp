@@ -1,15 +1,17 @@
 
 ;;; quotation
 (define (analyze-quoted exp)
-  (lambda (env)
-	exp)) ;; @@@TODO
+  (let ((val (cadr exp)))
+	(define (eval-quoted env) val)
+	eval-quoted))
 
 ;;; assignment
 (define (analyze-assginment exp)
   (let ((var (cadr exp))
 		(val (analyze (caddr exp))))
-	(lambda (env)
-	  (set-variable-value! var (val env) env))))
+	(define (eval-assginment env)
+	  (set-variable-value! var (val env) env))
+	eval-assginment))
 
 ;;; definition
 (define (analyze-definition exp)
@@ -20,50 +22,29 @@
 			  (if (symbol? (cadr exp))
 				  (caddr exp)
 				  (cons 'lambda (cons (cdadr exp) (cddr exp)))))))
-	(lambda (env)
-	  (define-variable! var (val env) env))))
+	(define (eval-definition env)
+	  (define-variable! var (val env) env))
+	eval-definition))
 
 ;;; condition
 (define (analyze-if exp)
   (let ((predicate (analyze (cadr exp)))
 		(consequent (analyze (caddr exp)))
 		(alternative (analyze (cadddr exp))))
-	(lambda (env)
+	(define (eval-if env)
 	  (if (true? (eval-proc predicate env))
 		  (eval-proc consequent env)
-		  (eval-proc alternative env)))))
+		  (eval-proc alternative env)))
+	eval-if))
 
 ;;; lambda
 (define (analyze-lambda exp)
   (let ((params (cadr exp))
-		(body (map analyze (cddr exp))))
-	(lambda (env)
-	  (make-procedure params body env))))
+		(body (analyze-sequence (cddr exp))))
+	(define (eval-lambda env)
+	  (make-procedure params body env))
+	eval-lambda))
 
-;;; sequence
-(define (analyze-sequence exp)
-  (analyze-sequence-original (cdr exp)))
-;  (analyze-sequence-by-alyssa (cdr exp)))
-
-(define (analyze-sequence-original exps)
-  (define (sequentially proc1 proc2)
-    (lambda (env) (proc1 env) (proc2 env)))
-  (define (loop first-proc rest-procs)
-    (if (null? rest-procs)
-        first-proc
-        (loop (sequentially first-proc (car rest-procs))
-              (cdr rest-procs))))
-  (let ((procs (map analyze exps)))
-    (if (null? procs)
-        (error "Empty sequence -- ANALYZE")
-		(loop (car procs) (cdr procs)))))
-
-(define (analyze-sequence-by-alyssa exps)
-  (define (execute-sequence procs env)
-    (cond ((null? (cdr procs)) ((car procs) env))
-          (else ((car procs) env)
-                (execute-sequence (cdr procs) env))))
-  (let ((procs (map analyze exps)))
-    (if (null? procs)
-        (error "Empty sequence -- ANALYZE")
-		(lambda (env) (execute-sequence procs env)))))
+;;; begin
+(define (analyze-begin exp)
+  (analyze-sequence (cdr exp)))

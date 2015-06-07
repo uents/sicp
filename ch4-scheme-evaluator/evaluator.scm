@@ -31,9 +31,10 @@
 (define (analyze-application exp)
   (let ((proc (analyze (car exp)))
 		(arguments (map analyze (cdr exp))))
-	(lambda (env)
+	(define (eval-application env)
 	  (apply-proc (eval-proc proc env)
-				  (map (lambda (arg) (eval-proc arg env)) arguments)))))
+				  (map (lambda (arg) (eval-proc arg env)) arguments)))
+	eval-application))
 
 ;;; compound procedure
 (define (make-procedure params body env)
