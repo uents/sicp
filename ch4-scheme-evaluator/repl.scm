@@ -5,6 +5,7 @@
 (load "./evaluator.scm")
 (load "./primitive-procedures.scm")
 (load "./special-forms.scm")
+(load "./derived-expressions.scm")
 (load "./parser.scm")
 
 (define (true? x) (not (eq? x false)))
