@@ -228,3 +228,21 @@ frozen
 ;; racket@> (restart)
 ;; 'done
 
+
+;;; ただし、この例は call-cc 使わなくても書ける
+(define (dft-node2 tree)
+  (cond ((null? tree) (restart))
+		((not (pair? tree)) tree)
+		(else (begin
+				(set! *saved*
+					  (cons (lambda () (dft-node2 (cdr tree)))
+							*saved*))
+				(dft-node2 (car tree))))))
+
+;; racket@> (dft-node2 t1)
+;; 'a
+;; racket@> (restart)
+;; 'b
+;; racket@> (restart)
+;; 'c
+;; ...
