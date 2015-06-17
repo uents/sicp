@@ -1,28 +1,32 @@
 
-(define escape false)
+(define *paths* '())
 
-(call/cc (lambda (cont)
-		   (set! escape cont)))
-
-(define (finish)
-  (escape (printf "; there are no more values ~%")))
-
-(define fail finish)
-
-(define (amb . values)
-  (if (null? values)
+(define (choose choices)
+  (if (null? choices)
 	  (fail)
-	  (let ((fail-former fail))
-		(call/cc
-		 (lambda (succeed)
-		   (set! fail (lambda ()
-						(printf "; fail: ~A ~%" (cdr values))
-						(set! fail fail-former)
-						(succeed (apply amb (cdr values)))))
-		   (succeed (begin
-					  (printf "; ok: ~A ~%" (car values))
-					  (car values))))))))
+	  (call/cc
+	   (lambda (cc)
+		 (set! *paths*
+			   (cons (lambda ()
+					   (cc (choose (cdr choices))))
+					 *paths*))
+		 (car choices)))))
 
-(define-syntax try-again
-  (syntax-rules ()
-	((_) (fail))))
+(define fail false)
+
+(call/cc
+ (lambda (cc)
+   (set! fail
+		 (lambda ()
+		   (if (null? *paths*)
+			   (cc '(there are no more values))
+			   (let ((proc (car *paths*)))
+				 (set! *paths* (cdr *paths*))
+				 (proc)))))))
+
+(define (amb . choices)
+  (choose choices))
+
+(define (try-again)
+  (choose '()))
+
