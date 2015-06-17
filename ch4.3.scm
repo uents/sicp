@@ -3,15 +3,13 @@
 
 (load "amb.scm")
 
-;;; SICP本文でのrequireはnecessaryという名前で定義
+;;; SICP本文でのrequireはreqという名前で定義
 
-(define (necessary p)
+(define (req p)
   (if (not p) (amb) false))
 
 (define (an-element-of items)
-  (necessary (not (null? items)))
   (apply amb items))
-
 
 ;;;; 4.3.1 ambと検索
 
@@ -20,12 +18,13 @@
 (define (prime-sum-pair list1 list2)
   (let ((a (an-element-of list1))
         (b (an-element-of list2)))
-	(necessary (prime? (+ a b)))
+	(req (prime? (+ a b)))
     (list a b)))
 
-;(define (an-integer-starting-from n)
-;  (amb n (an-integer-starting-from (+ n 1))))
+;;(prime-sum-pair '(1 3 5 8) '(20 35 110))
 
+;;(define (an-integer-starting-from n)
+;;  (amb n (an-integer-starting-from (+ n 1))))
 
 
 ;;; ex 4.35
