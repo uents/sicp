@@ -1,4 +1,6 @@
 
+(define nil '())
+
 ;;; streamsを使うためにロード
 (require racket/stream)
 

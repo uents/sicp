@@ -1,13 +1,13 @@
 
 
-(define frozen false)
-
 (+ 1
    (call/cc
 	(lambda (cc)
 	  2))
    3)
 ;; => 6
+
+(define frozen false)
 
 (+ 1
    (call/cc
