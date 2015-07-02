@@ -1,32 +1,29 @@
 
-(define *paths* '())
+(define *alternatives* '())
 
 (define (choose choices)
   (if (null? choices)
-	  (fail)
+	  (try-again)
 	  (call/cc
 	   (lambda (cc)
-		 (set! *paths*
-			   (cons (lambda ()
-					   (cc (choose (cdr choices))))
-					 *paths*))
-		 (car choices)))))
+		 (define try-next
+		   (lambda () (cc (choose (cdr choices)))))
+		 (set! *alternatives*
+			   (cons try-next *alternatives*))
+		 (force (car choices))))))
 
-(define fail false)
 
+(define try-again false)
+	
 (call/cc
  (lambda (cc)
-   (set! fail
+   (set! try-again
 		 (lambda ()
-		   (if (null? *paths*)
+		   (if (null? *alternatives*)
 			   (cc '(there are no more values))
-			   (let ((proc (car *paths*)))
-				 (set! *paths* (cdr *paths*))
-				 (proc)))))))
+			   (let ((next (car *alternatives*)))
+				 (set! *alternatives* (cdr *alternatives*))
+				 (next)))))))
 
 (define (amb . choices)
   (choose choices))
-
-(define (try-again)
-  (choose '()))
-
