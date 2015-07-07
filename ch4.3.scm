@@ -173,3 +173,30 @@
 ;; => 544
 
 
+;; ex 4.42
+
+(define (girls-standing)
+  (let ((betty (amb 1 2 3 4 5))
+		(ethel (amb 1 2 3 4 5))
+		(joan (amb 1 2 3 4 5))
+		(kitty (amb 1 2 3 4 5))
+		(mary (amb 1 2 3 4 5)))
+
+	))
+
+;; ex 4.43
+
+(define (yacht-owner)
+  (let ((moore
+		 (cons 'mary 'lorna))
+		(downing
+		 (cons (amb 'lorna 'rosalind 'gabrielle) 'melissa))
+		(hall
+		 (cons (amb 'lorna 'gabrielle) 'rosalind))
+		(barnacle-hood
+		 (cons 'melissa 'gabrielle))
+		(parker
+		 (cons (amb 'lorna 'rosalind 'gabrielle) 'mary)))
+
+	))
+
