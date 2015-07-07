@@ -73,11 +73,11 @@
 
 ;;; ex 4.37
 
-(define *try-count* 0)
+(define *backtrack-count* 0)
 
 (define (req p)
   (if (not p)
-	  (begin (set! *try-count* (+ *try-count* 1))
+	  (begin (set! *backtrack-count* (add1 *backtrack-count*))
 			 (amb))
 	  false))
 
@@ -97,5 +97,79 @@
 ;; ...
 ;; racket@> (try-again)
 ;; => '(there are no more values)
-;; racket@> *try-count*
+;; racket@> *backtrack-count*
 ;; => 225
+
+
+;;;; 4.3.2
+
+;;; ex 4.39
+
+;; - 解そのものには影響しない
+;; - 解が出るまでの時間 (計算回数) には影響する
+;;  => バックトラックの回数を数えればよい
+
+;;; ex 4.40
+
+(define (distinct? items)
+  (cond ((null? items) true)
+        ((null? (cdr items)) true)
+        ((member (car items) (cdr items)) false)
+        (else (distinct? (cdr items)))))
+
+(define (multiple-dwelling)
+  (let ((baker (amb 1 2 3 4 5))
+        (cooper (amb 1 2 3 4 5))
+        (fletcher (amb 1 2 3 4 5))
+        (miller (amb 1 2 3 4 5))
+        (smith (amb 1 2 3 4 5)))
+    (req (distinct? (list baker cooper fletcher miller smith)))
+    (req (not (= baker 5)))
+    (req (not (= cooper 1)))
+    (req (not (= fletcher 5)))
+    (req (not (= fletcher 1)))
+    (req (> miller cooper))
+    (req (not (= (abs (- smith fletcher)) 1)))
+    (req (not (= (abs (- fletcher cooper)) 1)))
+    (list (list 'baker baker)
+          (list 'cooper cooper)
+          (list 'fletcher fletcher)
+          (list 'miller miller)
+          (list 'smith smith))))
+
+;; racket@> (multiple-dwelling)
+;; => '((baker 3) (cooper 2) (fletcher 4) (miller 5) (smith 1))
+;; racket@> (try-again)
+;; => '(there are no more values)
+;; racket@> *backtrack-count*
+;; => 3124
+
+(define (multiple-dwelling-ex)
+  (let ((fletcher (amb 1 2 3 4 5)))
+    (req (not (= fletcher 5)))
+    (req (not (= fletcher 1)))
+	(let ((baker (amb 1 2 3 4 5)))
+	  (req (not (= baker 5)))
+	  (let ((cooper (amb 1 2 3 4 5)))
+		(req (not (= cooper 1)))
+		(let ((miller (amb 1 2 3 4 5)))
+		  (req (> miller cooper))
+		  (let ((smith (amb 1 2 3 4 5)))
+			(req (not (= (abs (- smith fletcher)) 1)))
+			(req (not (= (abs (- fletcher cooper)) 1)))
+			(begin
+			  (req (distinct? (list baker cooper fletcher miller smith)))
+			  (list (list 'baker baker)
+					(list 'cooper cooper)
+					(list 'fletcher fletcher)
+					(list 'miller miller)
+					(list 'smith smith)))))))))
+
+;; racket@> (multiple-dwelling-ex)
+;; => '((baker 3) (cooper 2) (fletcher 4) (miller 5) (smith 1))
+;; racket@> (try-again)
+;; => '(there are no more values)
+;; racket@> *backtrack-count*
+;; => 544
+
+
