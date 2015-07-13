@@ -44,16 +44,15 @@
 (define (an-integer-between low high)
   (an-element-of (enumerate-interval low high)))
 
-
-
-;;; ex 4.36
-
 (define (a-pythagorean-triple-between low high)
   (let ((i (an-integer-between low high)))
 	(let ((j (an-integer-between i high)))
 	  (let ((k (an-integer-between j high)))
 		(req (= (+ (* i i) (* j j)) (* k k)))
 		(list i j k)))))
+
+
+;;; ex 4.36
 
 (define (a-pythagorean-triple)
   (let ((i (an-integer-starting-from 1)))
@@ -181,8 +180,7 @@
 		(joan (amb 1 2 3 4 5))
 		(kitty (amb 1 2 3 4 5))
 		(mary (amb 1 2 3 4 5)))
-
-	))
+	false))
 
 ;; ex 4.43
 
@@ -197,6 +195,5 @@
 		 (cons 'melissa 'gabrielle))
 		(parker
 		 (cons (amb 'lorna 'rosalind 'gabrielle) 'mary)))
-
-	))
+	false))
 
