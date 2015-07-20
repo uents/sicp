@@ -180,20 +180,63 @@
 		(joan (amb 1 2 3 4 5))
 		(kitty (amb 1 2 3 4 5))
 		(mary (amb 1 2 3 4 5)))
-	false))
+	(req (distinct? (list betty ethel joan kitty mary)))
+	(req (xor (= kitty 2) (= betty 3))) ;; betty said
+	(req (xor (= ethel 1) (= joan 2)))  ;; ehtel said
+	(req (xor (= joan 3) (= ethel 5)))  ;; joan said
+	(req (xor (= kitty 2) (= mary 4)))  ;; kitty said
+	(req (xor (= mary 4) (= betty 1)))  ;; mary said
+	(list (list 'betty betty)
+		  (list 'ethel ethel)
+		  (list 'joan joan)
+		  (list 'kitty kitty)
+		  (list 'mary mary))))
+
+;; racket@> (girls-standing)
+;; => '((betty 3) (ethel 5) (joan 2) (kitty 1) (mary 4))
+;; racket@> (try-again)
+;; => '(there are no more values)
+
+
 
 ;; ex 4.43
 
 (define (yacht-owner)
-  (let ((moore
-		 (cons 'mary 'lorna))
-		(downing
-		 (cons (amb 'lorna 'rosalind 'gabrielle) 'melissa))
-		(hall
-		 (cons (amb 'lorna 'gabrielle) 'rosalind))
-		(barnacle-hood
-		 (cons 'melissa 'gabrielle))
-		(parker
-		 (cons (amb 'lorna 'rosalind 'gabrielle) 'mary)))
-	false))
+  (let (;; 「Mary Ann Mooreの父はヨットを持っており」 => 娘はMary
+		;; 「MooreさんのはLorna」 => ヨットはLorna
+		(moore (cons 'mary
+					 'lorna))
+		;; 娘は? => 残りの条件からRosalind, Gabrielle
+		;; 「Downing大佐のMelissaはBarnacle卿の娘の名」 => ヨットはMelissa
+		(downing (cons (amb 'lorna 'rosalind 'gabrielle)
+					   'melissa))
+		;; 娘は? => 残りの条件からLorna, Gabrielle
+		;; 「HallさんのはRosalind」 => ヨットはGabrielle
+		(hall (cons (amb 'lorna 'gabrielle)
+					'rosalind))
+		;; 「Downing大佐のMelissaはBarnacle卿の娘の名」 => 娘はMelissa
+		;; 「Barnacle卿のヨットはGabrielle」 => ヨットはGabrielle
+		(barnacle (cons 'melissa     
+						'gabrielle))
+		;; 「Gabrielleの父のヨットはDr.Parkerの娘から」
+		;;  => ParkerはGabrielleの父ではない
+		;;  => 娘はLorna, Rosalind
+		;; Parker以外はヨットは決まっている
+		;;  => ヨットは残りのMary
+		(parker (cons (amb 'lorna 'rosalind) 'mary)))
+					  
+	(let ((fathers (list moore downing hall barnacle parker)))
+	  ;; 娘は重複しない
+	  (req (distinct? (map car fathers)))
 
+	  ;; 残る条件は「Gabrielleの父のヨットはDr.Parkerの娘から」
+	  (let ((gabrielle-father
+			 (car (filter (lambda (owner) (equal? (car owner) 'gabrielle))
+						  fathers))))
+		(req (equal? (cdr gabrielle-father) (car parker)))
+		
+		(list (list 'moore moore)
+			  (list 'downing downing)
+			  (list 'hall hall)
+			  (list 'barnacle barnacle)
+			  (list 'parker parker))))))
