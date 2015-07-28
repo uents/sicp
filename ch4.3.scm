@@ -172,7 +172,7 @@
 ;; => 544
 
 
-;; ex 4.42
+;;; ex 4.42
 
 (define (girls-standing)
   (let ((betty (amb 1 2 3 4 5))
@@ -199,7 +199,7 @@
 
 
 
-;; ex 4.43
+;;; ex 4.43
 
 (define (yacht-owner)
   (let (;; 「Mary Ann Mooreの父はヨットを持っており」 => 娘はMary
@@ -240,3 +240,4 @@
 			  (list 'hall hall)
 			  (list 'barnacle barnacle)
 			  (list 'parker parker))))))
+
