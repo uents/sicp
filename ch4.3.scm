@@ -348,8 +348,7 @@
 												 (list 6 q6)
 												 (list 7 q7)
 												 (list 8 q8))))
-				  (try-again)
-				  )))))))))
+				  (try-again))))))))))
 							
 (define (safe? k positions)
   (safe-iter? (- k 1) k positions))
