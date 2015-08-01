@@ -454,3 +454,106 @@
 ;; ((1 8) (2 4) (3 1) (4 3) (5 6) (6 2) (7 7) (8 5)) 
 ;; '(there are no more values)
 
+
+
+;;; Parsing natural language
+
+(define nouns '(noun student professor cat class))
+
+(define verbs '(verb studies lectures eats sleeps))
+
+(define articles '(article the a)) ;; 冠詞
+
+(define prepositions '(prep for to in by with)) ;; 前置詞
+
+
+(define (parse-word word-list)
+  (req (not (null? *unparsed*)))
+  (req (memq (car *unparsed*) (cdr word-list)))
+  (let ((found-word (car *unparsed*)))
+	(set! *unparsed* (cdr *unparsed*))
+	(list (car word-list) found-word)))
+
+(define *unparsed* '())
+
+(define (parse input)
+  (set! *unparsed* input)
+  (let ((sent (parse-sentence)))
+	(req (null? *unparsed*))
+	sent))
+
+;; (define (parse-sentence)
+;;   (list 'sentence
+;; 		(parse-noun-phrase)
+;; 		(parse-word verbs)))
+
+(define (parse-sentence)
+  (list 'sentence
+		(parse-noun-phrase)
+		(parse-verb-phrase)))
+
+(define (parse-noun-phrase)
+  (list 'noun-phrase
+		(parse-word articles)
+		(parse-word nouns)))
+
+(define (parse-prepositional-phrase)
+  (list 'prep-phrase
+		(parse-word prepositions)
+		(parse-noun-phrase)))
+
+(define (parse-verb-phrase)
+  (define (maybe-extend verb-phrase)
+	(amb verb-phrase
+		 (delay (maybe-extend (list 'verb-phrase
+									verb-phrase
+									(parse-prepositional-phrase))))))
+  (maybe-extend (parse-word verbs)))
+
+(define (parse-simple-noun-phrase)
+  (list 'simple-noun-phrase
+		(parse-word articles)
+		(parse-word nouns)))
+
+(define (parse-noun-phrase)
+  (define (maybe-extend noun-phrase)
+	(amb noun-phrase
+		 (delay (maybe-extend (list 'noun-phrase
+									noun-phrase
+									(parse-prepositional-phrase))))))
+  (maybe-extend (parse-simple-noun-phrase)))
+
+;; racket@> (parse '(the cat eats))
+;; => '(sentence (noun-phrase (article the) (noun cat)) (verb eats))
+
+;; racket@> (parse '(the student in the cat sleeps))
+;; => '(sentence
+;;      (noun-phrase
+;;       (simple-noun-phrase (article the) (noun student))
+;;       (prep-phrase (prep in) (simple-noun-phrase (article the) (noun cat))))
+;;      (verb sleeps))
+
+;; racket@> (parse '(the student with the cat sleeps in the class))
+;; => '(sentence
+;;      (noun-phrase
+;;       (simple-noun-phrase (article the) (noun student))
+;;       (prep-phrase (prep with) (simple-noun-phrase (article the) (noun cat))))
+;;      (verb-phrase
+;;       (verb sleeps)
+;;       (prep-phrase (prep in) (simple-noun-phrase (article the) (noun class)))))
+;; 
+;; racket@> (try-again)
+;; => '(there are no more values)
+
+
+;; racket@> (parse '(the professor lectures to the student with the cat))
+;; => '(sentence
+;;      (simple-noun-phrase (article the) (noun professor))
+;;      (verb-phrase
+;;       (verb-phrase
+;;        (verb lectures)
+;;        (prep-phrase (prep to) (simple-noun-phrase (article the) (noun student))))
+;;       (prep-phrase (prep with) (simple-noun-phrase (article the) (noun cat)))))
+;; racket@> (try-again)
+;; => '(there are no more values)  ;; もう1つの解が出ない...
+
