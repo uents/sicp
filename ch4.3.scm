@@ -202,28 +202,11 @@
 ;;; ex 4.43
 
 (define (yacht-owner)
-  (let (;; 「Mary Ann Mooreの父はヨットを持っており」 => 娘はMary
-		;; 「MooreさんのはLorna」 => ヨットはLorna
-		(moore (cons 'mary
-					 'lorna))
-		;; 娘は? => 残りの条件からRosalind, Gabrielle
-		;; 「Downing大佐のMelissaはBarnacle卿の娘の名」 => ヨットはMelissa
-		(downing (cons (amb 'lorna 'rosalind 'gabrielle)
-					   'melissa))
-		;; 娘は? => 残りの条件からLorna, Gabrielle
-		;; 「HallさんのはRosalind」 => ヨットはGabrielle
-		(hall (cons (amb 'lorna 'gabrielle)
-					'rosalind))
-		;; 「Downing大佐のMelissaはBarnacle卿の娘の名」 => 娘はMelissa
-		;; 「Barnacle卿のヨットはGabrielle」 => ヨットはGabrielle
-		(barnacle (cons 'melissa     
-						'gabrielle))
-		;; 「Gabrielleの父のヨットはDr.Parkerの娘から」
-		;;  => ParkerはGabrielleの父ではない
-		;;  => 娘はLorna, Rosalind
-		;; Parker以外はヨットは決まっている
-		;;  => ヨットは残りのMary
-		(parker (cons (amb 'lorna 'rosalind) 'mary)))
+  (let ((moore    (cons 'mary 'lorna))
+		(downing  (cons (amb 'lorna 'rosalind 'gabrielle) 'melissa))
+		(hall     (cons (amb 'lorna 'gabrielle) 'rosalind))
+		(barnacle (cons 'melissa 'gabrielle))
+		(parker   (cons (amb 'lorna 'rosalind) 'mary)))
 					  
 	(let ((fathers (list moore downing hall barnacle parker)))
 	  ;; 娘は重複しない
@@ -240,6 +223,15 @@
 			  (list 'hall hall)
 			  (list 'barnacle barnacle)
 			  (list 'parker parker))))))
+
+;; racket@> (yacht-owner)
+;; '((moore (mary . lorna))
+;;   (downing (lorna . melissa))
+;;   (hall (gabrielle . rosalind))
+;;   (barnacle (melissa . gabrielle))
+;;   (parker (rosalind . mary)))
+;; racket@> (try-again)
+;; '(there are no more values)
 
 
 ;;; ex 4.44
