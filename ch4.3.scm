@@ -455,3 +455,46 @@
 ;; ((1 8) (2 4) (3 1) (4 3) (5 6) (6 2) (7 7) (8 5)) 
 ;; '(there are no more values)
 
+
+
+;;; Parsing natural language
+
+(define nouns '(noun student professor cat class))
+
+(define verbs '(verb studies lectures eats sleeps))
+
+(define articles '(article the a)) ;; 冠詞
+
+
+;; ;; output of parse
+;; '(sentence (noun-phrase (article the) (noun cat))
+;;  		   (verb eats))
+
+(define (parse-sentence)
+  (list 'sentence
+		(parse-noun-phrase)
+		(parse-word verbs)))
+
+(define (parse-noun-phrase)
+  (list 'noun-phrase
+		(parse-word articles)
+		(parse-word nouns)))
+
+(define (parse-word word-list)
+  (req (not (null? *unparsed*)))
+  (req (memq (car *unparsed*) (cdr word-list)))
+  (let ((found-word (car *unparsed*)))
+	(set! *unparsed* (cdr *unparsed*))
+	(list (car word-list) found-word)))
+
+(define *unparsed* '())
+
+(define (parse input)
+  (set! *unparsed* input)
+  (let ((sent (parse-sentence)))
+	(req (null? *unparsed*))
+	sent))
+
+
+
+
