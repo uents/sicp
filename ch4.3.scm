@@ -504,7 +504,7 @@
 
 (define (parse-verb-phrase)
   (define (maybe-extend verb-phrase)
-	(amb (delay verb-phrase)
+	(amb verb-phrase
 		 (delay (maybe-extend (list 'verb-phrase
 									verb-phrase
 									(parse-prepositional-phrase))))))
@@ -517,7 +517,7 @@
 
 (define (parse-noun-phrase)
   (define (maybe-extend noun-phrase)
-	(amb (delay noun-phrase)
+	(amb noun-phrase
 		 (delay (maybe-extend (list 'noun-phrase
 									noun-phrase
 									(parse-prepositional-phrase))))))
@@ -555,4 +555,5 @@
 ;;        (prep-phrase (prep to) (simple-noun-phrase (article the) (noun student))))
 ;;       (prep-phrase (prep with) (simple-noun-phrase (article the) (noun cat)))))
 ;; racket@> (try-again)
-;; => '(there are no more values)  ;; 上手くうごいていないのか、もう1つの解が出ない...
+;; => '(there are no more values)  ;; もう1つの解が出ない...
+
