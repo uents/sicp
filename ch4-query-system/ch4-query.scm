@@ -651,4 +651,30 @@
       (or (supervisor ?staff-person ?boss)
           (and (supervisor ?staff-person ?middle-manager)
                (outranked-by ?middle-manager ?boss))))
+
+;; from ex 4.57
+(rule (replace ?person-1 ?person-2)
+	  (and (job ?person-1 ?job-1)
+		   (job ?person-2 ?job-2)
+		   (or (same ?job-1 ?job-2)
+			   (can-do-job ?job-1 ?job-2))
+		   (not (same ?person-1 ?person-2))))
+
+;; from ex 4.58
+(rule (big-shot ?person)
+	  (and (supervisor ?person ?boss)
+		   (not (replace ?boss ?person))))
+
+;; from ex 4.59
+(meeting accounting (Monday 9am))
+(meeting administration (Monday 10am))
+(meeting computer (Wednesday 3pm))
+(meeting administration (Friday 1pm))
+(meeting whole-company (Wednesday 4pm))
+
+(rule (meeting-time ?person ?day-and-time)
+	  (or (and (job ?person (?section . ?type))
+			   (meeting ?section ?day-and-time))
+		  (meeting whole-company ?day-and-time)))
 ))
+
