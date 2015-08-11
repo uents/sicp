@@ -1,7 +1,7 @@
 
 ### 使い方
 
-Racket Shellで以下のように入力する。
+Racket REPLで以下のように入力する。
 
 ```scheme
 racket@> (load "start.scm")

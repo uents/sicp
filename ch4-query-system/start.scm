@@ -1,4 +1,3 @@
-
 (require r5rs)
 (load "../streams.scm")
 (load "ch4-query.scm")

@@ -19,6 +19,18 @@
 (define input-prompt ";;; Query input:")
 (define output-prompt ";;; Query results:")
 
+(define (instantiate exp frame unbound-var-handler)
+  (define (copy exp)
+    (cond ((var? exp)
+           (let ((binding (binding-in-frame exp frame)))
+             (if binding
+                 (copy (binding-value binding))
+                 (unbound-var-handler exp frame))))
+          ((pair? exp)
+           (cons (copy (car exp)) (copy (cdr exp))))
+          (else exp)))
+  (copy exp))
+
 (define (query-driver-loop)
   (prompt-for-input input-prompt)
   (let ((q (query-syntax-process (read))))
@@ -41,17 +53,6 @@
              (qeval q (singleton-stream '()))))
            (query-driver-loop)))))
 
-(define (instantiate exp frame unbound-var-handler)
-  (define (copy exp)
-    (cond ((var? exp)
-           (let ((binding (binding-in-frame exp frame)))
-             (if binding
-                 (copy (binding-value binding))
-                 (unbound-var-handler exp frame))))
-          ((pair? exp)
-           (cons (copy (car exp)) (copy (cdr exp))))
-          (else exp)))
-  (copy exp))
 
 
 ;;;SECTION 4.4.4.2
@@ -124,7 +125,7 @@
 ;;(put 'lisp-value 'qeval lisp-value)
 
 (define (execute exp)
-  (apply (eval (predicate exp) user-initial-environment)
+  (apply (eval (predicate exp) (interaction-environment))
          (args exp)))
 
 (define (always-true ignore frame-stream) frame-stream)
@@ -279,13 +280,13 @@
   (store-assertion-in-index assertion)
   (let ((old-assertions THE-ASSERTIONS))
     (set! THE-ASSERTIONS
-          (cons-stream assertion old-assertions))
+          (stream-cons assertion old-assertions))
     'ok))
 
 (define (add-rule! rule)
   (store-rule-in-index rule)
   (let ((old-rules THE-RULES))
-    (set! THE-RULES (cons-stream rule old-rules))
+    (set! THE-RULES (stream-cons rule old-rules))
     'ok))
 
 (define (store-assertion-in-index assertion)
@@ -295,7 +296,7 @@
                (get-stream key 'assertion-stream)))
           (put key
                'assertion-stream
-               (cons-stream assertion
+               (stream-cons assertion
                             current-assertion-stream))))))
 
 (define (store-rule-in-index rule)
@@ -306,7 +307,7 @@
                  (get-stream key 'rule-stream)))
             (put key
                  'rule-stream
-                 (cons-stream rule
+                 (stream-cons rule
                               current-rule-stream)))))))
 
 (define (indexable? pat)
@@ -326,14 +327,14 @@
 (define (stream-append-delayed s1 delayed-s2)
   (if (stream-null? s1)
       (force delayed-s2)
-      (cons-stream
+      (stream-cons
        (stream-car s1)
        (stream-append-delayed (stream-cdr s1) delayed-s2))))
 
 (define (interleave-delayed s1 delayed-s2)
   (if (stream-null? s1)
       (force delayed-s2)
-      (cons-stream
+      (stream-cons
        (stream-car s1)
        (interleave-delayed (force delayed-s2)
                            (delay (stream-cdr s1))))))
@@ -350,7 +351,7 @@
 
 
 (define (singleton-stream x)
-  (cons-stream x the-empty-stream))
+  (stream-cons x the-empty-stream))
 
 
 ;;;SECTION 4.4.4.7
@@ -473,7 +474,7 @@
 (define (stream-map proc s)
   (if (stream-null? s)
       the-empty-stream
-      (cons-stream (proc (stream-car s))
+      (stream-cons (proc (stream-car s))
                    (stream-map proc (stream-cdr s)))))
 
 (define (stream-for-each proc s)
@@ -491,7 +492,7 @@
 (define (stream-filter pred stream)
   (cond ((stream-null? stream) the-empty-stream)
         ((pred (stream-car stream))
-         (cons-stream (stream-car stream)
+         (stream-cons (stream-car stream)
                       (stream-filter pred
                                      (stream-cdr stream))))
         (else (stream-filter pred (stream-cdr stream)))))
@@ -499,13 +500,13 @@
 (define (stream-append s1 s2)
   (if (stream-null? s1)
       s2
-      (cons-stream (stream-car s1)
+      (stream-cons (stream-car s1)
                    (stream-append (stream-cdr s1) s2))))
 
 (define (interleave s1 s2)
   (if (stream-null? s1)
       s2
-      (cons-stream (stream-car s1)
+      (stream-cons (stream-car s1)
                    (interleave s2 (stream-cdr s1)))))
 
 ;;;;Table support from Chapter 3, Section 3.3.3 (local tables)
