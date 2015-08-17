@@ -136,9 +136,13 @@
 ;;;Finding Assertions by Pattern Matching
 
 (define (find-assertions pattern frame)
-  (stream-flatmap (lambda (datum)
-                    (check-an-assertion datum pattern frame))
-                  (fetch-assertions pattern frame)))
+  (let ((a (stream-flatmap (lambda (datum)
+							 (check-an-assertion datum pattern frame))
+						   (fetch-assertions pattern frame))))
+	(newline)
+	(display "find-assertions: ")
+	(display-stream a)
+	a))
 
 (define (check-an-assertion assertion query-pat query-frame)
   (let ((match-result
@@ -398,7 +402,9 @@
       (caddr rule)))
 
 (define (query-syntax-process exp)
-  (map-over-symbols expand-question-mark exp))
+  (let ((q (map-over-symbols expand-question-mark exp)))
+	(display (format "query-syntax-process: ~a ~%" q))
+	q))
 
 (define (map-over-symbols proc exp)
   (cond ((pair? exp)
