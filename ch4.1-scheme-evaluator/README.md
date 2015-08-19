@@ -16,7 +16,7 @@ racket@> (driver-loop)
 
 ```
 
-(3). For example, input scheme code as below.
+### Examples
 
 ```scheme
 ;;; M-Eval input:

@@ -4,7 +4,7 @@
 - Bundler 
 - rbenv
 
-### Setup & Run
+### Setup
 
 (1). install ruby.
 
@@ -20,13 +20,17 @@
 % bundle install --path vendor/bundle
 ```
 
-(3). start pry and load evaluator.
+### Run
+
+start pry and load evaluator.
 
 ```sh
 % bundle exec pry
 [1] pry(main)> load "repl.rb"
 >
 ```
+
+### Examples
 
 `>` is REPL prompt. for example, input scheme code as below.
 

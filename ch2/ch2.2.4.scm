@@ -5,29 +5,9 @@
 ;;;;
 ;;;; Author: @uents on twitter
 ;;;;
-;;;; Usage:
-;;;;
-;;;; 0. Setup Geiser on Emacs
-;;;;     M-x package-install geiser
-;;;;
-;;;; 1. Download source codes
-;;;;     git clone https://github.com/uents/sicp.git
-;;;;
-;;;; 2. Start Emacs and Racket REPL (M-x run-racket)
-;;;;
-;;;; 3. Executes below commands on Racket REPL
-;;;;
-;;;;   (load "ch2.2.4.scm")
-;;;;   (open-canvas)
-;;;;   (draw wave)
-;;;;   (clear-canvas)
-;;;;   (draw (corner-split wave 4))
-;;;;   (clear-canvas)
-;;;;   (draw (square-limit wave 4))
-;;;;   ....
-;;;;
 
 (load-relative "../misc.scm")
+
 
 ;;;; Vector (ex. 2.46)
 
