@@ -1,3 +1,5 @@
+;;;; #lang racket
+
 (module misc racket
   (provide (all-defined-out))
 
@@ -17,3 +19,5 @@
 		(cons low (enumerate-interval (+ low 1) high))))
 
   )
+
+(require 'misc)
