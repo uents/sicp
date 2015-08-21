@@ -92,6 +92,42 @@ racket@> (display-stream (accelerated-sequence euler-transform pi-stream))
 							 (sqrt-improve guess x))
 						   (sqrt-stream-2 x))))
 
+;; 実行結果は以下の通り。
+;; 後者のguessを使わない方は、繰り返しsqrt-streamが
+;; 呼ばれてストリームが生成される。
+;; ただしメモ化しないストリームでは、guessを使う場合でも
+;; 繰り返しsqrt-streamが呼ばれてしまうため、効率に差はなくなる。
+
+
+#|
+racket@> (stream-ref (sqrt-stream-1 2) 5)
+guess=1.0 
+guess=1.5 
+guess=1.4166666666666665 
+guess=1.4142156862745097 
+guess=1.4142135623746899 
+1.414213562373095
+
+racket@> (stream-ref (sqrt-stream-2 2) 5)
+guess=1.0 
+guess=1.0 
+guess=1.5 
+guess=1.0 
+guess=1.5 
+guess=1.4166666666666665 
+guess=1.0 
+guess=1.5 
+guess=1.4166666666666665 
+guess=1.4142156862745097 
+guess=1.0 
+guess=1.5 
+guess=1.4166666666666665 
+guess=1.4142156862745097 
+guess=1.4142135623746899 
+1.414213562373095
+|#
+
+
 ;;; ex 3.64
 
 (define (sqrt x tolerance)
