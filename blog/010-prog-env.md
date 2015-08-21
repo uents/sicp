@@ -94,11 +94,11 @@ Emacsを開き```M-x run-racket```とすると、Racketが起動する。
 
 ![RacketをEmacsで起動](https://farm3.staticflickr.com/2929/14423624370_8f74e98a57_o_d.png)
 
-あとはSchemeのコードを書いていけば良いし、ファイルを読み込みたい場合は```(load "foo.scm")``` とすればよいです。
+あとはSchemeのコードを書いていけば良いし、ファイルを読み込みたい場合は```(load-relative "foo.scm")``` とすればよいです。
 
 また、
 
-- 拡張子が.scmの場合、major-modeはScheme、minor-modeはRacketとなる
+- 拡張子が`.scm`の場合、major-modeはScheme、minor-modeはRacketとなる
 - Auto Complete Modeを事前に導入していると、minor-modeにAuto Completeが追加される
 
 
