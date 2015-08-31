@@ -60,6 +60,32 @@
 		  (enumerate-interval 1 (- i 1))))
    (enumerate-interval 1 n)))
 
+
+;; flatmapのテスト
+(flatmap (lambda (x) (begin
+					   (display (format "~a ~%" x))
+					   x))
+		 (list (list 1 2) (list 3) (list 4 5 6)))
+;; (1 2) 
+;; (3) 
+;; (4 5 6) 
+;;=> '(1 2 3 4 5 6)
+
+(flatmap (lambda (x)
+		   (map (lambda (y) (* y 2)) x))
+		 (list (list 1 2) (list 3) (list 4 5 6)))
+;;=> '(2 4 6 8 10 12)
+
+(flatmap (lambda (x) (begin
+					   (display (format "~a ~%" x))
+					   x))
+		 (list (list 1 2) (list 3 (list 4 5)) (list (list 7) 8 9)))
+;; (1 2) 
+;; (3 (4 5)) 
+;; ((7) 8 9) 
+;;=> '(1 2 3 (4 5) (7) 8 9)
+
+
 ;; prime?を借りるためにロード
 (require math/number-theory)
 
