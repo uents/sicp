@@ -62,12 +62,12 @@
 
   ;; from ex 3.50
   (define (stream-map proc . argstreams)
-	(if (stream-null? (car argstreams))
-		the-empty-stream
-		(cons-stream
-		 (apply proc (map stream-car argstreams))
-		 (apply stream-map
-				(cons proc (map stream-cdr argstreams))))))
+  	(if (stream-null? (car argstreams))
+  		the-empty-stream
+  		(cons-stream
+  		 (apply proc (map stream-car argstreams))
+  		 (apply stream-map
+  				(cons proc (map stream-cdr argstreams))))))
 
   (define (list->stream sequence)
 	(if (null? sequence)
@@ -93,18 +93,3 @@
   )
 
 (require 'streams)
-
-
-;;; @NOTE reackt/streamを使う場合
-;;; - cons-stream : stream-consが特殊形式のためマクロで再定義
-;;; - stream-car, stream-cdr, stream-null?, the-stream-empty : SICPの名前に合わせて定義
-;;; - stream-ref, stream-map, stream-filter など : racket/streamに含まれている
-
-;; (require racket/stream)
-;; (define-syntax cons-stream
-;;   (syntax-rules ()
-;; 	((cons-stream a b) (stream-cons a b))))
-;; (define stream-car stream-first)
-;; (define stream-cdr stream-rest)
-;; (define stream-null? stream-empty?)
-;; (define the-empty-stream empty-stream)
