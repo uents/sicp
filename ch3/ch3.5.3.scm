@@ -305,14 +305,148 @@ racket@> (filter
 '((14 (4 4)) (22 (4 5)) (38 (4 6)) (54 (4 7)))
 |#
 
-a
+(define (pairs-index i j)
+  (letrec ((iter (lambda (i j)
+				   (cond ((> i j) (error "unexpected index " i j))
+						 ((and (= i 0) (= j 0)) 0)
+						 ((= i j) (+ (iter (- i 1) (- j 1)) (expt 2 i)))
+						 ((= i (- j 1)) (+ (iter i (- j 1)) (expt 2 i)))
+						 (else (+ (iter i (- j 1)) (expt 2 (+ i 1))))))))
+	(iter (- i 1) (- j 1))))
+
+#|
+racket@> (pairs-index 1 100)
+197
+racket@> (pairs-index 99 100)
+950737950171172051122527404030
+racket@> (pairs-index 100 100)
+1267650600228229401496703205374
+
+;; 答え合わせ
+
+racket@> (stream-ref (pairs integers integers) 197)
+=> '(1 100)
+racket@> (stream-ref (pairs integers integers) 950737950171172051122527404030)
+=> いくら待っても返らない...
+
+|#
+
+
 ;;; ex 3.67
+
+(define (pairs-ex s t)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (interleave
+	(interleave
+	 (stream-map (lambda (x) (list (stream-car s) x))
+				 (stream-cdr t))
+	 (stream-map (lambda (x) (list x (stream-car t)))
+				 (stream-cdr s)))
+	(pairs (stream-cdr s) (stream-cdr t)))))
+
+#|
+racket@> (map (lambda (k)
+				(let ((p (stream-ref (pairs-ex integers integers) k)))
+				  (cons k (list p))))
+			  (enumerate-interval 0 25))
+'((0 (1 1))
+  (1 (1 2))
+  (2 (2 2))
+  (3 (2 1))
+  (4 (2 3))
+  (5 (1 3))
+  (6 (3 3))
+  (7 (3 1))
+  (8 (2 4))
+  (9 (1 4))
+  (10 (3 4))
+  (11 (4 1))
+  (12 (2 5))
+  (13 (1 5))
+  (14 (4 4))
+  (15 (5 1))
+  (16 (2 6))
+  (17 (1 6))
+  (18 (3 5))
+  (19 (6 1))
+  (20 (2 7))
+  (21 (1 7))
+  (22 (4 5))
+  (23 (7 1))
+  (24 (2 8))
+  (25 (1 8)))
+|#
+
 
 ;;; ex 3.68
 
+;; interleaveの呼び出しが無限に続き、処理が返らない
+
+
 ;;; ex 3.69
 
+(define (triples s t u)
+  (cons-stream
+   (list (stream-car s) (stream-car t) (stream-car u))
+   (interleave
+	(stream-map (lambda (x) (flatten (list (stream-car u) x)))
+				(pairs (stream-cdr s) (stream-cdr t)))
+	(triples (stream-cdr s) (stream-cdr t) (stream-cdr u)))))
+
+#|
+racket@> (map (lambda (k)
+				(let ((p (stream-ref (triples integers integers integers) k)))
+				  (cons k (list p))))
+			  (enumerate-interval 0 25))
+'((0 (1 1 1))
+  (1 (1 2 2))
+  (2 (2 2 2))
+  (3 (1 2 3))
+  (4 (2 3 3))
+  (5 (1 3 3))
+  (6 (3 3 3))
+  (7 (1 2 4))
+  (8 (2 3 4))
+  (9 (1 3 4))
+  (10 (3 4 4))
+  (11 (1 2 5))
+  (12 (2 4 4))
+  (13 (1 4 4))
+  (14 (4 4 4))
+  (15 (1 2 6))
+  (16 (2 3 5))
+  (17 (1 3 5))
+  (18 (3 4 5))
+  (19 (1 2 7))
+  (20 (2 4 5))
+  (21 (1 4 5))
+  (22 (4 5 5))
+  (23 (1 2 8))
+  (24 (2 3 6))
+  (25 (1 3 6)))
+|#
+
+(define pythagoras
+  (stream-filter (lambda (triple)
+				   (= (+ (expt (car triple) 2) (expt (cadr triple) 2))
+					  (expt (caddr triple) 2)))
+				 (triples integers integers integers)))
+
+#|
+racket@> (map (lambda (n)
+			    (stream-ref pythagoras n))
+			  (enumerate-interval 0 3))
+'((3 4 5) (6 8 10) (5 12 13) (9 12 15))
+|#
+
+;; ただし (triples integers integers integers) が重いため
+;; (stream-ref pythagoras 6) あたりから返ってこなくなる..
+
+
 ;;; ex 3.70
+
+
 
 ;;; ex 3.71
 
