@@ -554,6 +554,27 @@ racket@> (map (lambda (n) (stream-ref p2 n))
 
 ;;; ex 3.71
 
+(define (cube n) (* n n n))
+
+(define (sum-of-cube pair)
+  (+ (cube (car pair)) (cube (cadr pair))))
+
+(define sum-of-cube-pairs
+  (weight-pairs integers integers sum-of-cube))
+
+(define (ramanujan s)
+  (let* ((s1 (stream-car s))
+		 (s2 (stream-car (stream-cdr s)))
+		 (w1 (sum-of-cube s1))
+		 (w2 (sum-of-cube s2)))
+	(if (= w1 w2)
+		(cons-stream (list w1 s1 s2)
+					 (ramanujan (stream-cdr s)))
+		(ramanujan (stream-cdr s)))))
+
+(define ramanujan-numbers
+  (ramanujan sum-of-cube-pairs))
+
 
 ;;; ex 3.72
 
