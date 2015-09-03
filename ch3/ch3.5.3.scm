@@ -572,9 +572,56 @@ racket@> (map (lambda (n) (stream-ref p2 n))
 (define ramanujan-numbers
   (ramanujan (weight-pairs integers integers sum-of-cube)))
 
+#|
+racket@> (map (lambda (k) (stream-ref ramanujan-numbers k))
+			  (enumerate-interval 0 4))
+'((1729 (1 12) (9 10))
+  (4104 (2 16) (9 15))
+  (13832 (2 24) (18 20))
+  (20683 (10 27) (19 24))
+  (32832 (4 32) (18 30)))
+|#
 
 ;;; ex 3.72
 
+(define (sum-of-square pair)
+  (+ (square (car pair)) (square (cadr pair))))
+
+(define (sum-of-squares s)
+  (let* ((s1 (stream-car s))
+		 (s2 (stream-car (stream-cdr s)))
+		 (s3 (stream-car (stream-cdr (stream-cdr s))))
+		 (w1 (sum-of-square s1))
+		 (w2 (sum-of-square s2))
+		 (w3 (sum-of-square s3)))
+	(if (= w1 w2 w3)
+		(cons-stream (list w1 s1 s2 s3)
+					 (sum-of-squares (stream-cdr s)))
+		(sum-of-squares (stream-cdr s)))))
+
+(define sum-of-square-numbers
+  (sum-of-squares (weight-pairs integers integers sum-of-square)))
+
+#|
+racket@> (map (lambda (k) (stream-ref sum-of-square-numbers k))
+			  (enumerate-interval 0 15))
+'((325 (1 18) (6 17) (10 15))
+  (425 (5 20) (8 19) (13 16))
+  (650 (5 25) (11 23) (17 19))
+  (725 (7 26) (10 25) (14 23))
+  (845 (2 29) (13 26) (19 22))
+  (850 (3 29) (11 27) (15 25))
+  (925 (5 30) (14 27) (21 22))
+  (1025 (1 32) (8 31) (20 25))
+  (1105 (4 33) (9 32) (12 31))
+  (1105 (9 32) (12 31) (23 24))
+  (1250 (5 35) (17 31) (25 25))
+  (1300 (2 36) (12 34) (20 30))
+  (1325 (10 35) (13 34) (22 29))
+  (1445 (1 38) (17 34) (22 31))
+  (1450 (9 37) (15 35) (19 33))
+  (1525 (2 39) (9 38) (25 30)))
+|#
 
 
 ;;;; 信号としてのストリーム
