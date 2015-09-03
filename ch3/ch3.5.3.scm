@@ -559,9 +559,6 @@ racket@> (map (lambda (n) (stream-ref p2 n))
 (define (sum-of-cube pair)
   (+ (cube (car pair)) (cube (cadr pair))))
 
-(define sum-of-cube-pairs
-  (weight-pairs integers integers sum-of-cube))
-
 (define (ramanujan s)
   (let* ((s1 (stream-car s))
 		 (s2 (stream-car (stream-cdr s)))
@@ -573,7 +570,7 @@ racket@> (map (lambda (n) (stream-ref p2 n))
 		(ramanujan (stream-cdr s)))))
 
 (define ramanujan-numbers
-  (ramanujan sum-of-cube-pairs))
+  (ramanujan (weight-pairs integers integers sum-of-cube)))
 
 
 ;;; ex 3.72
