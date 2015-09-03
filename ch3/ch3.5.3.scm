@@ -446,9 +446,114 @@ racket@> (map (lambda (n)
 
 ;;; ex 3.70
 
+(define (merge-weighted s1 s2 weight)
+  (cond ((stream-null? s1) s2)
+		((stream-null? s2) s1)
+		(else
+		 (let* ((s1-car (stream-car s1))
+				(s2-car (stream-car s2))
+				(w1 (weight s1-car))
+				(w2 (weight s2-car)))
+		   (if (<= w1 w2)
+			   (cons-stream s1-car
+							(merge-weighted (stream-cdr s1) s2 weight))
+			   (cons-stream s2-car
+							(merge-weighted s1 (stream-cdr s2) weight)))))))
+
+(define (weight-pairs s t weight)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (merge-weighted
+	(stream-map (lambda (x) (list (stream-car s) x))
+				(stream-cdr t))
+	(weight-pairs (stream-cdr s) (stream-cdr t) weight)
+	weight)))
+
+;; a.
+(define p1
+  (weight-pairs integers integers
+				(lambda (pair) (+ (car pair) (cadr pair)))))
+
+#|
+racket@> (map (lambda (n) (stream-ref p1 n))
+			  (enumerate-interval 0 24))
+'((1 1)
+  (1 2)
+  (1 3)
+  (2 2)
+  (1 4)
+  (2 3)
+  (1 5)
+  (2 4)
+  (3 3)
+  (1 6)
+  (2 5)
+  (3 4)
+  (1 7)
+  (2 6)
+  (3 5)
+  (4 4)
+  (1 8)
+  (2 7)
+  (3 6)
+  (4 5)
+  (1 9)
+  (2 8)
+  (3 7)
+  (4 6)
+  (5 5))
+|#
+
+;; b.
+(define (divisible? n)
+  (or (eq? (remainder n 2) 0)
+	  (eq? (remainder n 3) 0)
+	  (eq? (remainder n 5) 0)))
+
+(define p2
+  (stream-filter
+   (lambda (pair)
+	 (and (not (divisible? (car pair)))
+		  (not (divisible? (cadr pair)))))
+   (weight-pairs integers integers
+				 (lambda (pair)
+				   (let ((i (car pair))
+						 (j (cadr pair)))
+					 (+ (* 2 i) (* 3 j) (* 5 i j)))))))
+
+#|
+racket@> (map (lambda (n) (stream-ref p2 n))
+			  (enumerate-interval 0 24))
+'((1 1)
+  (1 7)
+  (1 11)
+  (1 13)
+  (1 17)
+  (1 19)
+  (1 23)
+  (1 29)
+  (1 31)
+  (7 7)
+  (1 37)
+  (1 41)
+  (1 43)
+  (1 47)
+  (1 49)
+  (1 53)
+  (7 11)
+  (1 59)
+  (1 61)
+  (7 13)
+  (1 67)
+  (1 71)
+  (1 73)
+  (1 77)
+  (1 79))
+|#
 
 
 ;;; ex 3.71
+
 
 ;;; ex 3.72
 
