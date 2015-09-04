@@ -23,8 +23,18 @@
   guesses)
 
 #|
-racket@> (display-stream (sqrt-stream 2))
-=> 1.0 1.5 1.4166666666666665 1.4142156862745097 ...
+racket@> (map (lambda (k) (stream-ref (sqrt-stream 2) k))
+			  (enumerate-interval 0 9))
+'(1.0
+  1.5
+  1.4166666666666665
+  1.4142156862745097
+  1.4142135623746899
+  1.414213562373095
+  1.414213562373095
+  1.414213562373095
+  1.414213562373095
+  1.414213562373095)
 |#
 
 
@@ -41,8 +51,18 @@ racket@> (display-stream (sqrt-stream 2))
   (scale-stream (partial-sums (pi-summands 1)) 4))
 
 #|
-racket@> (display-stream pi-stream)
-=> 4.0 2.666666666666667 3.466666666666667 ... 3.1420954187666665 ...
+racket@> (map (lambda (k) (stream-ref pi-stream k))
+			  (enumerate-interval 0 9))
+'(4.0
+  2.666666666666667
+  3.466666666666667
+  2.8952380952380956
+  3.3396825396825403
+  2.9760461760461765
+  3.2837384837384844
+  3.017071817071818
+  3.2523659347188767
+  3.0418396189294032)
 |#
 
 
@@ -55,8 +75,19 @@ racket@> (display-stream pi-stream)
 				 (euler-transform (stream-cdr s)))))
 
 #|
-racket@> (display-stream (euler-transform pi-stream))
-=> 3.166666666666667 3.1333333333333337 3.1452380952380956 ...
+racket@> (map (lambda (k)
+				(stream-ref (euler-transform pi-stream) k))
+			  (enumerate-interval 0 9))
+'(3.166666666666667
+  3.1333333333333337
+  3.1452380952380956
+  3.13968253968254
+  3.1427128427128435
+  3.1408813408813416
+  3.142071817071818
+  3.1412548236077655
+  3.1418396189294033
+  3.141406718496503)
 |#
 
 (define (make-tableau transform s)
@@ -69,8 +100,19 @@ racket@> (display-stream (euler-transform pi-stream))
 			  (make-tableau transform s)))
 
 #|
-racket@> (display-stream (accelerated-sequence euler-transform pi-stream))
-=> 4.0 3.166666666666667 3.142105263157895 3.141599357319005 3.1415927140337785 3.1415926539752927 3.1415926535911765 3.141592653589778 3.1415926535897953 3.141592653589795 +nan.0 +nan.0 +nan.0 ....
+racket@> (map (lambda (k)
+				(stream-ref (accelerated-sequence euler-transform pi-stream) k))
+			  (enumerate-interval 0 9))
+'(4.0
+  3.166666666666667
+  3.142105263157895
+  3.141599357319005
+  3.1415927140337785
+  3.1415926539752927
+  3.1415926535911765
+  3.141592653589778
+  3.1415926535897953
+  3.141592653589795)
 |#
 
 
@@ -144,10 +186,10 @@ guess=1.4142135623746899
 
 #|
 racket@> (sqrt 2 0.01)
-=> '(1.4142156862745097 . 2)
-racket@> (stream-limit (sqrt-stream 2) 0.00001)
-=> '(1.4142135623746899 . 3)
+'(1.4142156862745097 . 2)
 
+racket@> (sqrt 2 0.00001)
+'(1.4142135623746899 . 3)
 |#
 
 
@@ -164,8 +206,7 @@ racket@> (stream-limit (sqrt-stream 2) 0.00001)
 racket@> (log 2)
 0.6931471805599453
 
-racket@> (map (lambda (n)
-				(stream-ref ln2-stream n))
+racket@> (map (lambda (n) (stream-ref ln2-stream n))
 			  (enumerate-interval 0 10))
 '(1.0
   0.5
@@ -381,7 +422,7 @@ racket@> (map (lambda (k)
 
 ;;; ex 3.68
 
-;; interleaveの呼び出しが無限に続き、処理が返らない
+;; interleaveの呼び出しが無限に続き処理が返らない
 
 
 ;;; ex 3.69
@@ -429,13 +470,15 @@ racket@> (map (lambda (k)
 
 (define pythagoras
   (stream-filter (lambda (triple)
-				   (= (+ (expt (car triple) 2) (expt (cadr triple) 2))
-					  (expt (caddr triple) 2)))
+				   (let ((x (car triple))
+						 (y (cadr triple))
+						 (z (caddr triple)))
+				   (= (+ (expt x 2) (expt y 2)) (expt z 2))))
 				 (triples integers integers integers)))
 
 #|
-racket@> (map (lambda (n)
-			    (stream-ref pythagoras n))
+racket@> (map (lambda (k)
+			    (stream-ref pythagoras k))
 			  (enumerate-interval 0 3))
 '((3 4 5) (6 8 10) (5 12 13) (9 12 15))
 |#
@@ -559,18 +602,19 @@ racket@> (map (lambda (n) (stream-ref p2 n))
 (define (sum-of-cube pair)
   (+ (cube (car pair)) (cube (cadr pair))))
 
-(define (ramanujan s)
-  (let* ((s1 (stream-car s))
-		 (s2 (stream-car (stream-cdr s)))
+(define (ramanujan-filter s)
+  (let* ((s1 (stream-ref s 0))
+		 (s2 (stream-ref s 1))
 		 (w1 (sum-of-cube s1))
 		 (w2 (sum-of-cube s2)))
 	(if (= w1 w2)
 		(cons-stream (list w1 s1 s2)
-					 (ramanujan (stream-cdr s)))
-		(ramanujan (stream-cdr s)))))
+					 (ramanujan-filter (stream-cdr s)))
+		(ramanujan-filter (stream-cdr s)))))
 
 (define ramanujan-numbers
-  (ramanujan (weight-pairs integers integers sum-of-cube)))
+  (ramanujan-filter
+   (weight-pairs integers integers sum-of-cube)))
 
 #|
 racket@> (map (lambda (k) (stream-ref ramanujan-numbers k))
@@ -587,20 +631,21 @@ racket@> (map (lambda (k) (stream-ref ramanujan-numbers k))
 (define (sum-of-square pair)
   (+ (square (car pair)) (square (cadr pair))))
 
-(define (sum-of-squares s)
-  (let* ((s1 (stream-car s))
-		 (s2 (stream-car (stream-cdr s)))
-		 (s3 (stream-car (stream-cdr (stream-cdr s))))
+(define (sum-of-squares-filter s)
+  (let* ((s1 (stream-ref s 0))
+		 (s2 (stream-ref s 1))
+		 (s3 (stream-ref s 2))
 		 (w1 (sum-of-square s1))
 		 (w2 (sum-of-square s2))
 		 (w3 (sum-of-square s3)))
 	(if (= w1 w2 w3)
 		(cons-stream (list w1 s1 s2 s3)
-					 (sum-of-squares (stream-cdr s)))
-		(sum-of-squares (stream-cdr s)))))
+					 (sum-of-squares-filter (stream-cdr s)))
+		(sum-of-squares-filter (stream-cdr s)))))
 
 (define sum-of-square-numbers
-  (sum-of-squares (weight-pairs integers integers sum-of-square)))
+  (sum-of-squares-filter
+   (weight-pairs integers integers sum-of-square)))
 
 #|
 racket@> (map (lambda (k) (stream-ref sum-of-square-numbers k))
