@@ -62,15 +62,12 @@
 ;;;   その線分を指定されるフレームないに描画する手続きを返す
 ;;; - segment->painterに与える線分リストは
 ;;;   単位方形 ([0.0,0.0] .. [1.0,1.0]) での座標を使って与えられる
-;;; - SICPのテキスト内のdraw-lineという手続きは、
-;;;   Racket Graphics Legacy Libraryに
-;;;   同名の手続きがあるため、ここではlineとしている
 
 (define (segments->painter segment-list)
   (lambda (frame)
 	(for-each
 	 (lambda (segment)
-	   (line
+	   (draw-line
 		((frame-coord-map frame) (start-segment segment))
 		((frame-coord-map frame) (end-segment segment))))
 	 segment-list)))
@@ -252,7 +249,7 @@
 
 ;;;; Canvas
 
-(require graphics/graphics)
+(require (prefix-in gfx: graphics/graphics))
 
 (define canvas-margin 4)
 (define canvas-width  512)
@@ -264,10 +261,11 @@
   (lambda ()
 	(if (null? vp)
 		(begin
-		  (open-graphics)
-		  (set! vp (open-viewport "A Picture Language"
-								  (+ canvas-width  (* canvas-margin 2))
-								  (+ canvas-height (* canvas-margin 2)))))
+		  (gfx:open-graphics)
+		  (set! vp (gfx:open-viewport
+					"A Picture Language"
+					(+ canvas-width  (* canvas-margin 2))
+					(+ canvas-height (* canvas-margin 2)))))
 		nil)))
 
 (define close-canvas
@@ -275,25 +273,24 @@
 	(if (null? vp)
 		nil
 		(begin
-		  (close-viewport vp)
-		  (close-graphics)
+		  (gfx:close-viewport vp)
+		  (gfx:close-graphics)
 		  (set! vp nil)))))
 
 (define clear-canvas
   (lambda ()
 	(if (null? vp)
 		nil
-		((clear-viewport vp)))))
+		((gfx:clear-viewport vp)))))
 
 
 ;;;; Painter-Canvas Glue
 
 ;; draw line on canvas
-(define (line start-vec end-vec)
+(define (draw-line start-vec end-vec)
   (define (vect->posn vec)
-	(make-posn (xcor-vect vec) (ycor-vect vec)))
-  ((draw-line vp) (vect->posn start-vec)
-                  (vect->posn end-vec)))
+	(gfx:make-posn (xcor-vect vec) (ycor-vect vec)))
+  ((gfx:draw-line vp) (vect->posn start-vec) (vect->posn end-vec)))
 
 ;; draw painter on canvas
 (define (draw painter)
