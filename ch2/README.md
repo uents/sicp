@@ -10,7 +10,7 @@
 racket@> ,enter "ch2.x.scm"
 ```
 
-#### `ch2.2.4.scm` (Chapter 2.2.4 A Picture Language)
+#### ch2.2.4.scm (chapter 2.2.4 A Picture Language)
 
 1. Start Emacs and Racket REPL. (or DrRacket)
 2. Load this script and type command lines as below.
@@ -27,7 +27,7 @@ racket@ch2.2.4.scm> (draw (square-limit wave 4))
 ;; ...
 ```
 
-#### `ch2.2.4-planet-sicp.scm` (using sicp.ss)
+#### ch2.2.4-planet-sicp.scm (chapter 2.2.4 A Picture Language using `sicp.ss`)
 
 1. Start DrRacket and load this script.
 2. Run it.
