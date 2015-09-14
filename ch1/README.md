@@ -7,5 +7,5 @@
 Start Racket REPL and load script.
 
 ```scheme
-racket@> (load "ch1.x.scm")
+racket@> ,enter "ch1.x.scm"
 ```

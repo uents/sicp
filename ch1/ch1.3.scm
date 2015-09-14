@@ -1,3 +1,4 @@
+#lang racket
 
 ;;;; 1.3 高階手続きによる抽象
 
@@ -42,11 +43,13 @@
 
 ;;; ex. 1.31
 
+#|
 ;; (a) 再帰的プロセス
 (define (product term a next b)
   (if (> a b)
 	  1
 	  (* (term a) (product term (next a) next b))))
+|#
 
 ;; (b) 反復的プロセス
 (define (product term a next b)
@@ -66,12 +69,14 @@
 
 ;;; ex. 1.32
 
+#|
 ;; (a) 再帰的プロセス
 (define (accumulate combiner null-value term a next b)
   (if (> a b)
 	  null-value
 	  (combiner (term a)
 				(accumulate combiner null-value term (next a) next b))))
+|#
 
 ;; (b) 反復的プロセス
 (define (accumulate combiner null-value term a next b)
@@ -81,22 +86,25 @@
 		(iter (next a) (combiner result (term a)))))
   (iter a null-value))
 
+#|
 ;; テスト
 (define (sum term a next b)
   (accumulate + 0 term a next b))
 
 (define (product term a next b)
   (accumulate * 1 term a next b))
-
+|#
 
 ;;; ex. 1.33
 
+#|
 ;; 再帰的プロセス
 (define (filtered-accumulate combiner null-value term a next b predicate)
   (if (> a b)
 	  null-value
 	  (combiner (if (predicate a) (term a) null-value)
 				(filtered-accumulate combiner null-value term (next a) next b predicate))))
+|#
 
 ;; 反復的プロセス
 (define (filtered-accumulate combiner null-value term a next b predicate)
@@ -167,7 +175,7 @@
 ;;   (18 0.6180339985218034)
 ;;   (19 0.6180339850173578))
 
-
+#|
 ;; 反復的手続き
 (define (cont-frac n d k)
   (define (iter i result)
@@ -175,7 +183,7 @@
 		result
 		(iter (- i 1) (/ (n i) (+ (d i) result)))))
   (iter k 0))
-
+|#
 
 ;;; ex. 1.41
 
@@ -184,9 +192,6 @@
 (define (double f)
   (lambda (x)
 	(f (f x))))
-
-(define (inc x) (+ x 1))
-
 
 ; i. (double inc) の置換モデルを考える
 (double inc)
@@ -338,6 +343,7 @@
 ((compose inc square) 2) ; => 5
 ((compose square inc) 2) ; => 9
 
+#|
 (define (compose . f)
   (define (helper funcs)
 	(let ((func (car funcs))
@@ -349,7 +355,7 @@
 
 ((compose inc square inc) 2) ; => 10
 ((compose square inc inc) 2) ; => 16
-
+|#
 
 ;;; ex. 1.43
 
@@ -359,6 +365,7 @@
 	  f
 	  (compose (repeated f (- n 1)) f)))
 
+#|
 ;; 反復的プロセス
 (define (repeated f n)
   (define (iter count result)
@@ -366,6 +373,6 @@
 		result
 		(iter (+ count 1) (compose f result))))
   (iter 1 f))
-
+|#
 	
 ((repeated square 2) 5) ; => 625
