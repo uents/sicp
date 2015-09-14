@@ -1,9 +1,11 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.1.4
+;;;;  Extended Exercise : Interval Arithmetic
+;;;;
+;;;; Author @uents on twitter
+;;;;
 
-;;;;--------------------------------------------------------
-;;;; chapter 2.1.4
-;;;; Extended Exercise : Interval Arithmetic
-;;;;--------------------------------------------------------
+#lang racket
+
 
 ;;; text
 

@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.4.3
+;;;;  Data-Directed Programming and Additivity
 ;;;;
-;;;; SICP Chapter 2.4.3 Data-Directed Programming and Additivity
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
+
+(require "../misc.scm")
 
 
 (define (make-from-real-imag x y)
@@ -28,9 +29,10 @@
 (define (magnitude-part z) (apply-generic 'magnitude-part z))
 (define (angle-part z) (apply-generic 'angle-part z))
 
-; racket@> (magnitude-part (make-from-real-imag 4 3))
-; 5
-
+#|
+(magnitude-part (make-from-real-imag 4 3))
+;;=> 5
+|#
 
 ;;;; ex 2.75
 
@@ -46,10 +48,10 @@
 		   (error "Unknown op -- MAKE-FROM-MAG-ANG" op))))
   dispatch)
 
-; racket@> (real-part (make-from-mag-ang 2 (/ pi 3)))
-; 1.0000000000000002
-;
-; racket@> (imag-part (make-from-mag-ang 2 (/ pi 3)))
-; 1.7320508075688772
+#|
+(real-part (make-from-mag-ang 2 (/ pi 3)))
+;;=> 1.0000000000000002
 
-
+(imag-part (make-from-mag-ang 2 (/ pi 3)))
+;;=> 1.7320508075688772
+|#

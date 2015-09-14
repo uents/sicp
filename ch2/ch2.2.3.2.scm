@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.2.3
+;;;;
+;;;; Author @uents on twitter
+;;;;
 
-(load-relative "../misc.scm")
+#lang racket
 
-;;;;--------------------------------------------------------
-;;;; chapter 2.2.3
-;;;; 
-;;;;--------------------------------------------------------
+(require "../misc.scm")
+
 
 ;;;; text code
 
@@ -21,10 +22,10 @@
 ;               (filter predicate (cdr sequence))))
 ;        (else (filter predicate (cdr sequence)))))
 
-(define (enumerate-interval low high)
-  (if (> low high)
-      nil
-      (cons low (enumerate-interval (+ low 1) high))))
+;(define (enumerate-interval low high)
+;  (if (> low high)
+;      nil
+;      (cons low (enumerate-interval (+ low 1) high))))
 
 (define (accumulate op initial sequence)
   (if (null? sequence)
@@ -117,6 +118,7 @@
 
 ;;; ex. 2.40
 
+#|
 (define (unique-pairs n)
   (flatmap
    (lambda (i)
@@ -128,7 +130,7 @@
   (map make-pair-sum
 	   (filter prime-sum?
 			   (unique-pairs n))))
-
+|#
 
 ;;; ex. 2.41
 

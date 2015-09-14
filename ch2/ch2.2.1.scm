@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.2
+;;;;  Hierarchical Data and the Closure Property
+;;;;
+;;;; Author @uents on twitter
+;;;;
 
-(load-relative "../misc.scm")
+#lang racket
 
-;;;;--------------------------------------------------------
-;;;; chapter 2.2
-;;;; Hierarchical Data and the Closure Property
-;;;;--------------------------------------------------------
+(require "../misc.scm")
 
 (define (list-ref items n)
   (if (= n 0)
@@ -52,10 +53,10 @@
 
 ;;;; ex. 2.17
 
-(define (last-pair lst)
+(define (my-last-pair lst)
   (cond ((null? lst) nil)
 		((null? (cdr lst)) (car lst))
-		(else (last-pair (cdr lst)))))
+		(else (my-last-pair (cdr lst)))))
 
 ;;;; ex. 2.18
 
@@ -94,13 +95,14 @@
 		   (iter (cdr tree) (cons (car tree) result)))))
   (iter tree nil))
 
+#|
 ;;; map,reverseを使ったバージョン。簡潔！
 
 (define (deep-reverse tree)
   (if (not (pair? tree))
 	  tree
 	  (reverse (map deep-reverse tree))))
-
+|#
 
 ;;;; ex. 2.28
 
@@ -199,6 +201,7 @@
 
 ;;; d.
 
+#|
 (define (make-mobile left right)
   (cons left right))
 
@@ -221,7 +224,7 @@
 			   (make-branch 4
 							(make-mobile (make-branch 1 2)
 										 (make-branch 2 1)))))
-
+|#
 
 ;;;; ex. 2.30
 
@@ -241,6 +244,7 @@
 
 ;;;; ex. 2.31
 
+#|
 (define (square-tree tree) (tree-map square tree))
 
 (define (tree-map proc tree)
@@ -249,6 +253,7 @@
 		(else
 		 (cons (tree-map proc (car tree))
 			   (tree-map proc (cdr tree))))))
+|#
 
 ;;;; ex. 2.32
 
@@ -262,5 +267,3 @@
 
 ;; 理由
 ;; 全ての部分集合は、ひとつの要素とそれ以外の残りの要素との全ての組み合わせから求まるため
-
-

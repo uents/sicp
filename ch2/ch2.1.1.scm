@@ -1,4 +1,4 @@
-;;;; #lang racket
+#lang racket
 
 (define (add-rat x y)
   (make-rat (+ (* (numer x) (denom y))
@@ -33,7 +33,8 @@
 ;: (car (car z))
 ;: (car (cdr z))
 
-(define (make-rat n d) (cons n d))
+
+;; (define (make-rat n d) (cons n d))
 
 (define (numer x) (car x))
 

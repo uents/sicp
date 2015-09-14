@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.5
+;;;;  Systems with Generic Operations
 ;;;;
-;;;; SICP Chapter 2.5 Systems with Generic Operations
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
+
+(define nil '())
 
 ;;;; ---------------------------
 ;;;; procedure table (using hash tables)
@@ -69,6 +70,7 @@
 ;;;; generic operators
 ;;;; -------------------------------------
 
+#|
 (define (apply-generic op . args)
   (let* ((type-tags (map type-tag args))
 		 (proc (get op type-tags)))
@@ -90,7 +92,7 @@
 							  (list op type-tags))))))
 			(error "No method for these types"
 				   (list op type-tags))))))
-
+|#
 
 (define (add x y) (apply-generic 'add x y))
 (define (sub x y) (apply-generic 'sub x y))
@@ -104,6 +106,8 @@
 (define (magnitude-part z) (apply-generic 'magnitude-part z))
 (define (angle-part z) (apply-generic 'angle-part z))
 
+(define (numer r) (apply-generic 'numer r))
+(define (denom r) (apply-generic 'denom r))
 
 ;;;; ---------------------------
 ;;;; rectangular and polar package
@@ -338,6 +342,8 @@
 
   ;; interface
   (define (tag x) (attach-tag 'rational x))
+  (put 'numer 'rational
+	   (lambda (r) (numer r)))
   (put 'add '(rational rational)
        (lambda (x y) (tag (add-rat x y))))
   (put 'sub '(rational rational)
@@ -490,6 +496,7 @@
 
 ;;; c.
 
+#|
 (define (apply-generic op . args)
   (let* ((type-tags (map type-tag args))
 		 (proc (get op type-tags)))
@@ -514,6 +521,7 @@
 								  (list op type-tags)))))))
 			(error "No method for these types"
 				   (list op type-tags))))))
+|#
 
 ; racket@> (exp (make-complex-from-real-imag 1 1) (make-complex-from-real-imag 4 3))
 ; (Bad key -- KEY2 (complex complex))
@@ -534,17 +542,17 @@
 
 ;;;; ex 2.83
 
-;; add to integer package
+;; added to integer package
 ;
 ;(put 'raise '(integer)
 ;	 (lambda (z) (make-rational z 1)))
 
-;; add to rational package
+;; added to rational package
 ;
 ;(put 'raise '(rational)
 ;	 (lambda (z) (make-scheme-number (/ (numer z) (denom z)))))
 
-;; add to scheme number package
+;; added to scheme number package
 ;
 ;(put 'raise '(scheme-number)
 ;	 (lambda (z) (make-complex-from-real-imag z 0)))
@@ -590,7 +598,7 @@
 ; racket@> (higher-type? (type-tag 5) (type-tag (make-integer 3)))
 ; 'scheme-number
 
-
+#|
 (define (apply-generic op . args)
   (let* ((type-tags (map type-tag args))
 		 (proc (get op type-tags)))
@@ -615,7 +623,7 @@
 								  (list op type-tags)))))))
 			(error "No method for these types"
 				   (list op type-tags))))))
-
+|#
 
 (put-coercion 'integer 'rational
 			  (lambda (z) (raise z)))
@@ -647,16 +655,16 @@
 ;;;; ex 2.85
 
 
-;; add to rational package
+;; added to rational package
 ; 
 ; (put 'project '(rational)
 ; 	 (lambda (z) (make-integer (/ (number z) (denom z)))))
 
-;; add to scheme number package
+;; added to scheme number package
 ; (put 'project '(scheme-number)
 ; 	 (lambda (z) (make-rational z 1)))
 
-;; add to complex package
+;; added to complex package
 ; 
 ; (put 'project '(complex)
 ; 	 (lambda (z) (make-scheme-number (real-part z))))
@@ -767,11 +775,11 @@
 ;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
 
 
-;;; add to integer package
+;;; added to integer package
 
-;;; add to rational package
+;;; added to rational package
 
-;;; add to scheme number package
+;;; added to scheme number package
 
 (define (square z) (apply-generic 'square z))
 (define (square-root z) (apply-generic 'square-root z))

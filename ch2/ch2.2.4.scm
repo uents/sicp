@@ -1,12 +1,12 @@
-;;;; #lang racket
-;;;;
 ;;;; SICP Chapter 2.2.4
 ;;;;  A Picture Language (using racket graphics legacy library)
 ;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
+
+(require "../misc.scm")
 
 
 ;;;; Vector (ex. 2.46)

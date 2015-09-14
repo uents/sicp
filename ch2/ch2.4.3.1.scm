@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.4.3
+;;;;  Data-Directed Programming and Additivity
 ;;;;
-;;;; SICP Chapter 2.4.3 Data-Directed Programming and Additivity
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
+
+(require "../misc.scm")
 
 ;;;; -----------------------------------
 ;;;; operation/type table (using hash tables)
@@ -192,17 +193,21 @@
 ;;;; test
 ;;;; -----------------------------------
 
-; racket@> (define z (make-from-real-imag 4 3))
-; 
-; racket@> z
-; '(rectangular 4 . 3)
-; 
-; racket@> (real-part z)
-; 4
-; racket@> (imag-part z)
-; 3
-; racket@> (magnitude-part z)
-; 5
+#|
+(define z (make-from-real-imag 4 3))
+
+z
+;;=> '(rectangular 4 . 3)
+
+(real-part z)
+;;=> 4
+
+(imag-part z)
+;;=> 3
+
+(magnitude-part z)
+;;=> 5
+|#
 
 ; 例えば (real-part z) は置き換えモデルを使うと、
 ; 
@@ -305,19 +310,25 @@
 (install-deriv-package)
 
 
-; racket@> (deriv '(+ x y z) 'x)
-; 1
-; racket@> (deriv '(+ x y z) 'y)
-; 1
-; racket@> (deriv '(+ x y z) 'w)
-; 0
+#|
+(deriv '(+ x y z) 'x)
+;;=> 1
 
-; racket@> (deriv '(** x 1) 'x)
-; 1
-; racket@> (deriv '(** x 2) 'x)
-; '(* 2 x)
-; racket@> (deriv '(** x 3) 'x)
-; '(* 3 (** x 2))
+(deriv '(+ x y z) 'y)
+;;=> 1
+
+(deriv '(+ x y z) 'w)
+;;=> 0
+
+(deriv '(** x 1) 'x)
+;;=> 1
+
+(deriv '(** x 2) 'x)
+;;=> '(* 2 x)
+
+(deriv '(** x 3) 'x)
+;;=> '(* 3 (** x 2))
+|#
 
 
 ;;; d.

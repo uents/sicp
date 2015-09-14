@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.2.3
+;;;;
+;;;; Author @uents on twitter
+;;;;
 
-(load-relative "../misc.scm")
+#lang racket
 
-;;;;--------------------------------------------------------
-;;;; chapter 2.2.3
-;;;; 
-;;;;--------------------------------------------------------
+(require "../misc.scm")
+
 
 ;;;; text code
 

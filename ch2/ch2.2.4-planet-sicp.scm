@@ -1,14 +1,14 @@
-;;;; #lang racket
-;;;;
 ;;;; SICP Chapter 2.2.4
 ;;;;  A Picture Language (using planet/sicp.ss)
 ;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
 
-;;; @NOTE: this package includes some text codes
+(require "../misc.scm")
+
+;;; @NOTE this package includes some text codes
 (require (planet "sicp.ss" ("soegaard" "sicp.plt" 2 1)))
 
 

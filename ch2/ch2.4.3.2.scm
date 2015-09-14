@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.4.3
+;;;;  Data-Directed Programming and Additivity
 ;;;;
-;;;; SICP Chapter 2.4.3 Data-Directed Programming and Additivity
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
+
+(require "../misc.scm")
 
 ;;;; -----------------------------------
 ;;;; operation/type table (using hash tables)
@@ -84,7 +85,7 @@
 ;;; d.
 
 ;; original database
-(define *tokyo-office-file*
+(define *tokyo-office-database*
 '(((Hiroshi Nakajima) . 1200)
   ((Katsuo Isono) . 1500)
   ((Hanako Hanazawa) . 1400)
@@ -112,11 +113,11 @@
 
 ;; append tag to original database file
 (define *tokyo-office-file*
-  (attach-tag 'tokyo *tokyo-office-file*))
+  (attach-tag 'tokyo *tokyo-office-database*))
 
 
 ;; original database of another office
-(define *osaka-office-file*
+(define *osaka-office-database*
 '((1 (Namihei Isono) 3600)
   (2 (Masuo Fuguta) 2400)
   (3 (Nanbutsu Isasaka) 4500)))
@@ -143,34 +144,38 @@
 
 ;; append tag to original database file
 (define *osaka-office-file*
-  (attach-tag 'osaka *osaka-office-file*))
+  (attach-tag 'osaka *osaka-office-database*))
 
 
 ;;; test
 
-; racket@> (get-salary (get-record *tokyo-office-file* '(Katsuo Isono)))
-; 1500
-; 
-; racket@> (get-salary (get-record *osaka-office-file* '(Masuo Fuguta)))
-; 2400
-;
-; racket@> (get-record *tokyo-office-file* '(Wakeme Isono))
-; '()
+#|
+(get-salary (get-record *tokyo-office-file* '(Katsuo Isono)))
+;;=> 1500
+
+(get-salary (get-record *osaka-office-file* '(Masuo Fuguta)))
+;;=> 2400
+
+(get-record *tokyo-office-file* '(Wakeme Isono))
+;;=> '()
 
 
-; racket@> (find-employee-record
-; 		  (list *tokyo-office-file* *osaka-office-file*)
-; 		  '(Katsuo Isono))
-; '((tokyo (Katsuo Isono) . 1500))
+(find-employee-record
+ (list *tokyo-office-file* *osaka-office-file*)
+ '(Katsuo Isono))
+;;=> '((tokyo (Katsuo Isono) . 1500))
 
 
-; racket@> (find-employee-record
-; 		  (list *tokyo-office-file* *osaka-office-file*)
-; 		  '(Namihei Isono))
-; '((osaka 1 (Namihei Isono) 3600))
+(find-employee-record
+ (list *tokyo-office-file* *osaka-office-file*)
+ '(Namihei Isono))
+;;=> '((osaka 1 (Namihei Isono) 3600))
 
-; racket@> (find-employee-record
-; 		  (list *tokyo-office-file* *osaka-office-file*)
-; 		  '(Wakeme Isono))
-; '()
+(find-employee-record
+ (list *tokyo-office-file* *osaka-office-file*)
+ '(Wakeme Isono))
+;;=> '()
+
+|#
+
 

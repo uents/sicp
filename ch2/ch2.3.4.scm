@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.3.4
+;;;;  Huffman Encoding Tree
 ;;;;
-;;;; SICP Chapter 2.3.4 Huffman Encoding Tree
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
+
+(require "../misc.scm")
 
 
 ;;;; 2.3.4 Huffman符号化木
@@ -94,9 +95,10 @@
 
 (define sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0))
 
-; racket@> (decode sample-message sample-tree)
-; => '(A D A B B C A)
-
+#|
+(decode sample-message sample-tree)
+;; => '(A D A B B C A)
+|#
 
 ;;; ex 2.68
 
@@ -123,11 +125,12 @@
 						  (right-branch tree)
 						  (append bits (list 1))))))
 
-; racket@> (equal?
-; 		  sample-message
-; 		  (encode (decode sample-message sample-tree) sample-tree))
-; => #t
-
+#|
+(equal?
+ sample-message
+ (encode (decode sample-message sample-tree) sample-tree))
+;;=> #t
+|#
 
 ;;; ex 2.69
 ;;; p.96 Huffman木の生成 のアルゴリズムを再現する
@@ -143,13 +146,15 @@
 		  (adjoin-set (make-code-tree (car tree) (cadr tree))
 					  (cddr tree))))))
 
-; rakcet@> (define sample-tree-2
-;            (generate-huffman-tree '((A 4) (B 2) (D 1) (C 1))))
+#|
+(define sample-tree-2
+  (generate-huffman-tree '((A 4) (B 2) (D 1) (C 1))))
 
-; racket@> (equal?
-; 		  sample-message
-; 		  (encode (decode sample-message sample-tree-2) sample-tree-2))
-; => #t
+(equal?
+ sample-message
+ (encode (decode sample-message sample-tree-2) sample-tree-2))
+;;=> #t
+|#
 
 
 ; p.s. 間違った解。これだと右に偏った木になってしまう
@@ -187,18 +192,15 @@
 	WAH YIP YIP YIP YIP YIP YIP YIP YIP YIP
 	SHA BOOM))
 
-			 
-; racket@> (define word-tree (generate-huffman-tree word-pairs))
-;
-; racket@> (equal?
-;		  song-lyrics
-;		  (decode (encode song-lyrics word-tree) word-tree))
-; => #t
-; 
-; racket@> (length (encode song-lyrics word-tree))
-; => 84
 
+#|
+(define word-tree (generate-huffman-tree word-pairs))
 
-
-
-
+(equal?
+ song-lyrics
+ (decode (encode song-lyrics word-tree) word-tree))
+;;=> #t
+ 
+(length (encode song-lyrics word-tree))
+;;=> 84
+|#

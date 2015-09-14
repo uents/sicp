@@ -1,15 +1,17 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.3.3
+;;;;  Representing Sets
 ;;;;
-;;;; SICP Chapter 2.3.3 Representing Sets
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;; 
 
-(load-relative "../misc.scm")
+#lang racket
+
+(require "../misc.scm")
 
 
 ;;;; 2.3.3 集合の表現
 
+#|
 ;;;; unordered set
 
 (define (element-of-set? x set)
@@ -46,7 +48,7 @@
 (define (adjoin-set x set) (cons x set))
 
 (define (union-set set1 set2) (append set1 set2))
-
+|#
 
 ;;;; ordered set
 
@@ -71,12 +73,14 @@
 
 ;;; ex 2.61
 
+#|
 (define (adjoin-set x set)
   (cond ((null? set) (list x))
 		((= x (car set)) set)
 		((< x (car set)) (cons x set))
 		(else (cons (car set)
 					(adjoin-set x (cdr set))))))
+|#
 
 ;;; ex 2.62
 
@@ -125,7 +129,6 @@
                     (left-branch set)
                     (adjoin-set x (right-branch set))))))
 
-  
 ;;; ex 2.63
 
 (define (tree->list-1 tree)
@@ -145,6 +148,16 @@
                                           result-list)))))
   (copy-to-list tree '()))
 
+#|
+(define tree nil)
+(map (lambda (n) (set! tree (adjoin-set n tree)))
+	 (shuffle (range 1 10)))
+
+(tree->list-1 tree)
+;;=> '(1 2 3 4 5 6 7 8 9)
+(tree->list-2 tree)
+;;=> '(1 2 3 4 5 6 7 8 9)
+|#
 
 ;;; ex 2.64
 
@@ -167,6 +180,10 @@
 		(cons (make-tree this-entry left-tree right-tree)
 			  remaining-elts))))
 
+#|
+(list->tree '(1 3 5 7 9 11))
+;;=> '(5 (1 () (3 () ())) (9 (7 () ()) (11 () ())))
+|#
 
 ;;; ex 2.65
 
@@ -180,7 +197,16 @@
    (intersection-set (tree->list-2 tree1)
 					 (tree->list-2 tree2))))
 
+#|
+(define tree1 (list->tree '(1 2 3 4)))
+(define tree2 (list->tree '(1 3 5 7)))
 
+(union-set-2 tree1 tree2)
+;;=> '(3 (1 () (2 () ())) (5 (4 () ()) (7 () ())))
+
+(intersection-set-2 tree1 tree2)
+;;=> '(1 () (3 () ()))
+|#
 
 ;;;; information retrieval
 
@@ -216,6 +242,7 @@
 
 ;;; ex 2.66
 
+#|
 (define (lookup given-key tree)
   (cond ((null? tree) false)
 		((equal? given-key (key (entry tree)))
@@ -239,7 +266,7 @@
 	(make-record 11 '(Oscar))
 	(make-record 12 '(Julio Cesar))
 	(make-record 23 '(Maicon)))))
-
+|#
 
 ; (lookup 3  slecao)  ; => '(3 Thiago Silva)
 ; (lookup 10 slecao)  ; => '(10 Neymar)

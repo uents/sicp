@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 2.5
+;;;;  Systems with Generic Operations
 ;;;;
-;;;; SICP Chapter 2.5 Systems with Generic Operations
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
+
+(require "../misc.scm")
 
 ;;;; ---------------------------
 ;;;; operation/type table (using hash tables)
@@ -40,6 +41,7 @@
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
 
+#|
 (define (type-tag datum)
   (if (pair? datum)
       (car datum)
@@ -49,7 +51,7 @@
   (if (pair? datum)
       (cdr datum)
       (error "Bad tagged datum -- CONTENTS" datum)))
-
+|#
 
 ;;;; ---------------------------
 ;;;;  generic operators
@@ -73,6 +75,9 @@
 (define (imag-part z) (apply-generic 'imag-part z))
 (define (magnitude-part z) (apply-generic 'magnitude-part z))
 (define (angle-part z) (apply-generic 'angle-part z))
+
+(define (numer r) (apply-generic 'numer r))
+(define (denom r) (apply-generic 'denom r))
 
 
 ;;;; ---------------------------
@@ -230,6 +235,10 @@
 
   ;; interface
   (define (tag x) (attach-tag 'rational x))
+  (put 'numer 'rational
+	   (lambda (r) (numer r)))
+  (put 'denom 'rational
+	   (lambda (r) (denom r)))
   (put 'add '(rational rational)
        (lambda (x y) (tag (add-rat x y))))
   (put 'sub '(rational rational)
@@ -296,45 +305,51 @@
 
 ;;;; ex 2.77
 
+#|
 ;; before
-;
-; racket@> (define z (cons 'complex (cons 'rectangular (cons 3 4))))
-; racket@> (magnitude-part z)
-; No method for these types -- APPLY-GENERIC (magnitude-part ((complex)))
-;   context...:
-;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
 
+(define z (cons 'complex (cons 'rectangular (cons 3 4))))
+(magnitude-part z)
+;;=> No method for these types -- APPLY-GENERIC (magnitude-part ((complex)))
+;;     context...:
+;;      /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
+|#
+
+#|
 ;; added to complex package
-;
-; (put 'real-part '(complex) real-part)
-; (put 'imag-part '(complex) imag-part)
-; (put 'magnitude-part '(complex) magnitude-part)
-; (put 'angle-part '(complex) angle-part)
+(put 'real-part '(complex) real-part)
+(put 'imag-part '(complex) imag-part)
+(put 'magnitude-part '(complex) magnitude-part)
+(put 'angle-part '(complex) angle-part)
+|#
 
+#|
 ;; after
-;
-; racket@> (magnitude-part z)
-; >(apply-generic 'magnitude-part '(complex rectangular 3 . 4))
-; >(apply-generic 'magnitude-part '(rectangular 3 . 4))
-; <5
-; 5
 
+(magnitude-part z)
+;; >(apply-generic 'magnitude-part '(complex rectangular 3 . 4))
+;; >(apply-generic 'magnitude-part '(rectangular 3 . 4))
+;; <5
+;;=> 5
+|#
 
 ;;;; ex 2.78
 
+#|
 ;; before
-;
-; racket@> (make-scheme-number 3)
-; '(scheme-number . 3)
-; 
-; racket@> (add (make-scheme-number 3) (make-scheme-number 4))
-; '(scheme-number . 7)
-;
-; racket@> (add 3 4)
-; Bad tagged datum -- TYPE-TAG 3
-;   context...:
-;    /Users/uents/work/sicp/ch2.5.scm:61:0: apply-generic
-;    /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
+
+(make-scheme-number 3)
+;;=> '(scheme-number . 3)
+ 
+(add (make-scheme-number 3) (make-scheme-number 4))
+;;=> '(scheme-number . 7)
+
+(add 3 4)
+;;=> Bad tagged datum -- TYPE-TAG 3
+;;     context...:
+;;      /Users/uents/work/sicp/ch2.5.scm:61:0: apply-generic
+;;      /Applications/Racket6.0.1/collects/racket/private/misc.rkt:87:7
+|#
 
 (define (type-tag datum)
   (cond ((number? datum) 'scheme-number)
@@ -346,85 +361,85 @@
 		((pair? datum) (cdr datum))
 		(else (error "Bad tagged datum -- CONTENTS" datum))))
 
+#|
 ;; after
-;
-; racket@> (make-scheme-number 3)
-; '(scheme-number . 3)
-; 
-; racket@> (add (make-scheme-number 3) (make-scheme-number 4))
-; '(scheme-number . 7)
-; 
-; racket@> (add 3 4)
-; '(scheme-number . 7)
 
+(make-scheme-number 3)
+;;=> '(scheme-number . 3)
+
+(add (make-scheme-number 3) (make-scheme-number 4))
+;;=> '(scheme-number . 7)
+
+(add 3 4)
+;;=> '(scheme-number . 7)
+|#
 
 ;;;; ex 2.79
 
-;; add to scheme-number package
-;
-; (put 'equ? '(scheme-number scheme-number)
-; 	 (lambda (x y) (= x y)))
+#|
+;; added to scheme-number package
+(put 'equ? '(scheme-number scheme-number)
+	 (lambda (x y) (= x y)))
 
-;; add to rational package
-;
-; (put 'equ? '(rational rational)
-; 	 (lambda (x y) (= (* (numer x) (denom y))
-;  					  (* (numer y) (denom x)))))
+;; added to rational package
+(put 'equ? '(rational rational)
+	 (lambda (x y) (= (* (numer x) (denom y))
+ 					  (* (numer y) (denom x)))))
 
-;; add to complex package
-;
-; (put 'equ? '(complex complex)
-; 	 (lambda (x y) (and (= (magnitude-part x) (magnitude-part y))
-; 						(= (angle-part x) (angle-part y)))))
+;; added to complex package
+(put 'equ? '(complex complex)
+	 (lambda (x y) (and (= (magnitude-part x) (magnitude-part y))
+						(= (angle-part x) (angle-part y)))))
+|#
 
 (define (equ? x y) (apply-generic 'equ? x y))
 
+#|
+(equ? 3 3)
+;;=> #t
 
-; racket@> (equ? 3 3)
-; #t
-;
-; racket@> (equ? 3 (make-scheme-number 3))
-; #t
-; 
-; racket@> (equ? (make-rational 2 3) (make-rational 6 9))
-; #t
-; 		 
-; racket@> (equ? (make-complex-from-real-imag 0 1)
-;			     (make-complex-from-mag-ang 1 (/ pi 2)))
-; #t
+(equ? 3 (make-scheme-number 3))
+;;=> #t
 
+(equ? (make-rational 2 3) (make-rational 6 9))
+;;=> #t
+
+(equ? (make-complex-from-real-imag 0 1)
+	  (make-complex-from-mag-ang 1 (/ pi 2)))
+;;=> #t
+|#
 
 ;;;; ex 2.80
 
-;; add to scheme number pakcage
-; 
-; (put '=zero? '(scheme-number)
-; 	 (lambda (x) (= x 0)))
+#|
+;; added to scheme number pakcage
+(put '=zero? '(scheme-number)
+ 	 (lambda (x) (= x 0)))
 
-;; add to rational package
-; 
-; (put '=zero? '(rational)
-; 	 (lambda (x) (= (numer x) 0)))
+;; added to rational package
+(put '=zero? '(rational)
+	 (lambda (x) (= (numer x) 0)))
 
-;; add to complex package
-; 
-; (put '=zero? '(complex)
-; 	 (lambda (x) (= (magnitude-part x) 0)))
+;; added to complex package
+(put '=zero? '(complex)
+	 (lambda (x) (= (magnitude-part x) 0)))
+|#
 
 (define (=zero? x) (apply-generic '=zero? x))
 
+#|
+(=zero? 0)
+;;=> #t
 
-; racket@> (=zero? 0)
-; #t
-; 
-; racket@> (=zero? (make-scheme-number 0))
-; #t
-; 
-; racket@> (=zero? (make-rational 0 3))
-; #t
-; 
-; racket@> (=zero? (make-complex-from-real-imag 0 0))
-; #t
-; 
-; racket@> (=zero? (make-complex-from-mag-ang 0 pi))
-; #t
+(=zero? (make-scheme-number 0))
+;;=> #t
+
+(=zero? (make-rational 0 3))
+;;=> #t
+
+(=zero? (make-complex-from-real-imag 0 0))
+;;=> #t
+
+(=zero? (make-complex-from-mag-ang 0 pi))
+;;=> #t
+|#
