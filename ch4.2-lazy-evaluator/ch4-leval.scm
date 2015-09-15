@@ -1,3 +1,7 @@
+#lang racket
+
+(require r5rs)
+
 ;;;;LAZY EVALUATOR FROM SECTION 4.2 OF
 ;;;; STRUCTURE AND INTERPRETATION OF COMPUTER PROGRAMS
 
@@ -24,14 +28,17 @@
 ;;**implementation-dependent loading of evaluator file
 ;;Note: It is loaded first so that the section 4.2 definition
 ;; of eval overrides the definition from 4.1.1
-(load "ch4-mceval.scm")
+;;(load "ch4-mceval.scm")
+
+(require racket/include)
+(include "ch4-mceval.scm")
 
 
 ;;;SECTION 4.2.2
 
 ;;; Modifying the evaluator
 
-(define (eval exp env)
+(define (eval-proc exp env)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
@@ -44,18 +51,18 @@
                          env))
         ((begin? exp) 
          (eval-sequence (begin-actions exp) env))
-        ((cond? exp) (eval (cond->if exp) env))
+        ((cond? exp) (eval-proc (cond->if exp) env))
         ((application? exp)             ; clause from book
-         (apply (actual-value (operator exp) env)
-                (operands exp)
-                env))
+         (apply-proc (actual-value (operator exp) env)
+					 (operands exp)
+					 env))
         (else
-         (error "Unknown expression type -- EVAL" exp))))
+         (error "Unknown expression type -- EVAL-PROC" exp))))
 
 (define (actual-value exp env)
-  (force-it (eval exp env)))
+  (force-it (eval-proc exp env)))
 
-(define (apply procedure arguments env)
+(define (apply-proc procedure arguments env)
   (cond ((primitive-procedure? procedure)
          (apply-primitive-procedure
           procedure
@@ -69,7 +76,7 @@
            (procedure-environment procedure))))
         (else
          (error
-          "Unknown procedure type -- APPLY" procedure))))
+          "Unknown procedure type -- APPLY-PROC" procedure))))
 
 (define (list-of-arg-values exps env)
   (if (no-operands? exps)
@@ -87,8 +94,8 @@
 
 (define (eval-if exp env)
   (if (true? (actual-value (if-predicate exp) env))
-      (eval (if-consequent exp) env)
-      (eval (if-alternative exp) env)))
+      (eval-proc (if-consequent exp) env)
+      (eval-proc (if-alternative exp) env)))
 
 (define input-prompt ";;; L-Eval input:")
 (define output-prompt ";;; L-Eval value:")
@@ -105,12 +112,14 @@
 
 ;;; Representing thunks
 
+#|
 ;; non-memoizing version of force-it
 
 (define (force-it obj)
   (if (thunk? obj)
       (actual-value (thunk-exp obj) (thunk-env obj))
       obj))
+|#
 
 ;; thunks
 
@@ -145,7 +154,7 @@
          (thunk-value obj))
         (else obj)))
 
-
+
 ;; A longer list of primitives -- suitable for running everything in 4.2
 ;; Overrides the list in ch4-mceval.scm
 
@@ -166,3 +175,6 @@
         ))
 
 'LAZY-EVALUATOR-LOADED
+
+(define the-global-environment (setup-environment))
+(driver-loop)

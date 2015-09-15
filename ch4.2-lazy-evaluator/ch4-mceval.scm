@@ -16,6 +16,7 @@
 
 ;;;SECTION 4.1.1
 
+#|
 (define (eval exp env)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
@@ -49,33 +50,35 @@
         (else
          (error
           "Unknown procedure type -- APPLY" procedure))))
-
+|#
 
 (define (list-of-values exps env)
   (if (no-operands? exps)
       '()
-      (cons (eval (first-operand exps) env)
+      (cons (eval-proc (first-operand exps) env)
             (list-of-values (rest-operands exps) env))))
 
+#|
 (define (eval-if exp env)
   (if (true? (eval (if-predicate exp) env))
       (eval (if-consequent exp) env)
       (eval (if-alternative exp) env)))
+|#
 
 (define (eval-sequence exps env)
-  (cond ((last-exp? exps) (eval (first-exp exps) env))
-        (else (eval (first-exp exps) env)
+  (cond ((last-exp? exps) (eval-proc (first-exp exps) env))
+        (else (eval-proc (first-exp exps) env)
               (eval-sequence (rest-exps exps) env))))
 
 (define (eval-assignment exp env)
   (set-variable-value! (assignment-variable exp)
-                       (eval (assignment-value exp) env)
+                       (eval-proc (assignment-value exp) env)
                        env)
   'ok)
 
 (define (eval-definition exp env)
   (define-variable! (definition-variable exp)
-                    (eval (definition-value exp) env)
+                    (eval-proc (definition-value exp) env)
                     env)
   'ok)
 
@@ -300,6 +303,7 @@
 
 (define (primitive-implementation proc) (cadr proc))
 
+#|
 (define primitive-procedures
   (list (list 'car car)
         (list 'cdr cdr)
@@ -307,6 +311,7 @@
         (list 'null? null?)
 ;;      more primitives
         ))
+|#
 
 (define (primitive-procedure-names)
   (map car
@@ -323,7 +328,7 @@
    (primitive-implementation proc) args))
 
 
-
+#|
 (define input-prompt ";;; M-Eval input:")
 (define output-prompt ";;; M-Eval value:")
 
@@ -334,6 +339,7 @@
       (announce-output output-prompt)
       (user-print output)))
   (driver-loop))
+|#
 
 (define (prompt-for-input string)
   (newline) (newline) (display string) (newline))
