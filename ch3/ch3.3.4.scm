@@ -1,12 +1,15 @@
-;;;; #lang racket
+;;;; SICP Chapter 3.3.4
+;;;;   A Simulator for Digital Circuits
 ;;;;
-;;;; SICP Chapter 3.3.4 A Simulator for Digital Circuits
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "mutable-lists.scm")
+#lang racket
+
+;;; for mutable pairs and lists
+(require r5rs)
+
+(require "../misc.scm")
 
 
 ;;;; -----------------------------------

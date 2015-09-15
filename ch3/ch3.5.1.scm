@@ -1,15 +1,15 @@
-;;;; #lang racket
+;;;; SICP Chapter 3.5.1
+;;;;  Streams
 ;;;;
-;;;; SICP Chapter 3.5.1 Streams
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "streams.scm")
+#lang racket
 
+(require "../misc.scm")
+(require "streams.scm")
 
-;; for using prime?
+;;; for using prime?
 (require math/number-theory)
 
 ;;; テスト
@@ -104,7 +104,7 @@
 ;; 6
 ;; 7
 ;; 7
-;; →やはり2回目の呼び出しでは評価は行わない
+;; →1〜5は評価済みなのでプリントされない
 ;; 
 ;; racket@> (stream->list x)
 ;; 8

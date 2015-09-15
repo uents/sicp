@@ -1,12 +1,15 @@
-;;;; #lang racket
+;;;; SICP Chapter 3.3.5
+;;;;  XXXX
 ;;;;
-;;;; SICP Chapter 3.3.5 XXXX
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "mutable-lists.scm")
+#lang racket
+
+;;; for mutable pairs and lists
+(require r5rs)
+
+(require "../misc.scm")
 
 
 ;;;; -----------------------------------

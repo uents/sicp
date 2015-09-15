@@ -1,12 +1,15 @@
-;;;; #lang racket
-;;;;
-;;;; SICP Chapter 3.3.3 Representing Tables
-;;;;
-;;;; Author: @uents on twitter
+;;;; SICP Chapter 3.3.3
+;;;;  Representing Tables
+;;;; 
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "mutable-lists.scm")
+#lang racket
+
+;;; for mutable pairs and lists
+(require r5rs)
+
+(require "../misc.scm")
 
 
 ;;;; ex 3.24
@@ -137,6 +140,8 @@
 
 ;;;; ex 3.26
 
+#|
+
 ;; tree
 (define (make-tree record left right)
   (list record left right))
@@ -186,6 +191,7 @@
 (define (make-table-tree)
   (make-tree (make-record -inf.0 nil) nil nil))
 
+|#
 
 ;;; test
 

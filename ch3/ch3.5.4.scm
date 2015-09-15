@@ -1,12 +1,13 @@
-;;;; #lang racket
-;;;;
 ;;;; SICP Chapter 3.5.4
 ;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "streams.scm")
+#lang racket
+
+(require "../misc.scm")
+;; (require "streams.scm")
+(require "racket-streams.scm")
 
 
 (define (integral delayed-integrand initial-value dt)
@@ -22,9 +23,10 @@
   (define dy (stream-map f y))
   y)
 
-;; racket@> (stream-ref (solve (lambda (y) y) 1 0.001) 1000)
+#|
+(stream-ref (solve (lambda (y) y) 1 0.001) 1000)
 ;; => 2.716923932235896
-
+|#
 
 ;;; ex 3.77
 (define (integral-ex delayed-integrand initial-value dt)
@@ -42,9 +44,10 @@
   (define dy (stream-map f y))
   y)
 
-;; racket@> (stream-ref (solve-ex (lambda (y) y) 1 0.001) 1000)
-;; => 2.716923932235896
-
+#|
+(stream-ref (solve-ex (lambda (y) y) 1 0.001) 1000)
+;;=> 2.716923932235896
+|#
 
 ;;; ex 3.78
 (define (solve-2nd dy0 y0 a b dt)

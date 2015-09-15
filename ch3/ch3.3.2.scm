@@ -1,14 +1,17 @@
-;;;; #lang racket
+;;;; SICP Chapter 3.3.2
+;;;;  Representing Queues
 ;;;;
-;;;; SICP Chapter 3.3.2 Representing Queues
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "mutable-lists.scm")
+#lang racket
 
+;;; for mutable pairs and lists
+(require r5rs)
 
+(require "../misc.scm")
+
+#|
 ;;; FIFO
 (define (make-queue) (cons '() '()))
 
@@ -41,7 +44,7 @@
         (else
          (set-front-ptr! queue (cdr (front-ptr queue)))
          queue))) 
-
+|#
 
 ;;; ex 3.21
 
@@ -59,10 +62,11 @@
 ; racket@> (delete-queue! q1)
 ; (mcons '() (mcons 'b '()))
 
+#|
 (define (print-queue queue)
   (display (front-ptr queue) (current-error-port))
   (newline (current-error-port)))
-
+|#
 
 ;;; ex 3.22
 

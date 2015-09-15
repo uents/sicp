@@ -1,12 +1,12 @@
-;;;; #lang racket
-;;;;
 ;;;; SICP Chapter 3.5.3 
 ;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "streams.scm")
+#lang racket
+
+(require "../misc.scm")
+(require "streams.scm")
 
 
 ;;;; 反復をストリームとして形式化する
@@ -23,8 +23,9 @@
   guesses)
 
 #|
-racket@> (map (lambda (k) (stream-ref (sqrt-stream 2) k))
-			  (enumerate-interval 0 9))
+(map (lambda (k) (stream-ref (sqrt-stream 2) k))
+	 (enumerate-interval 0 9))
+;;=>
 '(1.0
   1.5
   1.4166666666666665
@@ -51,8 +52,10 @@ racket@> (map (lambda (k) (stream-ref (sqrt-stream 2) k))
   (scale-stream (partial-sums (pi-summands 1)) 4))
 
 #|
-racket@> (map (lambda (k) (stream-ref pi-stream k))
-			  (enumerate-interval 0 9))
+(map (lambda (k) (stream-ref pi-stream k))
+	 (enumerate-interval 0 9))
+
+;;=>
 '(4.0
   2.666666666666667
   3.466666666666667
@@ -65,7 +68,6 @@ racket@> (map (lambda (k) (stream-ref pi-stream k))
   3.0418396189294032)
 |#
 
-
 (define (euler-transform s)
   (let ((s0 (stream-ref s 0))    ; S_{n-1}
 		(s1 (stream-ref s 1))    ; S_{n}
@@ -75,9 +77,11 @@ racket@> (map (lambda (k) (stream-ref pi-stream k))
 				 (euler-transform (stream-cdr s)))))
 
 #|
-racket@> (map (lambda (k)
-				(stream-ref (euler-transform pi-stream) k))
-			  (enumerate-interval 0 9))
+(map (lambda (k)
+	   (stream-ref (euler-transform pi-stream) k))
+	 (enumerate-interval 0 9))
+
+;;=>
 '(3.166666666666667
   3.1333333333333337
   3.1452380952380956
@@ -100,9 +104,11 @@ racket@> (map (lambda (k)
 			  (make-tableau transform s)))
 
 #|
-racket@> (map (lambda (k)
-				(stream-ref (accelerated-sequence euler-transform pi-stream) k))
-			  (enumerate-interval 0 9))
+(map (lambda (k)
+	   (stream-ref (accelerated-sequence euler-transform pi-stream) k))
+	 (enumerate-interval 0 9))
+
+;;=>
 '(4.0
   3.166666666666667
   3.142105263157895
@@ -142,7 +148,7 @@ racket@> (map (lambda (k)
 
 
 #|
-racket@> (stream-ref (sqrt-stream-1 2) 5)
+(stream-ref (sqrt-stream-1 2) 5)
 guess=1.0 
 guess=1.5 
 guess=1.4166666666666665 
@@ -150,7 +156,7 @@ guess=1.4142156862745097
 guess=1.4142135623746899 
 1.414213562373095
 
-racket@> (stream-ref (sqrt-stream-2 2) 5)
+(stream-ref (sqrt-stream-2 2) 5)
 guess=1.0 
 guess=1.0 
 guess=1.5 
@@ -185,11 +191,11 @@ guess=1.4142135623746899
   (iter s 0))
 
 #|
-racket@> (sqrt 2 0.01)
-'(1.4142156862745097 . 2)
+(sqrt 2 0.01)
+;;=> '(1.4142156862745097 . 2)
 
-racket@> (sqrt 2 0.00001)
-'(1.4142135623746899 . 3)
+(sqrt 2 0.00001)
+;;=> '(1.4142135623746899 . 3)
 |#
 
 
@@ -203,11 +209,12 @@ racket@> (sqrt 2 0.00001)
   (partial-sums (ln2-sum 1)))
 
 #|
-racket@> (log 2)
-0.6931471805599453
+(log 2)
+;;=> 0.6931471805599453
 
-racket@> (map (lambda (n) (stream-ref ln2-stream n))
-			  (enumerate-interval 0 10))
+(map (lambda (n) (stream-ref ln2-stream n))
+	 (enumerate-interval 0 10))
+;;=>
 '(1.0
   0.5
   0.8333333333333333
@@ -220,9 +227,10 @@ racket@> (map (lambda (n) (stream-ref ln2-stream n))
   0.6456349206349207
   0.7365440115440116)
 
-racket@> (map (lambda (n)
-				(stream-ref (euler-transform ln2-stream) n))
-			  (enumerate-interval 0 10))
+(map (lambda (n)
+	   (stream-ref (euler-transform ln2-stream) n))
+	 (enumerate-interval 0 10))
+;;=>
 '(0.7
   0.6904761904761905
   0.6944444444444444
@@ -235,9 +243,10 @@ racket@> (map (lambda (n)
   0.6930657506744464
   0.6932106782106783)
 
-racket@> (map (lambda (n)
-				(stream-ref (accelerated-sequence euler-transform ln2-stream) n))
-			  (enumerate-interval 0 10))
+(map (lambda (n)
+	   (stream-ref (accelerated-sequence euler-transform ln2-stream) n))
+	 (enumerate-interval 0 10))
+;;=>
 '(1.0
   0.7
   0.6932773109243697
@@ -262,18 +271,6 @@ racket@> (map (lambda (n)
                 (stream-cdr t))
     (pairs (stream-cdr s) (stream-cdr t)))))
 
-(define (stream-append s1 s2)
-  (if (stream-null? s1)
-      s2
-      (cons-stream (stream-car s1)
-                   (stream-append (stream-cdr s1) s2))))
-
-(define (interleave s1 s2)
-  (if (stream-null? s1)
-      s2
-      (cons-stream (stream-car s1)
-                   (interleave s2 (stream-cdr s1)))))
-
 ;; from ch 3.5.2
 (define ones (cons-stream 1 ones))
 (define integers (cons-stream 1 (add-streams ones integers)))
@@ -282,10 +279,11 @@ racket@> (map (lambda (n)
 ;;; ex 3.66
 
 #|
-racket@> (map (lambda (k)
-				(let ((p (stream-ref (pairs integers integers) k)))
-				  (cons k (list p))))
-			  (enumerate-interval 0 25))
+(map (lambda (k)
+	   (let ((p (stream-ref (pairs integers integers) k)))
+		 (cons k (list p))))
+	 (enumerate-interval 0 25))
+;;=>
 '((0 (1 1))
   (1 (1 2))
   (2 (2 2))
@@ -313,37 +311,37 @@ racket@> (map (lambda (k)
   (24 (2 8))
   (25 (1 14)))
 
-racket@> (filter
-		  (lambda (x) (= (caadr x) 1))
-		  (map (lambda (k)
-				 (let ((p (stream-ref (pairs integers integers) k)))
-				   (cons k (list p))))
-			   (enumerate-interval 0 10)))
-'((0 (1 1)) (1 (1 2)) (3 (1 3)) (5 (1 4)) (7 (1 5)) (9 (1 6)))
+(filter
+ (lambda (x) (= (caadr x) 1))
+ (map (lambda (k)
+		(let ((p (stream-ref (pairs integers integers) k)))
+		  (cons k (list p))))
+	  (enumerate-interval 0 10)))
+;;=> '((0 (1 1)) (1 (1 2)) (3 (1 3)) (5 (1 4)) (7 (1 5)) (9 (1 6)))
 
-racket@> (filter
-		  (lambda (x) (= (caadr x) 2))
-		  (map (lambda (k)
-				 (let ((p (stream-ref (pairs integers integers) k)))
-				   (cons k (list p))))
-			   (enumerate-interval 0 20)))
-'((2 (2 2)) (4 (2 3)) (8 (2 4)) (12 (2 5)) (16 (2 6)) (20 (2 7)))
+(filter
+ (lambda (x) (= (caadr x) 2))
+ (map (lambda (k)
+		(let ((p (stream-ref (pairs integers integers) k)))
+		  (cons k (list p))))
+	  (enumerate-interval 0 20)))
+;;=> '((2 (2 2)) (4 (2 3)) (8 (2 4)) (12 (2 5)) (16 (2 6)) (20 (2 7)))
 
-racket@> (filter
-		  (lambda (x) (= (caadr x) 3))
-		  (map (lambda (k)
-				 (let ((p (stream-ref (pairs integers integers) k)))
-				   (cons k (list p))))
-			   (enumerate-interval 0 30)))
-'((6 (3 3)) (10 (3 4)) (18 (3 5)) (26 (3 6)))
+(filter
+ (lambda (x) (= (caadr x) 3))
+ (map (lambda (k)
+		(let ((p (stream-ref (pairs integers integers) k)))
+		  (cons k (list p))))
+	  (enumerate-interval 0 30)))
+;;=> '((6 (3 3)) (10 (3 4)) (18 (3 5)) (26 (3 6)))
 
-racket@> (filter
-		  (lambda (x) (= (caadr x) 4))
-		  (map (lambda (k)
-				 (let ((p (stream-ref (pairs integers integers) k)))
-				   (cons k (list p))))
-			   (enumerate-interval 0 60)))
-'((14 (4 4)) (22 (4 5)) (38 (4 6)) (54 (4 7)))
+(filter
+ (lambda (x) (= (caadr x) 4))
+ (map (lambda (k)
+		(let ((p (stream-ref (pairs integers integers) k)))
+		  (cons k (list p))))
+	  (enumerate-interval 0 60)))
+;;=> '((14 (4 4)) (22 (4 5)) (38 (4 6)) (54 (4 7)))
 |#
 
 (define (pairs-index i j)
@@ -356,20 +354,21 @@ racket@> (filter
 	(iter (- i 1) (- j 1))))
 
 #|
-racket@> (pairs-index 1 100)
-197
-racket@> (pairs-index 99 100)
-950737950171172051122527404030
-racket@> (pairs-index 100 100)
-1267650600228229401496703205374
+(pairs-index 1 100)
+;;=> 197
 
-;; 答え合わせ
+(pairs-index 99 100)
+;;=> 950737950171172051122527404030
 
-racket@> (stream-ref (pairs integers integers) 197)
-=> '(1 100)
-racket@> (stream-ref (pairs integers integers) 950737950171172051122527404030)
-=> いくら待っても返らない...
+(pairs-index 100 100)
+;;=> 1267650600228229401496703205374
 
+;;; 答え合わせ
+
+(stream-ref (pairs integers integers) 197)
+;;=> '(1 100)
+(stream-ref (pairs integers integers) 950737950171172051122527404030)
+;;=> いくら待っても返らない...
 |#
 
 
@@ -387,10 +386,11 @@ racket@> (stream-ref (pairs integers integers) 950737950171172051122527404030)
 	(pairs (stream-cdr s) (stream-cdr t)))))
 
 #|
-racket@> (map (lambda (k)
-				(let ((p (stream-ref (pairs-ex integers integers) k)))
-				  (cons k (list p))))
-			  (enumerate-interval 0 25))
+(map (lambda (k)
+	   (let ((p (stream-ref (pairs-ex integers integers) k)))
+		 (cons k (list p))))
+	 (enumerate-interval 0 25))
+;;=>
 '((0 (1 1))
   (1 (1 2))
   (2 (2 2))
@@ -436,10 +436,11 @@ racket@> (map (lambda (k)
 	(triples (stream-cdr s) (stream-cdr t) (stream-cdr u)))))
 
 #|
-racket@> (map (lambda (k)
-				(let ((p (stream-ref (triples integers integers integers) k)))
-				  (cons k (list p))))
-			  (enumerate-interval 0 25))
+(map (lambda (k)
+	   (let ((p (stream-ref (triples integers integers integers) k)))
+		 (cons k (list p))))
+	 (enumerate-interval 0 25))
+;;=>
 '((0 (1 1 1))
   (1 (1 2 2))
   (2 (2 2 2))
@@ -477,9 +478,10 @@ racket@> (map (lambda (k)
 				 (triples integers integers integers)))
 
 #|
-racket@> (map (lambda (k)
-			    (stream-ref pythagoras k))
-			  (enumerate-interval 0 3))
+(map (lambda (k)
+	   (stream-ref pythagoras k))
+	 (enumerate-interval 0 3))
+;;=>
 '((3 4 5) (6 8 10) (5 12 13) (9 12 15))
 |#
 
@@ -518,8 +520,9 @@ racket@> (map (lambda (k)
 				(lambda (pair) (+ (car pair) (cadr pair)))))
 
 #|
-racket@> (map (lambda (n) (stream-ref p1 n))
-			  (enumerate-interval 0 24))
+(map (lambda (n) (stream-ref p1 n))
+	 (enumerate-interval 0 24))
+;;=>
 '((1 1)
   (1 2)
   (1 3)
@@ -565,8 +568,9 @@ racket@> (map (lambda (n) (stream-ref p1 n))
 					 (+ (* 2 i) (* 3 j) (* 5 i j)))))))
 
 #|
-racket@> (map (lambda (n) (stream-ref p2 n))
-			  (enumerate-interval 0 24))
+(map (lambda (n) (stream-ref p2 n))
+	 (enumerate-interval 0 24))
+;;=>
 '((1 1)
   (1 7)
   (1 11)
@@ -597,8 +601,6 @@ racket@> (map (lambda (n) (stream-ref p2 n))
 
 ;;; ex 3.71
 
-(define (cube n) (* n n n))
-
 (define (sum-of-cube pair)
   (+ (cube (car pair)) (cube (cadr pair))))
 
@@ -617,8 +619,9 @@ racket@> (map (lambda (n) (stream-ref p2 n))
    (weight-pairs integers integers sum-of-cube)))
 
 #|
-racket@> (map (lambda (k) (stream-ref ramanujan-numbers k))
-			  (enumerate-interval 0 4))
+(map (lambda (k) (stream-ref ramanujan-numbers k))
+	 (enumerate-interval 0 4))
+;;=>
 '((1729 (1 12) (9 10))
   (4104 (2 16) (9 15))
   (13832 (2 24) (18 20))
@@ -648,8 +651,9 @@ racket@> (map (lambda (k) (stream-ref ramanujan-numbers k))
    (weight-pairs integers integers sum-of-square)))
 
 #|
-racket@> (map (lambda (k) (stream-ref sum-of-square-numbers k))
-			  (enumerate-interval 0 15))
+(map (lambda (k) (stream-ref sum-of-square-numbers k))
+	 (enumerate-interval 0 15))
+;;=>
 '((325 (1 18) (6 17) (10 15))
   (425 (5 20) (8 19) (13 16))
   (650 (5 25) (11 23) (17 19))
@@ -706,10 +710,11 @@ racket@> (map (lambda (k) (stream-ref sum-of-square-numbers k))
 			  sense-data
 			  (cons-stream 0 sense-data)))
 
-;; racket@> (map (lambda (i) (stream-ref zero-crossings i))
-;; 			  (enumerate-interval 0 12))
-;; '(0 0 0 0 0 -1 0 0 0 0 1 0 0)
-
+#|
+(map (lambda (i) (stream-ref zero-crossings i))
+	 (enumerate-interval 0 12))
+;;=> '(0 0 0 0 0 -1 0 0 0 0 1 0 0)
+|#
 
 ;;; ex 3.75
 
@@ -722,6 +727,13 @@ racket@> (map (lambda (k) (stream-ref sum-of-square-numbers k))
 (define smooth-sense-data
   (make-zero-crossings sense-data 0 0))
 
+#|
+(map (lambda (i) (stream-ref
+				  (make-zero-crossings sense-data 0 0) i))
+	 (enumerate-interval 0 12))
+;;=> '(0 0 0 0 0 0 -1 0 0 0 0 1 0)
+|#
+
 ;;; ex 3.76
 
 (define (smooth input-stream)
@@ -729,7 +741,18 @@ racket@> (map (lambda (k) (stream-ref sum-of-square-numbers k))
 			  input-stream
 			  (cons-stream 0 input-stream)))
 
-(define (make-zero-crossings input-stream)
+(define (make-zero-crossings-2 input-stream)
   (stream-map sign-change-detector
 			  input-stream
 			  (cons-stream 0 input-stream)))
+
+#|
+(map (lambda (i) (stream-ref (smooth sense-data) i))
+	 (enumerate-interval 0 12))
+;;=> '(1/2 3/2 1.75 1.25 0.75 0.2 -1.05 -5/2 -5/2 -1.25 -0.15 1.6 7/2)
+
+(map (lambda (i) (stream-ref
+				  (make-zero-crossings-2 (smooth sense-data)) i))
+	 (enumerate-interval 0 12))
+;;=> '(0 0 0 0 0 0 -1 0 0 0 0 1 0)
+|#

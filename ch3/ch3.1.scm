@@ -1,11 +1,12 @@
-;;;; #lang racket
+;;;; SICP Chapter 3.1
+;;;;  Assignment and Local State
 ;;;;
-;;;; SICP Chapter 3.1 Assignment and Local State
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
+#lang racket
+
+(require "../misc.scm")
 
 
 ;;;; ex 3.1
@@ -73,12 +74,13 @@
 ; 
 ; racket@> ((acc 'secret-password 'withdraw) 40)
 ; 60
-; racket@> (acc 'secret-other-password 'deposit)
+; racket@> (acc 'other-password 'deposit)
 ; "Incorrect password"
 
 
 ;;;; ex 3.4
 
+#|
 (define (make-secure-account balance password call-the-cops)
   (let ((account (make-account balance))
 		(mistake-counter 0))
@@ -90,6 +92,7 @@
 				 (if (< mistake-counter 3)
 					 "Incorrect password"
 					 (call-the-cops)))))))
+|#
 
 ; racket@> (define acc (make-secure-account 100 'secret-password (lambda() "Oops!")))
 ; 

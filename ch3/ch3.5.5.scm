@@ -1,12 +1,12 @@
-;;;; #lang racket
-;;;;
 ;;;; SICP Chapter 3.5.5
 ;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "streams.scm")
+#lang racket
+
+(require "../misc.scm")
+(require "streams.scm")
 
 
 ;; §3.1から転用

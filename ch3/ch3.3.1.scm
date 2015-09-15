@@ -1,18 +1,21 @@
-;;;; #lang racket
+;;;; SICP Chapter 3.3.1
+;;;;  Mutable List Structure
 ;;;;
-;;;; SICP Chapter 3.3.1 Mutable List Structure
-;;;;
-;;;; Author: @uents on twitter
+;;;; Author @uents on twitter
 ;;;;
 
-(load-relative "../misc.scm")
-(load-relative "mutable-lists.scm")
+#lang racket
+
+;;; for mutable pairs and lists
+(require r5rs)
+
+(require "../misc.scm")
 
 
 ;; display procedure for mutable list
 (define (disp msg)
-  (display msg (current-error-port))
-  (newline (current-error-port)))
+  (display msg)
+  (newline))
 
 
 ;;; ex 3.12
