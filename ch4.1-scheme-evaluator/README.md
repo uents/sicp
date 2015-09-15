@@ -4,13 +4,11 @@
 
 ### Run
 
-(1). Start Racket REPL.
-
-(2). Load and start evaluator on Racket REPL.
+1. Start Racket REPL.
+2. Load and start evaluator on Racket REPL.
 
 ```scheme
-racket@> (load "repl.scm")
-racket@> (driver-loop)
+racket@> ,enter "repl.scm"
 
 ;;; M-Eval input:
 
