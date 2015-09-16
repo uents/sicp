@@ -1,3 +1,6 @@
+;;;for mutable pairs and lists (in Racket Language)
+(require r5rs)
+
 ;;;;METACIRCULAR EVALUATOR FROM CHAPTER 4 (SECTIONS 4.1.1-4.1.4) of
 ;;;; STRUCTURE AND INTERPRETATION OF COMPUTER PROGRAMS
 
