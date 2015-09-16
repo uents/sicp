@@ -1,3 +1,4 @@
+#lang racket
 
 (define *alternatives* '())
 
@@ -27,3 +28,9 @@
 
 (define (amb . choices)
   (choose choices))
+
+(define (reset)
+  (set! *alternatives* '()))
+
+
+(provide (all-defined-out))

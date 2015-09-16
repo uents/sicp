@@ -1,4 +1,4 @@
-
+#lang racket
 
 (+ 1
    (call/cc
@@ -37,29 +37,33 @@ frozen
 
 ;;; false を放り込んでみる
 
-;; racket@> (frozen false)
-;; +: contract violation
-;;   expected: number?
-;;   given: #f
-;;   argument position: 2nd
-;;   other arguments...:
-;;    1
-;;    3
+#|
+(frozen false)
++: contract violation
+  expected: number?
+  given: #f
+  argument position: 2nd
+  other arguments...:
+   1
+   3
+|#
 
 ;;; => 引数は2番目ということが分かる
 
 
 ;;; 引数を2つ以上与えてみる
 
-;; racket@> (frozen 10 20 30)
-;; result arity mismatch;
-;;  expected number of values not received
-;;   expected: 1
-;;   received: 3
-;;   values...:
-;;    10
-;;    20
-;;    30
+#|
+(frozen 10 20 30)
+result arity mismatch;
+ expected number of values not received
+  expected: 1
+  received: 3
+  values...:
+   10
+   20
+   30
+|#
 
 ;;; => 引数は1つしかムリ
 
@@ -122,13 +126,10 @@ frozen
 (frozen 10)
 ;; => 14
 
-(frozen 2)
-;; => 6
 
 
 (set! frozen false)
-(define a 1)
-(define y 3)
+(set! a 1)
 
 (+ a
    (call/cc
@@ -155,7 +156,7 @@ frozen
 	 (set! accumlator cc)))
   (set! x (+ x 1))
   x)
-;; => 0
+;; => 1
 
 (accumlator)
 ;; => 2
@@ -163,10 +164,6 @@ frozen
 (accumlator 100)
 ;; => 3
 ;; 引数があっても無視する
-
-
-
-
 
 
 ;;; 深さ優先探索の例
@@ -181,10 +178,12 @@ frozen
 		(else (dft (car tree))
 			  (dft (cdr tree)))))
 
-;; racket@> (dft t1)
-;; a b d h c e f i g 'done
-;; racket@> (dft t2)
-;; 1 2 3 6 7 4 5 'done
+#|
+(dft t1)
+;;=> a b d h c e f i g 'done
+(dft t2)
+;;=> 1 2 3 6 7 4 5 'done
+|#
 
 (define *saved* '())
 
@@ -212,22 +211,25 @@ frozen
 	(cond ((eq? node 'done) 'done)
 		  (else (display (format "~A " node))
 				(restart)))))
-		  
-;; racket@> (dft2 t1)
-;; a b d h c e f i g 'done
-;; racket@> (dft2 t2)
-;; 1 2 3 6 7 4 5 'done
-;;
-;; racket@> (dft-node t1)
-;; 'a
-;; racket@> (restart)
-;; 'b
-;; racket@> (restart)
-;; 'c
-;; ...
-;; racket@> (restart)
-;; 'done
 
+#|
+(dft2 t1)
+;;=> a b d h c e f i g 'done
+(dft2 t2)
+;;=> 1 2 3 6 7 4 5 'done
+
+(dft-node t1)
+;;=> 'a
+(restart)
+;;=> 'b
+(restart)
+;;=> 'c
+
+;; ...
+
+(restart)
+;;=> 'done
+|#
 
 ;;; ただし、この例は call-cc 使わなくても書ける
 (define (dft-node2 tree)
@@ -239,10 +241,13 @@ frozen
 							*saved*))
 				(dft-node2 (car tree))))))
 
-;; racket@> (dft-node2 t1)
-;; 'a
-;; racket@> (restart)
-;; 'b
-;; racket@> (restart)
-;; 'c
+#|
+(dft-node2 t1)
+;;=> 'a
+(restart)
+;;=> 'b
+(restart)
+;;=> 'c
+
 ;; ...
+|#
