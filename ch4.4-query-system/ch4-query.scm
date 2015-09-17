@@ -1,3 +1,5 @@
+#lang racket
+
 ;;;;QUERY SYSTEM FROM SECTION 4.4.4 OF
 ;;;; STRUCTURE AND INTERPRETATION OF COMPUTER PROGRAMS
 
@@ -124,8 +126,10 @@
 ;;(put 'lisp-value 'qeval lisp-value)
 
 (define (execute exp)
-  (apply (eval (predicate exp) user-initial-environment)
-         (args exp)))
+;;  (apply (eval (predicate exp) user-initial-environment)
+;;         (args exp)))
+  (apply (eval (predicate exp))
+		 (args exp)))
 
 (define (always-true ignore frame-stream) frame-stream)
 
@@ -296,7 +300,8 @@
           (put key
                'assertion-stream
                (cons-stream assertion
-                            current-assertion-stream))))))
+                            current-assertion-stream))))
+	  false))
 
 (define (store-rule-in-index rule)
   (let ((pattern (conclusion rule)))
@@ -307,7 +312,8 @@
             (put key
                  'rule-stream
                  (cons-stream rule
-                              current-rule-stream)))))))
+                              current-rule-stream))))
+		false)))
 
 (define (indexable? pat)
   (or (constant-symbol? (car pat))
@@ -470,76 +476,12 @@
 
 ;;;;Stream support from Chapter 3
 
-(define (stream-map proc s)
-  (if (stream-null? s)
-      the-empty-stream
-      (cons-stream (proc (stream-car s))
-                   (stream-map proc (stream-cdr s)))))
-
-(define (stream-for-each proc s)
-  (if (stream-null? s)
-      'done
-      (begin (proc (stream-car s))
-             (stream-for-each proc (stream-cdr s)))))
-
-(define (display-stream s)
-  (stream-for-each display-line s))
-(define (display-line x)
-  (newline)
-  (display x))
-
-(define (stream-filter pred stream)
-  (cond ((stream-null? stream) the-empty-stream)
-        ((pred (stream-car stream))
-         (cons-stream (stream-car stream)
-                      (stream-filter pred
-                                     (stream-cdr stream))))
-        (else (stream-filter pred (stream-cdr stream)))))
-
-(define (stream-append s1 s2)
-  (if (stream-null? s1)
-      s2
-      (cons-stream (stream-car s1)
-                   (stream-append (stream-cdr s1) s2))))
-
-(define (interleave s1 s2)
-  (if (stream-null? s1)
-      s2
-      (cons-stream (stream-car s1)
-                   (interleave s2 (stream-cdr s1)))))
+(require "streams.scm")
 
 ;;;;Table support from Chapter 3, Section 3.3.3 (local tables)
 
-(define (make-table)
-  (let ((local-table (list '*table*)))
-    (define (lookup key-1 key-2)
-      (let ((subtable (assoc key-1 (cdr local-table))))
-        (if subtable
-            (let ((record (assoc key-2 (cdr subtable))))
-              (if record
-                  (cdr record)
-                  false))
-            false)))
-    (define (insert! key-1 key-2 value)
-      (let ((subtable (assoc key-1 (cdr local-table))))
-        (if subtable
-            (let ((record (assoc key-2 (cdr subtable))))
-              (if record
-                  (set-cdr! record value)
-                  (set-cdr! subtable
-                            (cons (cons key-2 value)
-                                  (cdr subtable)))))
-            (set-cdr! local-table
-                      (cons (list key-1
-                                  (cons key-2 value))
-                            (cdr local-table)))))
-      'ok)    
-    (define (dispatch m)
-      (cond ((eq? m 'lookup-proc) lookup)
-            ((eq? m 'insert-proc!) insert!)
-            (else (error "Unknown operation -- TABLE" m))))
-    dispatch))
-
+(require "tables.scm")
+
 ;;;; From instructor's manual
 
 (define get '())
@@ -676,3 +618,7 @@
 			   (meeting ?division ?day-and-time))
 		  (meeting whole-company ?day-and-time)))
 ))
+
+;;; run driver loop
+(initialize-data-base microshaft-data-base)
+(query-driver-loop)

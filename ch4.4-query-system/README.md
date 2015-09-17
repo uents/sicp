@@ -1,17 +1,15 @@
 ### Requirements
 
 - Racket 6.0+
-- SICP Complete Code
-    + get `ch4-query.scm` from https://mitpress.mit.edu/sicp/code/index.html
 
 ### Run
 
-(1). Start Racket REPL.
-
-(2). Load start script on Racket REPL.
+1. Start Racket REPL
+2. Load start script on Racket REPL
 
 ```scheme
-racket@> (load "start.scm")
+racket@> ,enter "ch4-query.scm"
+'done
 
 ;;; Query input:
 
