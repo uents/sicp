@@ -13,13 +13,13 @@
 	promise))
 
 #|
-;; non-memozied stream
+;; non-memozing stream
 (define-syntax cons-stream
   (syntax-rules ()
 	((_ a b) (cons a (lambda () b)))))
 |#
 
-;; memoized stream
+;; memoizing stream
 (define-syntax cons-stream
   (syntax-rules ()
 	((_ a b) (cons a (memo-proc (lambda () b))))))
