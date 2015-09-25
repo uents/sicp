@@ -32,6 +32,12 @@
 	  (cons-stream (car sequence)
 				   (list->stream (cdr sequence)))))
 
+(define (stream->list s)
+  (if (stream-null? s)
+	  the-empty-stream
+	  (cons (stream-car s)
+			(stream->list (stream-cdr s)))))
+
 (define (stream-map proc s)
   (if (stream-null? s)
       the-empty-stream
