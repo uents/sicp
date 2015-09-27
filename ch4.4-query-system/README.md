@@ -10,6 +10,7 @@
 ```scheme
 racket@> ,enter "ch4-query.scm"
 'done
+racket@ch4-query.scm> (query-driver-loop)
 
 ;;; Query input:
 
@@ -17,59 +18,66 @@ racket@> ,enter "ch4-query.scm"
 
 ### Exmaples
 
-プログラマを全て見つける。
+simple query.
 
 ```scheme
 ;;; Query input:
-(job ?who (computer programmer))
+(job ?x ?y)
 
 ;;; Query results:
-(job (Fect Cy D) (computer programmer))
-(job (Hacker Alyssa P) (computer programmer))
-```
-
-全ての社員の住所をリストアップする。
-
-```scheme
-;;; Query input:
-(address ?x ?y)
-
-;;; Query results:
-(address (Aull DeWitt) (Slumerville (Onion Square) 5))
-(address (Cratchet Robert) (Allston (N Harvard Street) 16))
-(address (Scrooge Eben) (Weston (Shady Lane) 10))
-(address (Warbucks Oliver) (Swellesley (Top Heap Road)))
-(address (Reasoner Louis) (Slumerville (Pine Tree Road) 80))
-(address (Tweakit Lem E) (Boston (Bay State Road) 22))
-(address (Fect Cy D) (Cambridge (Ames Street) 3))
-(address (Hacker Alyssa P) (Cambridge (Mass Ave) 78))
-(address (Bitdiddle Ben) (Slumerville (Ridge Road) 10))
-```
-
-コンピュータ部門の社員を見つける。
-
-```scheme
-;;; Query input:
-(job ?who (computer ?type))
-
-;;; Query results:
-(job (Tweakit Lem E) (computer technician))
-(job (Fect Cy D) (computer programmer))
-(job (Hacker Alyssa P) (computer programmer))
-(job (Bitdiddle Ben) (computer wizard))
-```
-
-さらに`.`をつけると複数のシンボルにもマッチする。
-
-```scheme
-;;; Query input:
-(job ?who (computer . ?type))
-
-;;; Query results:
+(job (Aull DeWitt) (administration secretary))
+(job (Cratchet Robert) (accounting scrivener))
+(job (Scrooge Eben) (accounting chief accountant))
+(job (Warbucks Oliver) (administration big wheel))
 (job (Reasoner Louis) (computer programmer trainee))
 (job (Tweakit Lem E) (computer technician))
 (job (Fect Cy D) (computer programmer))
 (job (Hacker Alyssa P) (computer programmer))
 (job (Bitdiddle Ben) (computer wizard))
 ```
+
+compound query.
+
+```scheme
+;;; Query input:
+(and (job ?who (computer programmer))
+     (address ?who ?where))
+
+;;; Query results:
+(and (job (Fect Cy D) (computer programmer)) (address (Fect Cy D) (Cambridge (Ames Street) 3)))
+(and (job (Hacker Alyssa P) (computer programmer)) (address (Hacker Alyssa P) (Cambridge (Mass Ave) 78)))
+
+;;; Query input:
+(or (supervisor ?who (Bitdiddle Ben))
+	(supervisor ?who (Hacker Alyssa P)))
+
+;;; Query results:
+(or (supervisor (Tweakit Lem E) (Bitdiddle Ben)) (supervisor (Tweakit Lem E) (Hacker Alyssa P)))
+(or (supervisor (Reasoner Louis) (Bitdiddle Ben)) (supervisor (Reasoner Louis) (Hacker Alyssa P)))
+(or (supervisor (Fect Cy D) (Bitdiddle Ben)) (supervisor (Fect Cy D) (Hacker Alyssa P)))
+(or (supervisor (Hacker Alyssa P) (Bitdiddle Ben)) (supervisor (Hacker Alyssa P) (Hacker Alyssa P)))
+```
+
+filter.
+
+```scheme
+;;; Query input:
+(and (supervisor ?who (Bitdiddle Ben))
+	 (not (job ?who (computer programmer))))
+
+;;; Query results:
+(and (supervisor (Tweakit Lem E) (Bitdiddle Ben)) (not (job (Tweakit Lem E) (computer programmer))))
+```
+
+rule.
+
+```scheme
+;;; Query input:
+(lives-near ?who (Bitdiddle Ben))
+
+;;; Query results:
+(lives-near (Aull DeWitt) (Bitdiddle Ben))
+(lives-near (Reasoner Louis) (Bitdiddle Ben))
+```
+
 

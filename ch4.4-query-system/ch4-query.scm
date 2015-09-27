@@ -61,6 +61,8 @@
 
 (define (qeval query frame-stream)
   (let ((qproc (get (type query) 'qeval)))
+;	(display (format "## query=~a ~%" query))
+;	(display (format "## frame=~a ~%" (stream->list frame-stream)))
     (if qproc
         (qproc (contents query) frame-stream)
         (simple-query query frame-stream))))
@@ -74,6 +76,17 @@
       (find-assertions query-pattern frame)
       (delay (apply-rules query-pattern frame))))
    frame-stream))
+
+#|
+;; from ex 4.71
+(define (simple-query query-pattern frame-stream)
+  (stream-flatmap
+   (lambda (frame)
+     (stream-append (find-assertions query-pattern frame)
+                    (apply-rules query-pattern frame)))
+   frame-stream))
+|#
+
 
 ;;;Compound queries
 
@@ -95,7 +108,18 @@
        (delay (disjoin (rest-disjuncts disjuncts)
                        frame-stream)))))
 
+#|
+;; from ex 4.71
+(define (disjoin disjuncts frame-stream)
+  (if (empty-disjunction? disjuncts)
+      the-empty-stream
+      (interleave
+       (qeval (first-disjunct disjuncts) frame-stream)
+       (disjoin (rest-disjuncts disjuncts) frame-stream))))
+|#
+
 ;;(put 'or 'qeval disjoin)
+
 
 ;;;Filters
 
@@ -352,6 +376,15 @@
        (stream-car stream)
        (delay (flatten-stream (stream-cdr stream))))))
 
+#|
+;; from ex 4.73
+(define (flatten-stream stream)
+  (if (stream-null? stream)
+      the-empty-stream
+      (interleave
+       (stream-car stream)
+       (flatten-stream (stream-cdr stream)))))
+|#
 
 (define (singleton-stream x)
   (cons-stream x the-empty-stream))
@@ -615,8 +648,14 @@
 	  (or (and (job ?person (?division . ?type))
 			   (meeting ?division ?day-and-time))
 		  (meeting whole-company ?day-and-time)))
+
+;; from chapter 4.4.3
+(married Mickey ?who)
+
+(rule (married ?x ?y)
+	  (married ?y ?x))
 ))
 
 ;;; run driver loop
 (initialize-data-base microshaft-data-base)
-(query-driver-loop)
+;;(query-driver-loop)

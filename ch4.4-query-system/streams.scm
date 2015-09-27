@@ -1,42 +1,23 @@
 #lang racket
 
-(define (memo-proc proc)
-  (let ((already-run? false)
-		(result false))
-	(define promise
-	  (lambda ()
-		(if (not already-run?)
-			(begin (set! result (proc))
-				   (set! already-run? true)
-				   result)
-			result)))
-	promise))
+#|
+- cons-stream :
+  + stream-consが特殊形式のためマクロで再定義
+- stream-car, stream-cdr, stream-null?, the-stream-empty :
+  + SICPの名前に合わせて定義
+- stream-ref, stream-filter, stream-append など :
+  + racket/streamに含まれている手続きをそのまま流用
+|#
+
+(require (prefix-in strm: racket/stream))
 
 (define-syntax cons-stream
   (syntax-rules ()
-	((_ a b) (cons a (memo-proc (lambda () b))))))
-
-(define (stream-car s) (car s))
-(define (stream-cdr s) ((cdr s)))
-(define (stream-null? s) (null? s))
-(define the-empty-stream '())
-
-(define (stream-ref s n)
-  (if (= n 0)
-	  (stream-car s)
-	  (stream-ref (stream-cdr s) (- n 1))))
-
-(define (list->stream sequence)
-  (if (null? sequence)
-	  the-empty-stream
-	  (cons-stream (car sequence)
-				   (list->stream (cdr sequence)))))
-
-(define (stream->list s)
-  (if (stream-null? s)
-	  the-empty-stream
-	  (cons (stream-car s)
-			(stream->list (stream-cdr s)))))
+	((_ a b) (strm:stream-cons a b))))
+(define stream-car strm:stream-first)
+(define stream-cdr strm:stream-rest)
+(define stream-null? strm:stream-empty?)
+(define the-empty-stream strm:empty-stream)
 
 (define (stream-map proc s)
   (if (stream-null? s)
