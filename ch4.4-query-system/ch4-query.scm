@@ -545,6 +545,7 @@
   (put 'not 'qeval negate)
   (put 'lisp-value 'qeval lisp-value)
   (put 'always-true 'qeval always-true)
+  (put 'unique 'qeval uniquely-asserted) ;; from ex 4.75
   (deal-out rules-and-assertions '() '()))
 
 ;; Do following to reinit the data base from microshaft-data-base
@@ -656,6 +657,21 @@
 	  (married ?y ?x))
 ))
 
-;;; run driver loop
+;; from ex 4.75
+(define (uniquely-query exps) (car exps))
+
+(define (uniquely-asserted contents frame-stream)
+  (stream-flatmap
+   (lambda (frame)
+	 (let ((result-stream (qeval (uniquely-query contents)
+								 (singleton-stream frame))))
+	   (if (and (not (stream-null? result-stream))
+				(stream-null? (stream-cdr result-stream)))
+		   result-stream
+		   the-empty-stream)))
+   frame-stream))
+
+
+;;; initialize
 (initialize-data-base microshaft-data-base)
 ;;(query-driver-loop)

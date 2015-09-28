@@ -93,3 +93,39 @@
 - 理由は、規則`lives-near`が重複チェックを`(not (same ?person-1 ?person-2))`でしかしていないため
 - 重複チェックとしてさらに名前の比較チェックを追加すればよい。実装はパス
 |#
+
+;;; ex 4.74
+
+#|
+(define (stream-flatmap proc s)
+  (flatten-stream (stream-map proc s)))
+
+(define (flatten-stream stream)
+  (if (stream-null? stream)
+      the-empty-stream
+      (interleave-delayed
+       (stream-car stream)
+       (delay (flatten-stream (stream-cdr stream))))))
+|#
+
+(define (simple-stream-flatmap proc s)
+  (simple-flatten (stream-map proc s)))
+
+(define (simple-flatten stream)
+  (stream-map stream-car
+			  (stream-filter (lambda (s) (not (stream-null? s))) stream)))
+
+;;; ex 4.75
+(define (uniquely-query exps) (car exps))
+
+(define (uniquely-asserted contents frame-stream)
+  (stream-flatmap
+   (lambda (frame)
+	 (let ((result-stream (qeval (uniquely-query contents)
+								 (singleton-stream frame))))
+	   (if (and (not (stream-null? result-stream))
+				(stream-null? (stream-cdr result-stream)))
+		   result-stream
+		   the-empty-stream)))
+   frame-stream))
+
