@@ -19,6 +19,12 @@
 (define stream-null? strm:stream-empty?)
 (define the-empty-stream strm:empty-stream)
 
+(define (list->stream sequence)
+  (if (null? sequence)
+	  the-empty-stream
+	  (cons-stream (car sequence)
+				   (list->stream (cdr sequence)))))
+
 (define (stream-map proc s)
   (if (stream-null? s)
       the-empty-stream
