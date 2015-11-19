@@ -9,8 +9,9 @@
 	;; オペレーションの登録
 	((machine 'install-operations) ops)
 	;; 命令シーケンスの登録
-	((machine 'install-instruction-sequence)
-	 (assemble ctrl-text machine))
+	(let ((inst-seq (assemble ctrl-text machine)))
+	  (pretty-print inst-seq)
+	  ((machine 'install-instruction-sequence) inst-seq))
 	machine))
 
 
@@ -133,17 +134,18 @@
 (define (extract-labels ctrl-text recieve)
   (if (null? ctrl-text)
 	  (recieve '() '())
-	  (extract-labels (cdr ctrl-text)
-					  (lambda (insts labels)
-						(let ((next-inst (car ctrl-text)))
-						  (if (symbol? next-inst)
-							  (recieve insts
-									   (cons (make-label-entry next-inst
-															   insts)
-											 labels))
-							  (recieve (cons (make-instruction next-inst)
-											 insts)
-									   labels)))))))
+	  (extract-labels
+	   (cdr ctrl-text)
+	   (lambda (insts labels)
+		 (let ((next-inst (car ctrl-text)))
+		   (if (symbol? next-inst)
+			   (recieve insts
+						(cons (make-label-entry next-inst
+												insts)
+							  labels))
+			   (recieve (cons (make-instruction next-inst)
+							  insts)
+						labels)))))))
 
 (define (update-insts! insts labels machine)
   (let ((pc (get-register machine 'pc))
@@ -213,9 +215,10 @@
 		 (value-proc (if (operation-exp? value-exp)
 						 (make-operation-exp value-exp machine labels ops)
 						 (make-primitive-exp (car value-exp) machine labels))))
-	(lambda () ;; assignに対する手続き
+	(define (assign-proc)
 	  (set-contents! target (value-proc))
-	  (advance-pc pc))))
+	  (advance-pc pc))
+	assign-proc))
 
 (define (assign-reg-name inst) (cadr inst))
 (define (assign-value-exp inst) (cddr inst))
@@ -226,9 +229,10 @@
 	(if (operation-exp? condition)
 		(let ((condition-proc (make-operation-exp
 							   condition machine labels ops)))
-		  (lambda ()
+		  (define (test-proc)
 			(set-contents! flag (condition-proc))
-			(advance-pc pc)))
+			(advance-pc pc))
+		  test-proc)
 		(error "[test] bad test instruction:" inst))))
 
 (define (test-condition inst) (cdr inst))
@@ -239,10 +243,11 @@
 	(if (label-exp? dest)
 		(let ((insts (lookup-label labels
 								   (label-exp-label dest))))
-		  (lambda ()
+		  (define (branch-proc)
 			(if (get-contents flag)
 				(set-contents! pc insts)
-				(advance-pc pc))))
+				(advance-pc pc)))
+		  branch-proc)
 		(error "[branch] bad branch instruction:" inst))))
 
 (define (branch-dest inst) (cadr inst))
@@ -250,16 +255,18 @@
 ;;; goto
 (define (make-goto inst machine labels pc)
   (let ((dest (goto-dest inst)))
-	(cond ((label-exp? dest)
+	(cond ((label-exp? dest) ;; for (goto (label xx))
 		   (let ((insts (lookup-label labels
 									  (label-exp-label dest))))
-			 (lambda ()
-			   (set-contents! pc insts))))
-		  ((register-exp? dest)
+			 (define (goto-proc-1)
+			   (set-contents! pc insts))
+			 goto-proc-1))
+		  ((register-exp? dest) ;; for (goto (reg xx))
 		   (let ((reg (get-register machine
 									(register-exp-reg dest))))
-			 (lambda ()
-			   (set-contents! pc (get-contents reg)))))
+			 (define (goto-proc-2)
+			   (set-contents! pc (get-contents reg)))
+			 goto-proc-2))
 		  (else
 		   (error "[goto] bad goto instruction:" inst)))))
 
@@ -269,16 +276,18 @@
 (define (make-save inst machine stack pc)
   (let ((reg (get-register machine
 						   (stack-inst-reg-name inst))))
-	(lambda ()
+	(define (save-proc)
 	  (push stack (get-contents reg))
-	  (advance-pc pc))))
+	  (advance-pc pc))
+	save-proc))
 
 (define (make-restore inst machine stack pc)
   (let ((reg (get-register machine
 						   (stack-inst-reg-name inst))))
-	(lambda ()
+	(define (restore-proc)
 	  (set-contents! reg (pop stack))
-	  (advance-pc pc))))
+	  (advance-pc pc))
+	restore-proc))
 
 (define (stack-inst-reg-name inst) (cadr inst))
 
@@ -287,9 +296,10 @@
   (let ((action (perform-action inst)))
 	(if (operation-exp? action)
 		(let ((action-proc (make-operation-exp action machine labels ops)))
-		  (lambda ()
+		  (define (perform-proc)
 			(action-proc)
-			(advance-pc)))
+			(advance-pc))
+		  perform-proc)
 		(error "[perform] bad instruction:" inst))))
 
 (define (perform-action inst) (cdr inst))
@@ -299,29 +309,33 @@
 (define (make-primitive-exp exp machine labels)
   (cond ((constant-exp? exp)
 		 (let ((const (constant-exp-value exp)))
-		   (lambda () const)))
+		   (define (const-proc) const)
+		   const-proc))
 		((label-exp? exp)
 		 (let ((insts (lookup-label labels (label-exp-label exp))))
-		   (lambda () insts)))
+		   (define (label-proc) insts)
+		   label-proc))
 		((register-exp? exp)
 		 (let ((reg (get-register machine (register-exp-reg exp))))
-		   (lambda () (get-contents reg))))
+		   (define (reg-proc) (get-contents reg))
+		   reg-proc))
 		(else
 		 (error "[primitive-exp] unknown expression type:" exp))))
 
 (define (make-operation-exp exp machine labels ops)
-  (define (lookup-prim key ops)
-	(let ((val (assoc key ops)))
-	  (if val
-		  (cadr val)
-		  (error "[operation-exp] unknown operation: " key))))
   (let ((op (lookup-prim (operation-exp-op exp) ops))
 		(procs (map (lambda (exp)
 					  (make-primitive-exp exp machine labels))
 					(operation-exp-operands exp))))
-	(lambda ()
-	  (apply op (map (lambda (proc) (proc)) procs)))))
+	(define (op-proc)
+	  (apply op (map (lambda (proc) (proc)) procs)))
+	op-proc))
 
+(define (lookup-prim key ops)
+  (let ((val (assoc key ops)))
+	(if val
+		(cadr val)
+		(error "[operation-exp] unknown operation: " key))))
 
 (define (constant-exp? exp) (tagged-list? exp 'const))
 (define (constant-exp-value exp) (cadr exp))
