@@ -36,10 +36,11 @@
 		(iter (next a) (+ result (term a)))))
   (iter a 0))
 
+#|
 ;; テスト
 (map (lambda (x) (sum identify 1 inc x)) (range 1 11))
-; => '(1 3 6 10 15 21 28 36 45 55)
-
+;;=> '(1 3 6 10 15 21 28 36 45 55)
+|#
 
 ;;; ex. 1.31
 
@@ -59,13 +60,14 @@
 		(iter (next a) (* result (term a)))))
   (iter a 1))
 
+#|
 ;; テスト
 (* (product (lambda (n) (/ (* n (+ n 2)) (* (+ n 1) (+ n 1))))
 			2
 			(lambda (n) (+ n 2))
 			100) 4.0)
-; => 3.15703...
-
+;;=> 3.15703...
+|#
 
 ;;; ex. 1.32
 
@@ -118,7 +120,9 @@
 (define (prime-square-sum a b)
   (filtered-accumulate + 0 square a inc b prime?)) 
 
+#|
 (prime-square-sum 1 10) ; => 88
+|#
 
 ;; (b) 省略
 
@@ -147,6 +151,7 @@
   (helper 0))
 
 
+#|
 ;; 誤差をチェック。
 ;; 小数点以下4 桁の精度の近似を得るにはkが10より大きければよい。
 
@@ -174,6 +179,7 @@
 ;;   (17 0.6180339631667064)
 ;;   (18 0.6180339985218034)
 ;;   (19 0.6180339850173578))
+|#
 
 #|
 ;; 反復的手続き
@@ -187,12 +193,15 @@
 
 ;;; ex. 1.41
 
-; (((double (double double)) inc) 5) ; => 21
+#|
+(((double (double double)) inc) 5) ; => 21
+|#
 
 (define (double f)
   (lambda (x)
 	(f (f x))))
 
+#|
 ; i. (double inc) の置換モデルを考える
 (double inc)
 
@@ -232,7 +241,7 @@
 	  (inc (inc x)))
 	((lambda (x)
 	   (inc (inc x))) x)))
-5)
+ 5)
 
 ((lambda (x)
    (inc (inc x)))
@@ -242,7 +251,6 @@
 ((lambda (x)
    (inc (inc x)))
  7) ; => 9
-
 
 ; iii. (double (double double)) の置換モデルを考える
 
@@ -331,19 +339,18 @@
 			  (inc (inc x)))
 			((lambda (x)
 			   (inc (inc x))) x))) x))) x)))
-5) ; => 21
- 
-
+ 5) ; => 21
+|#
    
 ;;; ex. 1.42
 
 (define (compose f g)
   (lambda (x) (f (g x))))
 
+#|
 ((compose inc square) 2) ; => 5
 ((compose square inc) 2) ; => 9
 
-#|
 (define (compose . f)
   (define (helper funcs)
 	(let ((func (car funcs))
@@ -374,5 +381,7 @@
 		(iter (+ count 1) (compose f result))))
   (iter 1 f))
 |#
-	
+
+#|	
 ((repeated square 2) 5) ; => 625
+|#
