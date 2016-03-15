@@ -134,18 +134,16 @@
 (define (extract-labels ctrl-text recieve)
   (if (null? ctrl-text)
 	  (recieve '() '())
-	  (extract-labels
-	   (cdr ctrl-text)
-	   (lambda (insts labels)
-		 (let ((next-inst (car ctrl-text)))
-		   (if (symbol? next-inst)
-			   (recieve insts
-						(cons (make-label-entry next-inst
-												insts)
-							  labels))
-			   (recieve (cons (make-instruction next-inst)
-							  insts)
-						labels)))))))
+	  (extract-labels (cdr ctrl-text)
+                      (lambda (insts labels)
+                        (let ((next-inst (car ctrl-text)))
+                          (if (symbol? next-inst)
+                              (recieve insts
+                                       (cons (make-label-entry next-inst insts)
+                                             labels))
+                              (recieve (cons (make-instruction next-inst)
+                                             insts)
+                                       labels)))))))
 
 (define (update-insts! insts labels machine)
   (let ((pc (get-register machine 'pc))
@@ -179,6 +177,7 @@
 ;;; - テーブルの要素はラベル名と命令データの対
 (define (make-label-entry label-name insts)
   (cons label-name insts))
+
 (define (lookup-label labels label-name)
   (let ((val (assoc label-name labels)))
 	(if val
@@ -258,15 +257,15 @@
 	(cond ((label-exp? dest) ;; for (goto (label xx))
 		   (let ((insts (lookup-label labels
 									  (label-exp-label dest))))
-			 (define (goto-proc-1)
+			 (define (goto-label-proc)
 			   (set-contents! pc insts))
-			 goto-proc-1))
+			 goto-label-proc))
 		  ((register-exp? dest) ;; for (goto (reg xx))
 		   (let ((reg (get-register machine
 									(register-exp-reg dest))))
-			 (define (goto-proc-2)
+			 (define (goto-reg-proc)
 			   (set-contents! pc (get-contents reg)))
-			 goto-proc-2))
+			 goto-reg-proc))
 		  (else
 		   (error "[goto] bad goto instruction:" inst)))))
 
