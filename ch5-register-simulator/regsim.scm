@@ -138,9 +138,11 @@
                       (lambda (insts labels)
                         (let ((next-inst (car ctrl-text)))
                           (if (symbol? next-inst)
-                              (recieve insts
-                                       (cons (make-label-entry next-inst insts)
-                                             labels))
+                              (if (label-insts labels next-inst)
+                                  (error "[extract-labels] duplicate label:" next-inst)
+                                  (recieve insts
+                                           (cons (make-label-entry next-inst insts)
+                                                 labels)))
                               (recieve (cons (make-instruction next-inst)
                                              insts)
                                        labels)))))))
@@ -178,8 +180,11 @@
 (define (make-label-entry label-name insts)
   (cons label-name insts))
 
+(define (label-insts labels label-name)
+  (assoc label-name labels))
+
 (define (lookup-label labels label-name)
-  (let ((val (assoc label-name labels)))
+  (let ((val (label-insts labels label-name)))
 	(if val
 		(cdr val)
 		(error "[lookup-label] undefined label:" label-name))))
