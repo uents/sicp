@@ -182,7 +182,7 @@
   (let ((val (assoc label-name labels)))
 	(if val
 		(cdr val)
-		(error "[label] undefined label:" label-name))))
+		(error "[lookup-label] undefined label:" label-name))))
 
 ;;; 実行手続きの生成
 (define (make-execution-procedure
@@ -202,7 +202,7 @@
 		((eq? (car inst) 'perform)
 		 (make-perform inst machine labels ops pc))
 		(else
-		 (error "[execution-procedure] unknown type:" inst))))
+		 (error "[make-execution-procedure] unknown type:" inst))))
 
 (define (advance-pc pc)
   (set-contents! pc (cdr (get-contents pc))))
@@ -232,7 +232,7 @@
 			(set-contents! flag (condition-proc))
 			(advance-pc pc))
 		  test-proc)
-		(error "[test] bad test instruction:" inst))))
+		(error "[make-test] bad test instruction:" inst))))
 
 (define (test-condition inst) (cdr inst))
 
@@ -247,7 +247,7 @@
 				(set-contents! pc insts)
 				(advance-pc pc)))
 		  branch-proc)
-		(error "[branch] bad branch instruction:" inst))))
+		(error "[make-branch] bad branch instruction:" inst))))
 
 (define (branch-dest inst) (cadr inst))
 
@@ -267,7 +267,7 @@
 			   (set-contents! pc (get-contents reg)))
 			 goto-reg-proc))
 		  (else
-		   (error "[goto] bad goto instruction:" inst)))))
+		   (error "[make-goto] bad goto instruction:" inst)))))
 
 (define (goto-dest inst) (cadr inst))
 
@@ -299,7 +299,7 @@
 			(action-proc)
 			(advance-pc))
 		  perform-proc)
-		(error "[perform] bad instruction:" inst))))
+		(error "[make-perform] bad instruction:" inst))))
 
 (define (perform-action inst) (cdr inst))
 
@@ -319,7 +319,7 @@
 		   (define (reg-proc) (get-contents reg))
 		   reg-proc))
 		(else
-		 (error "[primitive-exp] unknown expression type:" exp))))
+		 (error "[make-primitive-exp] unknown expression type:" exp))))
 
 (define (make-operation-exp exp machine labels ops)
   (let ((op (lookup-prim (operation-exp-op exp) ops))
@@ -334,7 +334,7 @@
   (let ((val (assoc key ops)))
 	(if val
 		(cadr val)
-		(error "[operation-exp] unknown operation: " key))))
+		(error "[make-operation-exp] unknown operation: " key))))
 
 (define (constant-exp? exp) (tagged-list? exp 'const))
 (define (constant-exp-value exp) (cadr exp))
