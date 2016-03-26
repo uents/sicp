@@ -302,7 +302,7 @@
 		(let ((action-proc (make-operation-exp action machine labels ops)))
 		  (define (perform-proc)
 			(action-proc)
-			(advance-pc))
+			(advance-pc pc))
 		  perform-proc)
 		(error "[make-perform] bad instruction:" inst))))
 
