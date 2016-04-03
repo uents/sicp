@@ -21,6 +21,8 @@
 		 (flag (make-register 'flag))
 		 (stack (make-stack))
 		 (the-instruction-sequence '())
+		 (instruction-count 0)
+		 (trace-flag false)
 		 (the-ops (list (list 'initialize-stack
 							  (lambda () (stack 'initialize)))
 						(list 'print-stack-statistics
@@ -44,7 +46,12 @@
 		(if (null? insts)
 			'done
 			(begin
-			  ((instruction-execution-proc (car insts)))
+			  (let ((inst (car insts)))
+				(if trace-flag
+					(pretty-print (list 'execute '= (instruction-text inst)))
+					false)
+				((instruction-execution-proc inst)))
+			  (set! instruction-count (+ instruction-count 1))
 			  (execute)))))
 	(define (dispatch message)
 	  (cond ((eq? message 'start)
@@ -53,6 +60,14 @@
 			((eq? message 'install-instruction-sequence)
 			 (lambda (seq)
 			   (set! the-instruction-sequence seq)))
+			((eq? message 'initialize-instruction-count)
+			 (set! instruction-count 0)
+			((eq? message 'get-instruction-count)
+			 instruction-count)
+			((eq? message 'trace-on)
+			 (set! trace-flag true)
+			((eq? message 'trace-off)
+			 (set! trace-flag false)
 			((eq? message 'allocate-register)
 			 allocate-register)
 			((eq? message 'get-register)

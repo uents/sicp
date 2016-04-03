@@ -30,6 +30,34 @@
 (get-register-contents gcd-machine 'a) #=> 2
 
 
+;;; factorial machine
+(define fact-machine
+  (make-machine
+   '(val n continue)
+   (list (list '= =)
+		 (list '- -)
+		 (list '* *))
+   '(controller
+	   (assign continue (label fact-done))
+	 fact-loop
+	   (test (op =) (reg n) (const 1))
+	   (branch (label base-case))
+	   (save continue)
+	   (save n)
+	   (assign n (op -) (reg n) (const 1))
+	   (assign continue (label after-fact))
+	   (goto (label fact-loop))
+	 after-fact
+	   (restore n)
+	   (restore continue)
+	   (assign val (op *) (reg n) (reg val))
+	   (goto (reg continue))
+	 base-case
+	   (assign val (const 1))
+	   (goto (reg continue))
+	 fact-done)))
+
+
 ;;; apply stack statistics to factorial machine
 (define fact-machine
   (make-machine
@@ -113,3 +141,62 @@
 ;; '(total-pushes = 16 max-depth = 16 curr-depth = 16)
 ;; '(total-pushes = 18 max-depth = 18 curr-depth = 18)
 ;; '(done done done done done done done done done done)
+
+
+;;; ex 5.15
+
+#|
+diff --git a/ch5-register-simulator/regsim.scm b/ch5-register-simulator/regsim.scm
+index 148ddb5..e475d4a 100644
+--- a/ch5-register-simulator/regsim.scm
++++ b/ch5-register-simulator/regsim.scm
+@@ -21,6 +21,7 @@
+		 (flag (make-register 'flag))
+		 (stack (make-stack))
+		 (the-instruction-sequence '())
++		 (instruction-count 0)
+		 (the-ops (list (list 'initialize-stack
+							  (lambda () (stack 'initialize)))
+						(list 'print-stack-statistics
+@@ -45,6 +46,7 @@
+			'done
+			(begin
+			  ((instruction-execution-proc (car insts)))
++			  (set! instruction-count (+ instruction-count 1))
+			  (execute)))))
+	(define (dispatch message)
+	  (cond ((eq? message 'start)
+@@ -53,6 +55,10 @@
+			((eq? message 'install-instruction-sequence)
+			 (lambda (seq)
+			   (set! the-instruction-sequence seq)))
++			((eq? message 'initialize-instruction-count)
++			 (set! instruction-count 0))
++			((eq? message 'get-instruction-count)
++			 instruction-count)
+			((eq? message 'allocate-register)
+			 allocate-register)
+			((eq? message 'get-register)
+|#
+
+(map (lambda (n)
+	   (set-register-contents! fact-machine 'n n)
+	   (fact-machine 'initialize-instruction-count)
+	   (start fact-machine)
+	   (pretty-print (list 'n '= n
+						   'instruction-count '=
+						   (fact-machine 'get-instruction-count))))
+	 '(1 2 3 4 5 6 7 8 9 10))
+
+;;=>
+;; '(n = 1 instruction-count = 5)
+;; '(n = 2 instruction-count = 16)
+;; '(n = 3 instruction-count = 27)
+;; '(n = 4 instruction-count = 38)
+;; '(n = 5 instruction-count = 49)
+;; '(n = 6 instruction-count = 60)
+;; '(n = 7 instruction-count = 71)
+;; '(n = 8 instruction-count = 82)
+;; '(n = 9 instruction-count = 93)
+;; '(n = 10 instruction-count = 104)
+
