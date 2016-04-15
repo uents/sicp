@@ -11,7 +11,7 @@
 	;; 命令シーケンスの登録
 	(let ((inst-seq (assemble ctrl-text machine)))
 	  (pretty-print inst-seq)
-	  ((machine 'install-instruction-sequence) inst-seq))
+	  ((machine 'install-instruction-sequence) (cons (car ctrl-text) inst-seq)))
 	machine))
 
 
@@ -45,14 +45,21 @@
 	  (let ((insts (get-contents pc)))
 		(if (null? insts)
 			'done
-			(begin
-			  (let ((inst (car insts)))
-				(if trace-flag
-					(pretty-print (list 'inst '= (instruction-text inst)))
-					false)
-				((instruction-execution-proc inst)))
-			  (set! instruction-count (+ instruction-count 1))
-			  (execute)))))
+			(if (symbol? (car insts))
+				(begin
+				  (if trace-flag
+					  (pretty-print (list 'label '= (car insts)))
+					  false)
+				  (set-contents! pc (cdr insts))
+				  (execute))
+				(begin
+				  (let ((inst (car insts)))
+					(if trace-flag
+						(pretty-print (list 'inst '= (instruction-text inst)))
+						false)
+					((instruction-execution-proc inst)))
+				  (set! instruction-count (+ instruction-count 1))
+				  (execute))))))
 	(define (dispatch message)
 	  (cond ((eq? message 'start)
 			 (set-contents! pc the-instruction-sequence)
@@ -173,7 +180,8 @@
 							  (if (label-insts labels next-inst)
 								  (error "[extract-labels] duplicate label:" next-inst)
 								  (recieve insts
-										   (cons (make-label-entry next-inst insts)
+										   (cons (make-label-entry next-inst
+																   (cons next-inst insts))
 												 labels)))
 							  (recieve (cons (make-instruction next-inst)
 											 insts)

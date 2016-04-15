@@ -205,3 +205,188 @@ index 148ddb5..e475d4a 100644
 ;; '(n = 9 instruction-count = 93)
 ;; '(n = 10 instruction-count = 104)
 
+
+;;; ex 5.16
+
+#|
+diff --git a/ch5-register-simulator/regsim.scm b/ch5-register-simulator/regsim.scm
+index 148ddb5..3732668 100644
+--- a/ch5-register-simulator/regsim.scm
++++ b/ch5-register-simulator/regsim.scm
+@@ -21,6 +21,8 @@
+		 (flag (make-register 'flag))
+		 (stack (make-stack))
+		 (the-instruction-sequence '())
+		 (instruction-count 0)
++		 (trace-flag false)
+		 (the-ops (list (list 'initialize-stack
+							  (lambda () (stack 'initialize)))
+						(list 'print-stack-statistics
+@@ -44,7 +46,12 @@
+		(if (null? insts)
+			'done
+			(begin
+-			  ((instruction-execution-proc (car insts)))
++			  (let ((inst (car insts)))
++				(if trace-flag
++					(pretty-print (list 'inst '= (instruction-text inst)))
++					false)
++				((instruction-execution-proc inst)))
+			  (set! instruction-count (+ instruction-count 1))
+			  (execute)))))
+	(define (dispatch message)
+	  (cond ((eq? message 'start)
+@@ -53,6 +60,14 @@
+			((eq? message 'install-instruction-sequence)
+			 (lambda (seq)
+			   (set! the-instruction-sequence seq)))
+			((eq? message 'initialize-instruction-count)
+			 (set! instruction-count 0))
+			((eq? message 'get-instruction-count)
+			 instruction-count)
++			((eq? message 'trace-on)
++			 (set! trace-flag true))
++			((eq? message 'trace-off)
++			 (set! trace-flag false))
+			((eq? message 'allocate-register)
+			 allocate-register)
+			((eq? message 'get-register)
+|#
+
+(fact-machine 'trace-on)
+(set-register-contents! fact-machine 'n 3)
+(start fact-machine)
+
+#|
+;;=>
+
+'(inst = (assign continue (label fact-done)))
+'(inst = (test (op =) (reg n) (const 1)))
+'(inst = (branch (label base-case)))
+'(inst = (save continue))
+'(inst = (save n))
+'(inst = (assign n (op -) (reg n) (const 1)))
+'(inst = (assign continue (label after-fact)))
+'(inst = (goto (label fact-loop)))
+'(inst = (test (op =) (reg n) (const 1)))
+'(inst = (branch (label base-case)))
+'(inst = (save continue))
+'(inst = (save n))
+'(inst = (assign n (op -) (reg n) (const 1)))
+'(inst = (assign continue (label after-fact)))
+'(inst = (goto (label fact-loop)))
+'(inst = (test (op =) (reg n) (const 1)))
+'(inst = (branch (label base-case)))
+'(inst = (assign val (const 1)))
+'(inst = (goto (reg continue)))
+'(inst = (restore n))
+'(inst = (restore continue))
+'(inst = (assign val (op *) (reg n) (reg val)))
+'(inst = (goto (reg continue)))
+'(inst = (restore n))
+'(inst = (restore continue))
+'(inst = (assign val (op *) (reg n) (reg val)))
+'(inst = (goto (reg continue)))
+'done
+|#
+
+
+;;; ex 5.17
+
+#|
+index f76d736..1f801f6 100644
+--- a/ch5-register-simulator/regsim.scm
++++ b/ch5-register-simulator/regsim.scm
+@@ -11,7 +11,7 @@
+	;; 命令シーケンスの登録
+	(let ((inst-seq (assemble ctrl-text machine)))
+	  (pretty-print inst-seq)
+-	  ((machine 'install-instruction-sequence) inst-seq))
++	  ((machine 'install-instruction-sequence) (cons (car ctrl-text) inst-seq)))
+	machine))
+
+
+@@ -45,14 +45,21 @@
+	  (let ((insts (get-contents pc)))
+		(if (null? insts)
+			'done
+-			(begin
+-			  (let ((inst (car insts)))
+-				(if trace-flag
+-					(pretty-print (list 'inst '= (instruction-text inst)))
+-					false)
+-				((instruction-execution-proc inst)))
+-			  (set! instruction-count (+ instruction-count 1))
+-			  (execute)))))
++			(if (symbol? (car insts))
++				(begin
++				  (if trace-flag
++					  (pretty-print (list 'label '= (car insts)))
++					  false)
++				  (set-contents! pc (cdr insts))
++				  (execute))
++				(begin
++				  (let ((inst (car insts)))
++					(if trace-flag
++						(pretty-print (list 'inst '= (instruction-text inst)))
++						false)
++					((instruction-execution-proc inst)))
++				  (set! instruction-count (+ instruction-count 1))
++				  (execute))))))
+	(define (dispatch message)
+	  (cond ((eq? message 'start)
+			 (set-contents! pc the-instruction-sequence)
+@@ -173,7 +180,8 @@
+							  (if (label-insts labels next-inst)
+								  (error "[extract-labels] duplicate label:" next-inst)
+								  (recieve insts
+-										   (cons (make-label-entry next-inst insts)
++										   (cons (make-label-entry next-inst
++																   (cons next-inst insts))
+												 labels)))
+							  (recieve (cons (make-instruction next-inst)
+											 insts)
+|#
+
+(set-register-contents! fact-machine 'n 3)
+(fact-machine 'trace-on)
+(start fact-machine)
+
+#|
+;;=>
+
+'(inst = (assign continue (label fact-done)))
+'(inst = (test (op =) (reg n) (const 1)))
+'(inst = (branch (label base-case)))
+'(inst = (save continue))
+'(inst = (save n))
+'(inst = (assign n (op -) (reg n) (const 1)))
+'(inst = (assign continue (label after-fact)))
+'(inst = (goto (label fact-loop)))
+'(label = fact-loop)
+'(inst = (test (op =) (reg n) (const 1)))
+'(inst = (branch (label base-case)))
+'(inst = (save continue))
+'(inst = (save n))
+'(inst = (assign n (op -) (reg n) (const 1)))
+'(inst = (assign continue (label after-fact)))
+'(inst = (goto (label fact-loop)))
+'(label = fact-loop)
+'(inst = (test (op =) (reg n) (const 1)))
+'(inst = (branch (label base-case)))
+'(label = base-case)
+'(inst = (assign val (const 1)))
+'(inst = (goto (reg continue)))
+'(label = after-fact)
+'(inst = (restore n))
+'(inst = (restore continue))
+'(inst = (assign val (op *) (reg n) (reg val)))
+'(inst = (goto (reg continue)))
+'(label = after-fact)
+'(inst = (restore n))
+'(inst = (restore continue))
+'(inst = (assign val (op *) (reg n) (reg val)))
+'(inst = (goto (reg continue)))
+'(label = fact-done)
+'done
+|#
