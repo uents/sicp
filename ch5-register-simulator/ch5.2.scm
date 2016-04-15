@@ -27,7 +27,7 @@
 (set-register-contents! gcd-machine 'a 206)
 (set-register-contents! gcd-machine 'b 40)
 (start gcd-machine)
-(get-register-contents gcd-machine 'a) #=> 2
+(get-register-contents gcd-machine 'a) ;;=> 2
 
 
 ;;; factorial machine
@@ -56,6 +56,11 @@
 	   (assign val (const 1))
 	   (goto (reg continue))
 	 fact-done)))
+
+(set-register-contents! fact-machine 'n 3)
+(fact-machine 'trace-on)
+(start fact-machine)
+(get-register-contents fact-machine 'val)
 
 
 ;;; apply stack statistics to factorial machine
