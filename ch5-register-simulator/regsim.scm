@@ -79,6 +79,12 @@
 			 allocate-register)
 			((eq? message 'get-register)
 			 lookup-register)
+			((eq? message 'trace-register-on)
+			 (lambda (reg-name)
+			   ((lookup-register reg-name) 'trace-on)))
+			((eq? message 'trace-register-off)
+			 (lambda (reg-name)
+			   ((lookup-register reg-name) 'trace-off)))
 			((eq? message 'install-operations)
 			 (lambda (ops)
 			   (set! the-ops (append the-ops ops))))
@@ -103,12 +109,22 @@
 
 ;;;; register
 (define (make-register name)
-  (let ((contents '*unassigned*))
+  (let ((contents '*unassigned*)
+		(trace-flag false))
 	(define (dispatch message)
 	  (cond ((eq? message 'get)
 			 contents)
 			((eq? message 'set)
-			 (lambda (value) (set! contents value)))
+			 (lambda (value)
+			   (if trace-flag
+				   (pretty-print (list 'reg '= name ':
+									   contents '=> value))
+				   false)
+			   (set! contents value)))
+			((eq? message 'trace-on)
+			 (set! trace-flag true))
+			((eq? message 'trace-off)
+			 (set! trace-flag false))
 			(else
 			 (error "[register] unknown request:" message))))
 	dispatch))

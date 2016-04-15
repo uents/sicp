@@ -390,3 +390,64 @@ index f76d736..1f801f6 100644
 '(label = fact-done)
 'done
 |#
+
+
+;;; ex 5.18
+
+#|
+diff --git a/ch5-register-simulator/regsim.scm b/ch5-register-simulator/regsim.scm
+index 03f8021..fb0c4e6 100644
+--- a/ch5-register-simulator/regsim.scm
++++ b/ch5-register-simulator/regsim.scm
+@@ -79,6 +79,12 @@
+			 allocate-register)
+			((eq? message 'get-register)
+			 lookup-register)
++			((eq? message 'trace-register-on)
++			 (lambda (reg-name)
++			   ((lookup-register reg-name) 'trace-on)))
++			((eq? message 'trace-register-off)
++			 (lambda (reg-name)
++			   ((lookup-register reg-name) 'trace-off)))
+			((eq? message 'install-operations)
+			 (lambda (ops)
+			   (set! the-ops (append the-ops ops))))
+@@ -103,12 +109,22 @@
+ 
+ ;;;; register
+ (define (make-register name)
+-  (let ((contents '*unassigned*))
++  (let ((contents '*unassigned*)
++		(trace-flag false))
+	(define (dispatch message)
+	  (cond ((eq? message 'get)
+			 contents)
+			((eq? message 'set)
+-			 (lambda (value) (set! contents value)))
++			 (lambda (value)
++			   (if trace-flag
++				   (pretty-print (list 'reg '= name ':
++									   contents '=> value))
++				   false)
++			   (set! contents value)))
++			((eq? message 'trace-on)
++			 (set! trace-flag true))
++			((eq? message 'trace-off)
++			 (set! trace-flag false))
+			(else
+			 (error "[register] unknown request:" message))))
+	dispatch))
+|#
+
+(set-register-contents! fact-machine 'n 3)
+((fact-machine 'trace-register-on) 'val)
+(start fact-machine)
+
+#|
+;;=>
+
+'(reg = val : *unassigned* => 1)
+'(reg = val : 1 => 2)
+'(reg = val : 2 => 6)
+'done
+|#
