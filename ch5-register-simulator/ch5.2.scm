@@ -457,3 +457,161 @@ index 03f8021..fb0c4e6 100644
 '(reg = val : 2 => 6)
 'done
 |#
+
+
+;;; ex 5.19
+
+#|
+
+```diff
+ (define (make-new-machine)
+   (let* ((pc (make-register 'pc))
+		 (flag (make-register 'flag))
+		 (stack (make-stack))
+		 (the-instruction-sequence '())
+		 (the-ops (list (list 'initialize-stack
+							  (lambda () (stack 'initialize)))
+						(list 'print-stack-statistics
+							  (lambda () (stack 'print-statistics)))))
+		 (register-table (list (list 'pc pc)
+							   (list 'flag flag)))
+		 (instruction-count 0)
+-		 (trace-flag false))
++		 (trace-flag false)
++		 (the-breakpoints '()))
+```
+
+```diff
++			((eq? message 'set-breakpoint)
++			 (lambda (label-name line-number)
++			   (set! the-breakpoints
++					 (cons (cons label-name line-number) the-breakpoints))))
++			((eq? message 'cancel-breakpoint)
++			 (lambda (label-name line-number)
++			   (set! the-breakpoints
++					 (filter (lambda (item)
++							   (not (equal? item (cons label-name line-number))))
++							 the-breakpoints))))
++			((eq? message 'cancel-all-breakpoints)
++			 (set! the-breakpoints '()))
++			((eq? message 'print-breakpoints)
++			 (pretty-print (list 'breakpoints '= the-breakpoints)))
+			(else
+			 (error "[machine] unknown request:" message))))
+	dispatch))
+```
+
+```diff
+ (define (make-new-machine)
+   (let* ((pc (make-register 'pc))
+		 (flag (make-register 'flag))
+		 (stack (make-stack))
+		 (the-instruction-sequence '())
+		 (the-ops (list (list 'initialize-stack
+							  (lambda () (stack 'initialize)))
+						(list 'print-stack-statistics
+							  (lambda () (stack 'print-statistics)))))
+		 (register-table (list (list 'pc pc)
+							   (list 'flag flag)))
+		 (instruction-count 0)
+		 (trace-flag false)
+-		 (the-breakpoints '()))
++		 (the-breakpoints '())
++		 (current-point '()))
+```
+
+```diff
+	(define (execute)
+	  (let ((insts (get-contents pc)))
+		(if (null? insts)
+			'done
+			(if (symbol? (car insts))
+				(begin
+				  (if trace-flag
+					  (pretty-print (list 'label '= (car insts)))
+					  false)
++				  (set! current-point (cons (car insts) 0))
+				  (set-contents! pc (cdr insts))
+				  (execute))
+				(begin
+				  (let ((inst (car insts)))
+					(if trace-flag
+						(pretty-print (list 'inst '= (instruction-text inst)))
+						false)
+					((instruction-execution-proc inst)))
+				  (set! instruction-count (+ instruction-count 1))
+-				  (execute))))))
++				  (set! current-point (cons (car current-point)
++											(add1 (cdr current-point))))
++				  (if (member current-point the-breakpoints)
++					  'break!
++					  (execute)))))))
+
+```
+
+```diff
++			((eq? message 'proceed)
++			 (execute))
+			(else
+			 (error "[machine] unknown request:" message))))
+	dispatch))
+```
+
+```diff
++(define (set-breakpoint machine label-name line-number)
++  ((machine 'set-breakpoint) label-name line-number))
++(define (cancel-breakpoint machine label-name line-number)
++  ((machine 'cancel-breakpoint) label-name line-number))
++(define (cancel-all-breakpoints machine)
++  (machine 'cancel-all-breakpoints))
++(define (proceed-machine machine)
++  (machine 'proceed))
+```
+|#
+
+(define gcd-machine
+  (make-machine
+   '(a b t)
+   (list (list 'rem remainder) (list '= =))
+   '(test-b
+	   (test (op =) (reg b) (const 0))
+	   (branch (label gcd-done))
+	   (assign t (op rem) (reg a) (reg b))
+	   (assign a (reg b))
+	   (assign b (reg t))
+	   (goto (label test-b))
+	   gcd-done)))
+
+(set-register-contents! gcd-machine 'a 206)
+(set-register-contents! gcd-machine 'b 40)
+(set-breakpoint gcd-machine 'test-b 4)
+(start gcd-machine)
+
+#|
+regsim.scm﻿> (start gcd-machine)
+'break!
+regsim.scm﻿> (get-register-contents gcd-machine 'a)
+40
+regsim.scm﻿> (proceed-machine gcd-machine)
+'break!
+regsim.scm﻿> (get-register-contents gcd-machine 'a)
+6
+regsim.scm﻿> (proceed-machine gcd-machine)
+'break!
+regsim.scm﻿> (get-register-contents gcd-machine 'a)
+4
+regsim.scm﻿> (proceed-machine gcd-machine)
+'break!
+regsim.scm﻿> (get-register-contents gcd-machine 'a)
+2
+regsim.scm﻿> (proceed-machine gcd-machine)
+'done
+regsim.scm﻿> (get-register-contents gcd-machine 'a)
+2
+regsim.scm﻿> (proceed-machine gcd-machine)
+'done
+regsim.scm﻿> (get-register-contents gcd-machine 'a)
+2
+regsim.scm﻿> (proceed-machine gcd-machine)
+'done
+|#
