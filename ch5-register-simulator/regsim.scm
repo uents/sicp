@@ -29,7 +29,8 @@
 							   (list 'flag flag)))
 		 (instruction-count 0)
 		 (trace-flag false)
-		 (the-breakpoints '()))
+		 (the-breakpoints '())
+		 (current-point '()))
 	(define (allocate-register name)
 	  (if (assoc name register-table)
 		  (error "[machine] multiply defined register: " name)
@@ -51,6 +52,7 @@
 				  (if trace-flag
 					  (pretty-print (list 'label '= (car insts)))
 					  false)
+				  (set! current-point (cons (car insts) 0))
 				  (set-contents! pc (cdr insts))
 				  (execute))
 				(begin
@@ -60,7 +62,11 @@
 						false)
 					((instruction-execution-proc inst)))
 				  (set! instruction-count (+ instruction-count 1))
-				  (execute))))))
+				  (set! current-point (cons (car current-point)
+											(add1 (cdr current-point))))
+				  (if (member current-point the-breakpoints)
+					  'break!
+					  (execute)))))))
 	(define (dispatch message)
 	  (cond ((eq? message 'start)
 			 (set-contents! pc the-instruction-sequence)
@@ -107,6 +113,8 @@
 			 (set! the-breakpoints '()))
 			((eq? message 'print-breakpoints)
 			 (pretty-print (list 'breakpoints '= the-breakpoints)))
+			((eq? message 'proceed)
+			 (execute))
 			(else
 			 (error "[machine] unknown request:" message))))
 	dispatch))
@@ -120,7 +128,14 @@
 (define (set-register-contents! machine reg-name value)
   (set-contents! (get-register machine reg-name) value)
   'done)
-
+(define (set-breakpoint machine label-name line-number)
+  ((machine 'set-breakpoint) label-name line-number))
+(define (cancel-breakpoint machine label-name line-number)
+  ((machine 'cancel-breakpoint) label-name line-number))
+(define (cancel-all-breakpoints machine)
+  (machine 'cancel-all-breakpoints))
+(define (proceed-machine machine)
+  (machine 'proceed))
 
 ;;;; register
 (define (make-register name)
