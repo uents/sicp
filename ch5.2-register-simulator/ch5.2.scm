@@ -627,10 +627,4 @@ regsim.scm﻿> (proceed-machine gcd-machine)
 'done
 regsim.scm﻿> (get-register-contents gcd-machine 'a)
 2
-regsim.scm﻿> (proceed-machine gcd-machine)
-'done
-regsim.scm﻿> (get-register-contents gcd-machine 'a)
-2
-regsim.scm﻿> (proceed-machine gcd-machine)
-'done
 |#
