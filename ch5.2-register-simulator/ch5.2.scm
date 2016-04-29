@@ -304,7 +304,17 @@ index f76d736..1f801f6 100644
 --- a/ch5-register-simulator/regsim.scm
 +++ b/ch5-register-simulator/regsim.scm
 @@ -11,7 +11,7 @@
+(define (make-machine register-names ops ctrl-text)
+  (let ((machine (make-new-machine)))
+	;; レジスタの登録
+	(for-each (lambda (register-name)
+				((machine 'allocate-register) register-name))
+			  register-names)
+	;; オペレーションの登録
+	((machine 'install-operations) ops)
 	;; 命令シーケンスの登録
+	(let ((inst-seq (assemble ctrl-text machine)))
+	  (pretty-print inst-seq)	;; 命令シーケンスの登録
 	(let ((inst-seq (assemble ctrl-text machine)))
 	  (pretty-print inst-seq)
 -	  ((machine 'install-instruction-sequence) inst-seq))
@@ -313,6 +323,7 @@ index f76d736..1f801f6 100644
 
 
 @@ -45,14 +45,21 @@
+	(define (execute)
 	  (let ((insts (get-contents pc)))
 		(if (null? insts)
 			'done
@@ -343,6 +354,13 @@ index f76d736..1f801f6 100644
 	  (cond ((eq? message 'start)
 			 (set-contents! pc the-instruction-sequence)
 @@ -173,7 +180,8 @@
+(define (extract-labels ctrl-text recieve)
+  (if (null? ctrl-text)
+	  (recieve '() '())
+	  (extract-labels (cdr ctrl-text)
+					  (lambda (insts labels)
+						(let ((next-inst (car ctrl-text)))
+						  (if (symbol? next-inst)
 							  (if (label-insts labels next-inst)
 								  (error "[extract-labels] duplicate label:" next-inst)
 								  (recieve insts
@@ -352,6 +370,7 @@ index f76d736..1f801f6 100644
 												 labels)))
 							  (recieve (cons (make-instruction next-inst)
 											 insts)
+									   labels)))))))
 |#
 
 (set-register-contents! fact-machine 'n 3)
