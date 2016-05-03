@@ -8,7 +8,7 @@
 2. Load and start evaluator on Racket REPL.
 
 ```scheme
-racket@> ,enter "repl.scm"
+racket@> ,enter "anylizing-mceval.scm" (or "mceval.scm")
 
 ;;; M-Eval input:
 
