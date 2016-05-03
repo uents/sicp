@@ -1,3 +1,34 @@
+;;;; SICP Chapter 5.2
+;;;; A Register-Machine Simulator
+;;;;
+;;;; Author @uents on twitter
+;;;;
+
+#| example
+
+(define gcd-machine
+  (make-machine
+   '(a b t)
+   (list (list 'rem remainder) (list '= =))
+   '(test-b
+	   (test (op =) (reg b) (const 0))
+	   (branch (label gcd-done))
+	   (assign t (op rem) (reg a) (reg b))
+	   (assign a (reg b))
+	   (assign b (reg t))
+	   (goto (label test-b))
+	   gcd-done)))
+
+(set-register-contents! gcd-machine 'a 206)
+
+(set-register-contents! gcd-machine 'b 40)
+
+(start gcd-machine)
+
+(get-register-contents gcd-machine 'a)
+
+|#
+
 #lang racket
 
 (define (make-machine register-names ops ctrl-text)
@@ -415,9 +446,10 @@
 (define (make-operation-exp exp machine labels ops)
   (let ((op (lookup-prim (operation-exp-op exp) ops))
 		(procs (map (lambda (exp)
-					  (if (label-exp? exp)
-						  (error "[make-operation-exp] cannot use label:" + exp)
-						  (make-primitive-exp exp machine labels)))
+;;					  (if (label-exp? exp)
+;;						  (error "[make-operation-exp] cannot use label:" + exp)
+;;						  (make-primitive-exp exp machine labels)))
+						  (make-primitive-exp exp machine labels))
 					(operation-exp-operands exp))))
 	(define (op-proc)
 	  (apply op (map (lambda (proc) (proc)) procs)))
@@ -429,50 +461,25 @@
 		(cadr val)
 		(error "[make-operation-exp] unknown operation: " key))))
 
-(define (constant-exp? exp) (tagged-list? exp 'const))
+(define (constant-exp? exp) (my-tagged-list? exp 'const))
 (define (constant-exp-value exp) (cadr exp))
 
-(define (label-exp? exp) (tagged-list? exp 'label))
+(define (label-exp? exp) (my-tagged-list? exp 'label))
 (define (label-exp-label exp) (cadr exp))
 
-(define (register-exp? exp) (tagged-list? exp 'reg))
+(define (register-exp? exp) (my-tagged-list? exp 'reg))
 (define (register-exp-reg exp) (cadr exp))
 
-(define (operation-exp? exp) (and (pair? exp) (tagged-list? (car exp) 'op)))
+(define (operation-exp? exp) (and (pair? exp) (my-tagged-list? (car exp) 'op)))
 (define (operation-exp-op exp) (cadr (car exp)))
 (define (operation-exp-operands exp) (cdr exp))
 
 ;;; from chapter 4.1
-(define (tagged-list? exp tag)
+(define (my-tagged-list? exp tag)
   (if (pair? exp)
 	  (eq? (car exp) tag)
 	  false))
 
-
 '(REGISTER SIMULATOR LOADED)
 
-
-#|
-
-(define gcd-machine
-  (make-machine
-   '(a b t)
-   (list (list 'rem remainder) (list '= =))
-   '(test-b
-	   (test (op =) (reg b) (const 0))
-	   (branch (label gcd-done))
-	   (assign t (op rem) (reg a) (reg b))
-	   (assign a (reg b))
-	   (assign b (reg t))
-	   (goto (label test-b))
-	   gcd-done)))
-
-(set-register-contents! gcd-machine 'a 206)
-
-(set-register-contents! gcd-machine 'b 40)
-
-(start gcd-machine)
-
-(get-register-contents gcd-machine 'a)
-
-|#
+(provide (all-defined-out))
