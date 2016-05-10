@@ -9,13 +9,9 @@
 (require "regsim.scm")
 (require "support.scm")
 
-;;; From section 5.4.4 footnote
-(define (get-global-environment)
-  the-global-environment)
-
-;;; will do following when ready to run, not when load this file
+;;; From section 5.4.4 footnote, To support the get-global-environment operation
 (define the-global-environment (setup-environment))
-
+(define (get-global-environment) the-global-environment)
 
 (define eceval-operations
   (list
@@ -79,7 +75,7 @@
    '(exp env val proc argl continue unev)
    eceval-operations
   '(
-;;SECTION 5.4.4
+;;; SECTION 5.4.4 - Running the Evaluator
 read-eval-print-loop
   (perform (op initialize-stack))
   (perform
@@ -88,8 +84,9 @@ read-eval-print-loop
   (assign env (op get-global-environment))
   (assign continue (label print-result))
   (goto (label eval-dispatch))
+
 print-result
-;;**following instruction optional -- if use it, need monitored stack
+  ;; Monitoring the performance of the evaluator
   (perform (op print-stack-statistics))
   (perform
    (op announce-output) (const ";;; EC-Eval value:"))
@@ -109,7 +106,7 @@ signal-error
   (perform (op user-print) (reg val))
   (goto (label read-eval-print-loop))
 
-;;SECTION 5.4.1
+;;; SECTION 5.4.1 - The Core of the Explicit-Control Evaluator
 eval-dispatch
   (test (op self-evaluating?) (reg exp))
   (branch (label ev-self-eval))
@@ -131,15 +128,19 @@ eval-dispatch
   (branch (label ev-application))
   (goto (label unknown-expression-type))
 
+;; Evaluating simple expressions
 ev-self-eval
   (assign val (reg exp))
   (goto (reg continue))
+  
 ev-variable
   (assign val (op lookup-variable-value) (reg exp) (reg env))
   (goto (reg continue))
+  
 ev-quoted
   (assign val (op text-of-quotation) (reg exp))
   (goto (reg continue))
+  
 ev-lambda
   (assign unev (op lambda-parameters) (reg exp))
   (assign exp (op lambda-body) (reg exp))
@@ -147,6 +148,7 @@ ev-lambda
 			  (reg unev) (reg exp) (reg env))
   (goto (reg continue))
 
+;; Evaluating procedure applications
 ev-application
   (save continue)
   (save env)
@@ -155,6 +157,7 @@ ev-application
   (assign exp (op operator) (reg exp))
   (assign continue (label ev-appl-did-operator))
   (goto (label eval-dispatch))
+  
 ev-appl-did-operator
   (restore unev)
   (restore env)
@@ -163,6 +166,7 @@ ev-appl-did-operator
   (test (op no-operands?) (reg unev))
   (branch (label apply-dispatch))
   (save proc)
+  
 ev-appl-operand-loop
   (save argl)
   (assign exp (op first-operand) (reg unev))
@@ -172,6 +176,7 @@ ev-appl-operand-loop
   (save unev)
   (assign continue (label ev-appl-accumulate-arg))
   (goto (label eval-dispatch))
+  
 ev-appl-accumulate-arg
   (restore unev)
   (restore env)
@@ -179,14 +184,18 @@ ev-appl-accumulate-arg
   (assign argl (op adjoin-arg) (reg val) (reg argl))
   (assign unev (op rest-operands) (reg unev))
   (goto (label ev-appl-operand-loop))
+  
 ev-appl-last-arg
   (assign continue (label ev-appl-accum-last-arg))
   (goto (label eval-dispatch))
+  
 ev-appl-accum-last-arg
   (restore argl)
   (assign argl (op adjoin-arg) (reg val) (reg argl))
   (restore proc)
   (goto (label apply-dispatch))
+
+;; Procedure application
 apply-dispatch
   (test (op primitive-procedure?) (reg proc))
   (branch (label primitive-apply))
@@ -209,7 +218,7 @@ compound-apply
   (assign unev (op procedure-body) (reg proc))
   (goto (label ev-sequence))
 
-;;;SECTION 5.4.2
+;;; SECTION 5.4.2 - Sequence Evaluation and Tail Recursion
 ev-begin
   (assign unev (op begin-actions) (reg exp))
   (save continue)
@@ -223,16 +232,18 @@ ev-sequence
   (save env)
   (assign continue (label ev-sequence-continue))
   (goto (label eval-dispatch))
+  
 ev-sequence-continue
   (restore env)
   (restore unev)
   (assign unev (op rest-exps) (reg unev))
   (goto (label ev-sequence))
+  
 ev-sequence-last-exp
   (restore continue)
   (goto (label eval-dispatch))
 
-;;;SECTION 5.4.3
+;;; SECTION 5.4.3 - Conditionals, Assignments, and Definitions
 ev-if
   (save exp)
   (save env)
@@ -240,19 +251,23 @@ ev-if
   (assign continue (label ev-if-decide))
   (assign exp (op if-predicate) (reg exp))
   (goto (label eval-dispatch))
+  
 ev-if-decide
   (restore continue)
   (restore env)
   (restore exp)
   (test (op true?) (reg val))
   (branch (label ev-if-consequent))
+  
 ev-if-alternative
   (assign exp (op if-alternative) (reg exp))
   (goto (label eval-dispatch))
+  
 ev-if-consequent
   (assign exp (op if-consequent) (reg exp))
   (goto (label eval-dispatch))
 
+;; Assignments and definitions	
 ev-assignment
   (assign unev (op assignment-variable) (reg exp))
   (save unev)
@@ -261,6 +276,7 @@ ev-assignment
   (save continue)
   (assign continue (label ev-assignment-1))
   (goto (label eval-dispatch))
+  
 ev-assignment-1
   (restore continue)
   (restore env)
@@ -278,6 +294,7 @@ ev-definition
   (save continue)
   (assign continue (label ev-definition-1))
   (goto (label eval-dispatch))
+  
 ev-definition-1
   (restore continue)
   (restore env)

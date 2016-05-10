@@ -6,9 +6,7 @@
 
 #lang racket
 
-
-;;;SECTION 4.1.2
-
+;;; SECTION 4.1.2
 (define (tagged-list? exp tag)
   (if (pair? exp)
 	  (eq? (car exp) tag)
@@ -86,9 +84,12 @@
 (define (begin-actions exp)
   (cdr exp))
 
-(define (last-exp? seq) (null? (cdr seq)))
-(define (first-exp seq) (car seq))
-(define (rest-exps seq) (cdr seq))
+(define (last-exp? seq)
+  (null? (cdr seq)))
+(define (first-exp seq)
+  (car seq))
+(define (rest-exps seq)
+  (cdr seq))
 
 (define (sequence->exp seq)
   (cond ((null? seq) seq)
@@ -112,7 +113,6 @@
   (car ops))
 (define (rest-operands ops)
   (cdr ops))
-
 
 (define (cond? exp)
   (tagged-list? exp 'cond))
@@ -144,7 +144,6 @@
 
 
 ;;;SECTION 4.1.3
-
 (define (true? x)
   (not (eq? x false)))
 
@@ -207,7 +206,6 @@
 
 
 ;;;SECTION 4.1.4
-
 (define (setup-environment)
   (let* ((frame (make-hash))
 		 (env (extend-environment (primitive-procedure-names)
@@ -266,19 +264,25 @@
 ;;; Simulation of new machine operations needed by
 ;;;	 eceval machine (not used by compiled code)
 
-;;; From section 5.4.1 footnote
+;;; From section 5.4.1 footnote,
+;; the following two procedures for manipulating argument lists
 (define (empty-arglist) '())
 (define (adjoin-arg arg arglist)
   (append arglist (list arg)))
+
+;; an additional syntax procedure to test for the last operand in a combination
 (define (last-operand? ops)
   (null? (cdr ops)))
 
 ;;; From section 5.4.2 footnote, for non-tail-recursive sequences
 (define (no-more-exps? seq) (null? seq))
 
+
 ;;; Simulation of new machine operations needed for compiled code
 ;;;	 and eceval/compiler interface (not used by plain eceval machine)
-;;; From section 5.5.2 footnote
+
+;;; From section 5.5.2 footnote,
+;;;	 machine operations to implement a data structure for representing compiled procedures
 (define (make-compiled-procedure entry env)
   (list 'compiled-procedure entry env))
 (define (compiled-procedure? proc)
