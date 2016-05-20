@@ -33,8 +33,7 @@
 (require "support.scm")
 
 
-;;;SECTION 5.5.1
-
+;;; SECTION 5.5.1 - Structure of the Compiler
 (define (compile exp target linkage)
   (cond ((self-evaluating? exp)
 		 (compile-self-evaluating exp target linkage))
@@ -57,7 +56,6 @@
 		(else
 		 (error "Unknown expression type -- COMPILE" exp))))
 
-
 (define (make-instruction-sequence needs modifies statements)
   (list needs modifies statements))
 
@@ -65,10 +63,9 @@
   (make-instruction-sequence '() '() '()))
 
 
-;;;SECTION 5.5.2
+;;; SECTION 5.5.2 - Compiling Expressions
 
-;;;linkage code
-
+;;; Compiling linkage code
 (define (compile-linkage linkage)
   (cond ((eq? linkage 'return)
 		 (make-instruction-sequence '(continue) '()
@@ -84,9 +81,7 @@
    instruction-sequence
    (compile-linkage linkage)))
 
-
-;;;simple expressions
-
+;;; Compiling simple expressions
 (define (compile-self-evaluating exp target linkage)
   (end-with-linkage linkage
    (make-instruction-sequence '() (list target)
@@ -105,6 +100,7 @@
 			  (const ,exp)
 			  (reg env))))))
 
+;;; Compiling assginment and definition expressions
 (define (compile-assignment exp target linkage)
   (let ((var (assignment-variable exp))
 		(get-value-code
@@ -133,21 +129,17 @@
 				  (reg env))
 		 (assign ,target (const ok))))))))
 
+;;; Compiling conditional expressions
 
-;;;conditional expressions
-
-;;;labels (from footnote)
+;; From footnote, to generate labels
 (define label-counter 0)
-
 (define (new-label-number)
   (set! label-counter (+ 1 label-counter))
   label-counter)
-
 (define (make-label name)
   (string->symbol
 	(string-append (symbol->string name)
 				   (number->string (new-label-number)))))
-;; end of footnote
 
 (define (compile-if exp target linkage)
   (let ((t-branch (make-label 'true-branch))
@@ -172,8 +164,7 @@
 		   (append-instruction-sequences f-branch a-code))
 		  after-if))))))
 
-;;; sequences
-
+;;; Compiling sequences
 (define (compile-sequence seq target linkage)
   (if (last-exp? seq)
 	  (compile (first-exp seq) target linkage)
@@ -181,8 +172,7 @@
 	   (compile (first-exp seq) target 'next)
 	   (compile-sequence (rest-exps seq) target linkage))))
 
-;;;lambda expressions
-
+;;; Compiling lambda expressions
 (define (compile-lambda exp target linkage)
   (let ((proc-entry (make-label 'entry))
 		(after-lambda (make-label 'after-lambda)))
@@ -213,10 +203,7 @@
 	 (compile-sequence (lambda-body exp) 'val 'return))))
 
 
-;;;SECTION 5.5.3
-
-;;;combinations
-
+;;; SECTION 5.5.3 - Compiling Combinations
 (define (compile-application exp target linkage)
   (let ((proc-code (compile (operator exp) 'proc 'next))
 		(operand-codes
@@ -258,8 +245,7 @@
 		 code-for-next-arg
 		 (code-to-get-rest-args (cdr operand-codes))))))
 
-;;;applying procedures
-
+;;; Applying compiled procedures
 (define (compile-procedure-call target linkage)
   (let ((primitive-branch (make-label 'primitive-branch))
 		(compiled-branch (make-label 'compiled-branch))
@@ -284,8 +270,6 @@
 					 (reg proc)
 					 (reg argl)))))))
 	   after-call))))
-
-;;;applying compiled procedures
 
 (define (compile-proc-appl target linkage)
   (cond ((and (eq? target 'val) (not (eq? linkage 'return)))
@@ -314,12 +298,11 @@
 		 (error "return linkage, target not val -- COMPILE"
 				target))))
 
-;; footnote
+;; From footnote, the list of names of all the registers
 (define all-regs '(env proc val argl continue))
 
 
-;;;SECTION 5.5.4
-
+;;; SECTION 5.5.4 - Combining Instruction Sequences
 (define (registers-needed s)
   (if (symbol? s) '() (car s)))
 
@@ -334,7 +317,6 @@
 
 (define (modifies-register? seq reg)
   (memq reg (registers-modified seq)))
-
 
 (define (append-instruction-sequences . seqs)
   (define (append-2-sequences seq1 seq2)
