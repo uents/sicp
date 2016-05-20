@@ -49,6 +49,7 @@
    (list 'rest-operands rest-operands)
 
    (list 'true? true?)
+   (list 'symbol? symbol?)
    (list 'make-procedure make-procedure)
    (list 'compound-procedure? compound-procedure?)
    (list 'procedure-parameters procedure-parameters)
@@ -150,22 +151,51 @@ ev-lambda
 
 ;; Evaluating procedure applications
 ev-application
-  (save continue)
-  (save env)
-  (assign unev (op operands) (reg exp))
-  (save unev)
-  (assign exp (op operator) (reg exp))
-  (assign continue (label ev-appl-did-operator))
-  (goto (label eval-dispatch))
+	 (save continue)
+	 (save env)
+	 (assign unev (op operands) (reg exp))
+	 (save unev)
+	 (assign exp (op operator) (reg exp))
+	 (assign continue (label ev-appl-did-operator))
+	 (goto (label eval-dispatch))
   
 ev-appl-did-operator
-  (restore unev)
-  (restore env)
-  (assign argl (op empty-arglist))
-  (assign proc (reg val))
-  (test (op no-operands?) (reg unev))
-  (branch (label apply-dispatch))
-  (save proc)
+	 (restore unev)
+	 (restore env)
+	 (assign argl (op empty-arglist))
+	 (assign proc (reg val))
+	 (test (op no-operands?) (reg unev))
+	 (branch (label apply-dispatch))
+	 (save proc)
+
+;; ;; from ex 5.32, avoid saving and restoring env
+;; ;;	 around the evaluation of the operator of a combination
+;; ;;	 in the case where the operator is a symbol
+;; ev-application
+;;	 (save continue)
+;;	 (assign unev (op operands) (reg exp))
+;;	 (assign exp (op operator) (reg exp))
+;;	 (test (op symbol?) (reg exp))	 ;;the operator is symbol?
+;;	 (branch (label ev-appl-operator-symbol))
+;;	 (save env)
+;;	 (save unev)
+;;	 (assign continue (label ev-appl-did-operator-with-restore))
+;;	 (goto (label eval-dispatch))
+
+;; ev-appl-operator-symbol
+;;	 (assign continue (label ev-appl-did-operator))
+;;	 (goto (label eval-dispatch))
+
+;; ev-appl-did-operator-with-restore
+;;	 (restore unev)
+;;	 (restore env)
+
+;; ev-appl-did-operator
+;;	 (assign argl (op empty-arglist))
+;;	 (assign proc (reg val))  ;;the evaluated operator
+;;	 (test (op no-operands?) (reg unev))
+;;	 (branch (label apply-dispatch))
+;;	 (save proc)
   
 ev-appl-operand-loop
   (save argl)
