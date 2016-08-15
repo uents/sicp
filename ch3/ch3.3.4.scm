@@ -44,8 +44,8 @@
 
 (define (logical-and x y)
   (if (and (= x 1) (= y 1))
-      1
-      0))
+	  1
+	  0))
 
 (define (half-adder a b s c)
   (let ((d (make-wire))
@@ -81,9 +81,11 @@
 		  (begin (set! signal-value new-value)
 				 (call-each action-procedures))
 		  'done))
-	(define (accept-action-procedure! proc)
-	  (set! action-procedures (cons proc action-procedures))
-	  (proc))
+;;	(define (accept-action-procedure! proc)
+;;	  (set! action-procedures (cons proc action-procedures))
+;;	  (proc))
+	(define (accept-action-procedure! proc) ;; for ex 3.31
+	  (set! action-procedures (cons proc action-procedures)))
 	(define (dispatch m)
 	  (cond ((eq? m 'get-signal) signal-value)
 			((eq? m 'set-signal!) set-my-signal!)
@@ -287,45 +289,46 @@
 	  0))
 
 ;; テスト
-;; racket@> (define in-1 (make-wire))
-;; (define in-2 (make-wire))
-;; (define out (make-wire))
 
-;; racket@> (probe 'in-1 in-1)
-;; (probe 'in-2 in-2)
-;; (probe 'out out)
+#|
+racket@> (define in-1 (make-wire))
+(define in-2 (make-wire))
+(define out (make-wire))
 
-;; in-1 0 New-value = 0
-;; in-2 0 New-value = 0
-;; out 0 New-value = 0
+racket@> (probe 'in-1 in-1)
+(probe 'in-2 in-2)
+(probe 'out out)
+in-1 0 New-value = 0
+in-2 0 New-value = 0
+out 0 New-value = 0
 
-;; racket@> (or-gate in-1 in-2 out)
-;; 'ok
+racket@> (or-gate in-1 in-2 out)
+'ok
 
-;; racket@> (set-signal! in-1 1)
-;; 'done
-;; racket@> (propagate)
-;; in-1 0 New-value = 1
-;; out 5 New-value = 1
+racket@> (set-signal! in-1 1)
+'done
+racket@> (propagate)
+in-1 0 New-value = 1
+out 5 New-value = 1
 
-;; racket@> (set-signal! in-1 0)
-;; 'done
-;; racket@> (propagate)
-;; in-1 5 New-value = 0
-;; out 10 New-value = 0
+racket@> (set-signal! in-1 0)
+'done
+racket@> (propagate)
+in-1 5 New-value = 0
+out 10 New-value = 0
 
-;; racket@> (set-signal! in-2 1)
-;; 'done
-;; racket@> (propagate)
-;; in-2 10 New-value = 1
-;; out 15 New-value = 1
+racket@> (set-signal! in-2 1)
+'done
+racket@> (propagate)
+in-2 10 New-value = 1
+out 15 New-value = 1
 
-;; racket@> (set-signal! in-2 0)
-;; 'done
-;; racket@> (propagate)
-;; in-2 15 New-value = 0
-;; out 20 New-value = 0
-
+racket@> (set-signal! in-2 0)
+'done
+racket@> (propagate)
+in-2 15 New-value = 0
+out 20 New-value = 0
+|#
 
 ;;; ex 3.29
 ;;; orをnotとandで実装する
@@ -342,169 +345,245 @@
 	'ok))
 
 ;; テスト
-;; racket@> (define in-1 (make-wire))
-;; racket@> (define in-2 (make-wire))
-;; racket@> (define out (make-wire))
 
-;; racket@> (probe 'in-1 in-1)
-;; in-1 0 New-value = 0
-;; racket@> (probe 'in-2 in-2)
-;; in-2 0 New-value = 0
-;; racket@> (probe 'out out)
-;; out 0 New-value = 0
+#|
+racket@> (define in-1 (make-wire))
+(define in-2 (make-wire))
+(define out (make-wire))
 
-;; racket@> (or-gate in-1 in-2 out)
-;; racket@> (set-signal! in-1 1)
-;; racket@> (propagate)
-;; in-1 0 New-value = 1
-;; out 7 New-value = 1
+racket@> (probe 'in-1 in-1)
+in-1 0 New-value = 0
+racket@> (probe 'in-2 in-2)
+in-2 0 New-value = 0
+racket@> (probe 'out out)
+out 0 New-value = 0
 
-;; racket@> (set-signal! in-1 0)
-;; racket@> (propagate)
-;; in-1 7 New-value = 0
-;; out 14 New-value = 0
+racket@> (or-gate in-1 in-2 out)
+racket@> (set-signal! in-1 1)
+racket@> (propagate)
+in-1 0 New-value = 1
+out 7 New-value = 1
 
-;; racket@> (set-signal! in-2 1)
-;; racket@> (propagate)
-;; in-2 14 New-value = 1
-;; out 21 New-value = 1
+racket@> (set-signal! in-1 0)
+racket@> (propagate)
+in-1 7 New-value = 0
+out 14 New-value = 0
 
-;; racket@> (set-signal! in-2 0)
-;; racket@> (propagate)
-;; in-2 21 New-value = 0
-;; out 28 New-value = 0
+racket@> (set-signal! in-2 1)
+racket@> (propagate)
+in-2 14 New-value = 1
+out 21 New-value = 1
 
+racket@> (set-signal! in-2 0)
+racket@> (propagate)
+in-2 21 New-value = 0
+out 28 New-value = 0
+|#
 
-;;; ripple-carry-adderを実装する前にfull-adderのテスト
+;; ripple-carry-adderを実装する前にfull-adderのテスト
 
-;; テスト
-;; racket@> (define a (make-wire))
-;; 'ok
-;; racket@> (define b (make-wire))
-;; 'ok
-;; racket@> (define c-in (make-wire))
-;; 'ok
-;; racket@> (define sum (make-wire))
-;; 'ok
-;; racket@> (define c-out (make-wire))
-;; 'ok
+#|
+racket@> (define a (make-wire))
+'ok
+racket@> (define b (make-wire))
+'ok
+racket@> (define c-in (make-wire))
+'ok
+racket@> (define sum (make-wire))
+'ok
+racket@> (define c-out (make-wire))
+'ok
 
-;; racket@> (probe 'a a)
-;; a 0 New-value = 0
-;; racket@> (probe 'b b)
-;; b 0 New-value = 0
-;; racket@> (probe 'c-in c-in)
-;; c-in 0 New-value = 0
-;; racket@> (probe 'sum sum)
-;; sum 0 New-value = 0
-;; racket@> (probe 'c-out c-out)
-;; c-out 0 New-value = 0
+racket@> (probe 'a a)
+a 0 New-value = 0
+racket@> (probe 'b b)
+b 0 New-value = 0
+racket@> (probe 'c-in c-in)
+c-in 0 New-value = 0
+racket@> (probe 'sum sum)
+sum 0 New-value = 0
+racket@> (probe 'c-out c-out)
+c-out 0 New-value = 0
 
-;; racket@> (full-adder a b c-in sum c-out)
-;; 'ok
+racket@> (full-adder a b c-in sum c-out)
+'ok
 
-;; racket@> (set-signal! a 1)
-;; a 0 New-value = 1
-;; 'done
-;; racket@> (propagate)
-;; sum 8 New-value = 1
-;; 'done
+racket@> (set-signal! a 1)
+a 0 New-value = 1
+'done
+racket@> (propagate)
+sum 8 New-value = 1
+'done
 
-;; racket@> (set-signal! b 1)
-;; b 8 New-value = 1
-;; 'done
-;; racket@> (propagate)
-;; c-out 24 New-value = 1
-;; sum 24 New-value = 0
-;; 'done
+racket@> (set-signal! b 1)
+b 8 New-value = 1
+'done
+racket@> (propagate)
+c-out 24 New-value = 1
+sum 24 New-value = 0
+'done
 
-;; racket@> (set-signal! c-in 1)
-;; c-in 24 New-value = 1
-;; 'done
-;; racket@> (propagate)
-;; sum 40 New-value = 1
-;; 'done
-
+racket@> (set-signal! c-in 1)
+c-in 24 New-value = 1
+'done
+racket@> (propagate)
+sum 40 New-value = 1
+'done
+|#
 
 ;;; ex 3.30
 (define (ripple-carry-adder a-list b-list sum-list c-out)
   (define (iter a-list b-list sum-list c-in)
-    (if (not (null? a-list))
-        (let ((a-k (car a-list))
+	(if (not (null? a-list))
+		(let ((a-k (car a-list))
 			  (b-k (car b-list))
 			  (sum-k (car sum-list))
 			  (c-out (make-wire)))
 		  (full-adder a-k b-k c-in sum-k c-out)
 		  (iter (cdr a-list) (cdr b-list) (cdr sum-list) c-out))
-        'ok))
+		'ok))
   (iter a-list b-list sum-list c-out))
 
 ;; テスト
-;; racket@> (define a1 (make-wire))
-;; (define a2 (make-wire))
-;; (define a3 (make-wire))
-;; (define a4 (make-wire))
-;; (define b1 (make-wire))
-;; (define b2 (make-wire))
-;; (define b3 (make-wire))
-;; (define b4 (make-wire))
-;; (define s1 (make-wire))
-;; (define s2 (make-wire))
-;; (define s3 (make-wire))
-;; (define s4 (make-wire))
-;; (define a (list a1 a2 a3 a4))
-;; (define b (list b1 b2 b3 b4))
-;; (define s (list s1 s2 s3 s4))
-;; (define c (make-wire))
 
-;; racket@> (probe 's1 s1)
-;; (probe 's2 s2)
-;; (probe 's3 s3)
-;; (probe 's4 s4)
-;; (probe 'c c)
-;; s1 0 New-value = 0
-;; s2 0 New-value = 0
-;; s3 0 New-value = 0
-;; s4 0 New-value = 0
-;; c 0 New-value = 0
+#|
+racket@> (define a1 (make-wire))
+(define a2 (make-wire))
+(define a3 (make-wire))
+(define a4 (make-wire))
+(define b1 (make-wire))
+(define b2 (make-wire))
+(define b3 (make-wire))
+(define b4 (make-wire))
+(define s1 (make-wire))
+(define s2 (make-wire))
+(define s3 (make-wire))
+(define s4 (make-wire))
+(define a (list a1 a2 a3 a4))
+(define b (list b1 b2 b3 b4))
+(define s (list s1 s2 s3 s4))
+(define c (make-wire))
 
-;; racket@> (ripple-carry-adder a b s c)
-;; 'ok
+racket@> (probe 's1 s1)
+(probe 's2 s2)
+(probe 's3 s3)
+(probe 's4 s4)
+(probe 'c c)
+s1 0 New-value = 0
+s2 0 New-value = 0
+s3 0 New-value = 0
+s4 0 New-value = 0
+c 0 New-value = 0
 
-;; racket@> (set-signal! a1 1)
-;; 'done
-;; racket@> (propagate)
-;; s1 8 New-value = 1
-;; 'done
-;; racket@> (set-signal! b1 1)
-;; 'done
-;; racket@> (propagate)
-;; s1 24 New-value = 0
-;; s2 40 New-value = 1
-;; 'done
-;; racket@> (set-signal! a2 1)
-;; 'done
-;; racket@> (propagate)
-;; s2 48 New-value = 0
-;; s3 64 New-value = 1
-;; 'done
+racket@> (ripple-carry-adder a b s c)
+'ok
 
+racket@> (set-signal! a1 1)
+'done
+racket@> (propagate)
+s1 8 New-value = 1
+'done
+racket@> (set-signal! b1 1)
+'done
+racket@> (propagate)
+s1 24 New-value = 0
+s2 40 New-value = 1
+'done
+racket@> (set-signal! a2 1)
+'done
+racket@> (propagate)
+s2 48 New-value = 0
+s3 64 New-value = 1
+'done
+|#
 
 ;;; ex 3.31
 
-;; 論理回路 `inverter`、`and-gate`、`or-gate`はいずれも
-;; `add-action!`に渡す手続きは内部で`after-delay`を実行する。
-;; この`after-delay`は内部で`add-to-agenda!`を実行して、
-;; アジェンダにアクション手続きを登録する。
+#|
+(define in-1 (make-wire))
+(define in-2 (make-wire))
+(define sum (make-wire))
+(define carry (make-wire))
 
-;; そこで`add-action!`の実体である`accept-action-procedure!`において、
-;; 追加されたアクション手続きを即座に走らせることで、
-;; アジェンダにアクション手続きが登録されるため、それらが必要となる。
+(probe 'sum sum)
+(probe 'carry carry)
+(half-adder in-1 in-2 sum carry)
 
-;; 仮に`accept-action-procedure!`で追加されたアクション手続きを
-;; 即座に走らせないようにすると、アジェンダに手続きが追加されないため
-;; `propagate`を実行しても何も起きない。
+(set-signal! in-1 0)
+(set-signal! in-2 1)
+(propagate)
+|#
 
+;; 普通に実行した場合
+
+#|
+racket@> (define in-1 (make-wire))
+(define in-2 (make-wire))
+(define sum (make-wire))
+(define carry (make-wire))
+
+racket@> (probe 'sum sum)
+sum 0 New-value = 0
+
+racket@> (probe 'carry carry)
+carry 0 New-value = 0
+
+racket@> (half-adder in-1 in-2 sum carry)
+'ok
+racket@> (set-signal! in-1 0)
+'done
+racket@> (set-signal! in-2 1)
+'done
+
+racket@> (propagate)
+sum 8 New-value = 1
+'done
+
+racket@> (get-signal sum)
+1
+racket@> (get-signal carry)
+0
+|#
+
+;; accept-action-procedure! を
+;;	(define (accept-action-procedure! proc)
+;;	  (set! action-procedures (cons proc action-procedures)))
+;; とした場合、
+
+#|
+racket@> (define in-1 (make-wire))
+(define in-2 (make-wire))
+(define sum (make-wire))
+(define carry (make-wire))
+
+racket@> (probe 'sum sum)
+racket@> (probe 'carry carry)
+
+racket@> (half-adder in-1 in-2 sum carry)
+'ok
+racket@> (set-signal! in-1 0)
+'done
+racket@> (set-signal! in-2 1)
+'done
+racket@> (propagate)
+'done
+
+racket@> (get-signal sum)
+0
+racket@> (get-signal carry)
+0
+|#
+
+;; `sum`や`carry`の`probe`で初期値が出力されないのは、
+;; `probe`での出力手続きが`accept-action-procedure!`の変更で呼ばれなくなったため、まあその通り。
+
+;; では、`(set-sitnal! in-2 1)`で`sum`へ出力が伝播しなかった理由だが、これは`(half-adder in-1 in-2 sum carry)`で入出力を結線する際に`(and-gate d e s)`において`and-action-procedure`が実行されないため、この`and-gate`の出力`s`が変わることができずこのようなことになる。
+
+;; よって、
+
+;; > 論理回路 `inverter`、`and-gate`、`or-gate`はいずれも`add-action!`に渡す手続きは内部で`after-delay`を実行する。この`after-delay`は内部で`add-to-agenda!`を実行して、アジェンダにアクション手続きを登録する。
+
+;; という処理が実行されなくなるため、`accept-action-procedure!`で与えられた手続きは即座に実行する必要がある。
 
 ;;; ex 3.32
 
